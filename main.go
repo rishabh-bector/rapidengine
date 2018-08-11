@@ -18,7 +18,11 @@ func main() {
 	defer glfw.Terminate()
 
 	program := initOpenGL()
-	renderer := Renderer{window, program}
+	renderer := Renderer{
+		window:        window,
+		shaderProgram: program,
+		children:      []Child{},
+	}
 	shaders := NewShaders()
 
 	err := shaders.CompileShaders()
@@ -28,46 +32,41 @@ func main() {
 
 	UnbindBuffers()
 
-	r := NewRectangle(
-		[]float32{
-			-0.5, -0.5, 0,
-			-0.5, 0.5, 0,
-			0.5, 0.5, 0,
-			0.5, -0.5, 0,
-		},
-		shaders,
+	///   CHILD !    ///
+
+	child1 := NewChild()
+	child1.AttachPrimitive(
+		NewTriangle(
+			[]float32{
+				-0.5, -0.5, 0,
+				-0.5, 0.5, 0,
+				0.5, 0.5, 0,
+				0.5, -0.5, 0,
+			},
+			shaders,
+		),
 	)
-	r.vao.AddVertexAttribute(
+	child1.AttachShader(program)
+	child1.AttachTexture(
+		"./texture.png",
 		[]float32{
 			0, 0,
 			0, 1,
 			1, 1,
 			1, 0,
-		}, 1, 2,
+		},
 	)
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	renderer.Register(child1)
 
-	gl.UseProgram(renderer.shaderProgram)
-
-	tex1, err := NewTexture("./texture.png")
-
-	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D, tex1)
-	loc1 := gl.GetUniformLocation(renderer.shaderProgram, gl.Str("texture0\x00"))
-	gl.Uniform1i(loc1, 0)
-
-	gl.BindAttribLocation(program, 0, gl.Str("position\x00"))
-	gl.BindAttribLocation(program, 1, gl.Str("tex\x00"))
+	//////////////////////
 
 	for !window.ShouldClose() {
 		gl.ClearColor(0.5, 0.5, 0.5, 0.5)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 		gl.Clear(gl.DEPTH_BUFFER_BIT)
 
-		renderer.DrawElements(*r.vao, 6)
+		renderer.RenderChildren()
 
 		glfw.PollEvents()
 		renderer.window.SwapBuffers()

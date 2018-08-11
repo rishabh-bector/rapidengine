@@ -5,20 +5,14 @@ import (
 )
 
 type VertexArray struct {
-	id             uint32
-	vertexBuffer   uint32
-	elementBuffer  uint32
-	vertexShader   uint32
-	fragmentShader uint32
+	id            uint32
+	vertexBuffer  uint32
+	elementBuffer uint32
 }
 
-func NewVertexArray(vertices []float32, elements []uint32, vShader, fShader uint32) *VertexArray {
+func NewVertexArray(vertices []float32, elements []uint32) *VertexArray {
 	var id uint32
-	vertexArray := VertexArray{
-		id:             id,
-		vertexShader:   vShader,
-		fragmentShader: fShader,
-	}
+	vertexArray := VertexArray{id: id}
 	gl.GenVertexArrays(1, &vertexArray.id)
 	gl.BindVertexArray(vertexArray.id)
 	vertexArray.vertexBuffer = vertexArray.AddVertexAttribute(vertices, 0, 3)

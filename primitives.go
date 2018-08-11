@@ -1,7 +1,8 @@
 package main
 
 type Primitive struct {
-	vao *VertexArray
+	vao         *VertexArray
+	numVertices int32
 }
 
 func NewTriangle(points []float32, shaders *Shaders) Primitive {
@@ -13,9 +14,8 @@ func NewTriangle(points []float32, shaders *Shaders) Primitive {
 		NewVertexArray(
 			points,
 			indices,
-			shaders.idList[0],
-			shaders.idList[1],
 		),
+		int32(len(indices)),
 	}
 	return t
 }
@@ -29,9 +29,8 @@ func NewRectangle(points []float32, shaders *Shaders) Primitive {
 		NewVertexArray(
 			points,
 			indices,
-			shaders.idList[0],
-			shaders.idList[1],
 		),
+		int32(len(indices)),
 	}
 	return r
 }
