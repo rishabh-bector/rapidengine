@@ -35,28 +35,105 @@ func NewRectangle(points []float32, shaders *Shaders) Primitive {
 	return r
 }
 
-/*func NewCube(shaders *Shaders) Prism {
-	points := []float32{
-		// Top
-		0.5, 0.5, 0.5,
-		0.5, 0.5, 0.5,
+func NewCube(shaders *Shaders) Primitive {
+	indices := []uint32{}
+	for i := 0; i < len(CubePoints); i++ {
+		indices = append(indices, uint32(i))
 	}
-	p := Prism{
+	c := Primitive{
 		NewVertexArray(
-			NewVertexBuffer(points),
-			NewElementBuffer(indices),
-			shaders.idList[0],
-			shaders.idList[1],
-			AttribConfig{
-				name:   "position",
-				index:  0,
-				size:   3,
-				xtype:  gl.FLOAT,
-				stride: 6 * 4,
-				offset: 0 * 4,
-			},
+			CubePoints,
+			indices,
 		),
+		int32(108),
 	}
+	return c
+}
 
-	return p
-}*/
+var CubePoints = []float32{
+	-0.5, -0.5, -0.5,
+	0.5, -0.5, -0.5,
+	0.5, 0.5, -0.5,
+	0.5, 0.5, -0.5,
+	-0.5, 0.5, -0.5,
+	-0.5, -0.5, -0.5,
+
+	-0.5, -0.5, 0.5,
+	0.5, -0.5, 0.5,
+	0.5, 0.5, 0.5,
+	0.5, 0.5, 0.5,
+	-0.5, 0.5, 0.5,
+	-0.5, -0.5, 0.5,
+
+	-0.5, 0.5, 0.5,
+	-0.5, 0.5, -0.5,
+	-0.5, -0.5, -0.5,
+	-0.5, -0.5, -0.5,
+	-0.5, -0.5, 0.5,
+	-0.5, 0.5, 0.5,
+
+	0.5, 0.5, 0.5,
+	0.5, 0.5, -0.5,
+	0.5, -0.5, -0.5,
+	0.5, -0.5, -0.5,
+	0.5, -0.5, 0.5,
+	0.5, 0.5, 0.5,
+
+	-0.5, -0.5, -0.5,
+	0.5, -0.5, -0.5,
+	0.5, -0.5, 0.5,
+	0.5, -0.5, 0.5,
+	-0.5, -0.5, 0.5,
+	-0.5, -0.5, -0.5,
+
+	-0.5, 0.5, -0.5,
+	0.5, 0.5, -0.5,
+	0.5, 0.5, 0.5,
+	0.5, 0.5, 0.5,
+	-0.5, 0.5, 0.5,
+	-0.5, 0.5, -0.5,
+}
+
+var CubeTextures = []float32{
+	0, 0,
+	1, 0,
+	1, 1,
+	1, 1,
+	0, 1,
+	0, 0,
+
+	0, 0,
+	1, 0,
+	1, 1,
+	1, 1,
+	0, 1,
+	0, 0,
+
+	1, 0,
+	1, 1,
+	0, 1,
+	0, 1,
+	0, 0,
+	1, 0,
+
+	1, 0,
+	1, 1,
+	0, 1,
+	0, 1,
+	0, 0,
+	1, 0,
+
+	0, 1,
+	1, 1,
+	1, 0,
+	1, 0,
+	0, 0,
+	0, 1,
+
+	0, 1,
+	1, 1,
+	1, 0,
+	1, 0,
+	0, 0,
+	0, 1,
+}
