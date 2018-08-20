@@ -17,7 +17,7 @@ var (
 	PolygonLines = false
 
 	CameraSpeed       = 0.02
-	CameraSensitivity = 0.05
+	CameraSensitivity = 0.2
 )
 
 func init() {
@@ -26,7 +26,7 @@ func init() {
 
 func main() {
 
-	renderer := NewRenderer(render, NewCamera(mgl32.Vec3{0, 0, 3}, float32(CameraSpeed)))
+	renderer := NewRenderer(render, NewCamera(mgl32.Vec3{0, 0, 0}, float32(CameraSpeed)))
 	gl.UseProgram(renderer.ShaderProgram)
 
 	shaders := NewShaders()

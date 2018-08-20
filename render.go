@@ -30,6 +30,7 @@ func (renderer *Renderer) startRenderer() {
 
 		glfw.PollEvents()
 		renderer.MainCamera.ProcessInput(renderer.Window)
+		renderer.MainCamera.ProcessMouse()
 		renderer.MainCamera.Look()
 		renderer.Window.SwapBuffers()
 	}
@@ -58,7 +59,7 @@ func NewRenderer(renderFunc func(renderer *Renderer), camera Camera) Renderer {
 		Done:          make(chan bool),
 		MainCamera:    camera,
 	}
-	r.Window.SetCursorPosCallback(r.MainCamera.ProcessMouse)
+	r.Window.SetCursorPosCallback(MouseCallback)
 	return r
 }
 
@@ -85,7 +86,7 @@ func initGLFW() *glfw.Window {
 		log.Fatal(err)
 	}
 
-	window.SetInputMode(glfw.CursorMode, glfw.CursorDisabled)
+	//window.SetInputMode(glfw.CursorMode, glfw.CursorDisabled)
 
 	window.MakeContextCurrent()
 
