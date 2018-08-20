@@ -9,31 +9,29 @@ import (
 )
 
 type Child struct {
-	vertexArray   *VertexArray
-	numVertices   int32
+	vertexArray *VertexArray
+	numVertices int32
+
 	shaderProgram uint32
 	texture       uint32
 
 	modelMatrix      mgl32.Mat4
-	viewMatrix       mgl32.Mat4
 	projectionMatrix mgl32.Mat4
 }
 
 func NewChild() Child {
 	return Child{
 		modelMatrix:      mgl32.Ident4(),
-		viewMatrix:       mgl32.Ident4(),
 		projectionMatrix: mgl32.Ident4(),
 	}
 }
 
-func (child *Child) PreRender() {
+func (child *Child) PreRender(mainCamera Camera) {
 	gl.BindVertexArray(child.vertexArray.id)
 	gl.UseProgram(child.shaderProgram)
 
 	child.modelMatrix = mgl32.HomogRotate3D(float32(glfw.GetTime())*mgl32.DegToRad(-55), mgl32.Vec3{0, 1, 0})
 
-	child.viewMatrix = mgl32.Translate3D(-0.5, 0, -3)
 	child.projectionMatrix = mgl32.Perspective(
 		mgl32.DegToRad(45),
 		float32(ScreenWidth)/float32(ScreenHeight),
@@ -46,7 +44,7 @@ func (child *Child) PreRender() {
 	)
 	gl.UniformMatrix4fv(
 		gl.GetUniformLocation(child.shaderProgram, gl.Str("viewMtx\x00")),
-		1, false, &child.viewMatrix[0],
+		1, false, &mainCamera.View[0],
 	)
 	gl.UniformMatrix4fv(
 		gl.GetUniformLocation(child.shaderProgram, gl.Str("projectionMtx\x00")),

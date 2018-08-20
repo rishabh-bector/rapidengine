@@ -7,14 +7,39 @@ import (
 )
 
 type Renderer struct {
-	window        *glfw.Window
-	shaderProgram uint32
-	children      []Child
+	Window *glfw.Window
+
+	ShaderProgram uint32
+
+	Children []Child
+
+	RenderFunc func(renderer *Renderer)
+
+	MainCamera Camera
+
+	Done chan bool
+}
+
+func (renderer *Renderer) startRenderer() {
+	for !renderer.Window.ShouldClose() {
+		gl.ClearColor(0.5, 0.5, 0.5, 0.5)
+		gl.Clear(gl.COLOR_BUFFER_BIT)
+		gl.Clear(gl.DEPTH_BUFFER_BIT)
+
+		renderer.RenderFunc(renderer)
+
+		glfw.PollEvents()
+		renderer.MainCamera.ProcessInput(renderer.Window)
+		renderer.MainCamera.Look()
+		renderer.Window.SwapBuffers()
+	}
+	glfw.Terminate()
+	renderer.Done <- true
 }
 
 func (renderer *Renderer) RenderChildren() {
-	for _, child := range renderer.children {
-		child.PreRender()
+	for _, child := range renderer.Children {
+		child.PreRender(renderer.MainCamera)
 		gl.UseProgram(child.shaderProgram)
 		gl.BindVertexArray(child.vertexArray.id)
 		gl.EnableVertexAttribArray(0)
@@ -24,9 +49,22 @@ func (renderer *Renderer) RenderChildren() {
 	}
 }
 
+func NewRenderer(renderFunc func(renderer *Renderer), camera Camera) Renderer {
+	r := Renderer{
+		Window:        initGLFW(),
+		ShaderProgram: initOpenGL(),
+		Children:      []Child{},
+		RenderFunc:    renderFunc,
+		Done:          make(chan bool),
+		MainCamera:    camera,
+	}
+	r.Window.SetCursorPosCallback(r.MainCamera.ProcessMouse)
+	return r
+}
+
 func (renderer *Renderer) Instance(child Child) {
-	child.PreRender()
-	renderer.children = append(renderer.children, child)
+	child.PreRender(renderer.MainCamera)
+	renderer.Children = append(renderer.Children, child)
 }
 
 func initGLFW() *glfw.Window {
@@ -46,6 +84,8 @@ func initGLFW() *glfw.Window {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	window.SetInputMode(glfw.CursorMode, glfw.CursorDisabled)
 
 	window.MakeContextCurrent()
 

@@ -4,7 +4,7 @@ import (
 	"runtime"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/go-gl/mathgl/mgl32"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -15,6 +15,9 @@ var (
 
 	WindowTitle  = "Test"
 	PolygonLines = false
+
+	CameraSpeed       = 0.02
+	CameraSensitivity = 0.05
 )
 
 func init() {
@@ -22,18 +25,9 @@ func init() {
 }
 
 func main() {
-	window := initGLFW()
-	defer glfw.Terminate()
 
-	program := initOpenGL()
-	gl.UseProgram(program)
-	CheckError("initOpenGL")
-
-	renderer := Renderer{
-		window:        window,
-		shaderProgram: program,
-		children:      []Child{},
-	}
+	renderer := NewRenderer(render, NewCamera(mgl32.Vec3{0, 0, 3}, float32(CameraSpeed)))
+	gl.UseProgram(renderer.ShaderProgram)
 
 	shaders := NewShaders()
 	err := shaders.CompileShaders()
@@ -41,13 +35,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	UnbindBuffers()
-
 	///   CHILD 1    ///
 
 	child1 := NewChild()
 	child1.AttachPrimitive(NewCube(shaders))
-	child1.AttachShader(program)
+	child1.AttachShader(renderer.ShaderProgram)
 	child1.AttachTexture(
 		"./texture.png",
 		CubeTextures,
@@ -57,16 +49,11 @@ func main() {
 
 	//////////////////////
 
-	for !window.ShouldClose() {
-		gl.ClearColor(0.5, 0.5, 0.5, 0.5)
-		gl.Clear(gl.COLOR_BUFFER_BIT)
-		gl.Clear(gl.DEPTH_BUFFER_BIT)
-
-		renderer.RenderChildren()
-
-		glfw.PollEvents()
-		renderer.window.SwapBuffers()
-	}
-
+	renderer.startRenderer()
+	<-renderer.Done
 	shaders.CleanUp()
+}
+
+func render(renderer *Renderer) {
+	renderer.RenderChildren()
 }
