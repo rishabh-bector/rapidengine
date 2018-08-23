@@ -18,6 +18,8 @@ var (
 
 	CameraSpeed       = 0.02
 	CameraSensitivity = 0.2
+
+	Dimensions = 2
 )
 
 func init() {
@@ -26,7 +28,8 @@ func init() {
 
 func main() {
 
-	renderer := NewRenderer(render, NewCamera(mgl32.Vec3{0, 0, 0}, float32(CameraSpeed)))
+	camera := NewCamera2(mgl32.Vec3{0, 0, 0}, float32(CameraSpeed))
+	renderer := NewRenderer(render, &camera)
 	gl.UseProgram(renderer.ShaderProgram)
 
 	shaders := NewShaders()
@@ -37,15 +40,20 @@ func main() {
 
 	///   CHILD 1    ///
 
-	child1 := NewChild()
-	child1.AttachPrimitive(NewCube(shaders))
+	child1 := NewChild2D()
+	child1.AttachPrimitive(NewRectangle(0.2, 0.2, shaders))
 	child1.AttachShader(renderer.ShaderProgram)
 	child1.AttachTexture(
 		"./texture.png",
-		CubeTextures,
+		[]float32{
+			-1, 1,
+			1, 1,
+			1, -1,
+			-1, -1,
+		},
 	)
 
-	renderer.Instance(child1)
+	renderer.Instance(&child1)
 
 	//////////////////////
 

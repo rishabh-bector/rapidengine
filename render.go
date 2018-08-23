@@ -30,7 +30,6 @@ func (renderer *Renderer) startRenderer() {
 
 		glfw.PollEvents()
 		renderer.MainCamera.ProcessInput(renderer.Window)
-		renderer.MainCamera.ProcessMouse()
 		renderer.MainCamera.Look()
 		renderer.Window.SwapBuffers()
 	}
@@ -41,11 +40,11 @@ func (renderer *Renderer) startRenderer() {
 func (renderer *Renderer) RenderChildren() {
 	for _, child := range renderer.Children {
 		child.PreRender(renderer.MainCamera)
-		gl.UseProgram(child.shaderProgram)
-		gl.BindVertexArray(child.vertexArray.id)
+		gl.UseProgram(child.GetShaderProgram())
+		gl.BindVertexArray(child.GetVertexArray().id)
 		gl.EnableVertexAttribArray(0)
 		gl.EnableVertexAttribArray(1)
-		gl.DrawElements(gl.TRIANGLES, child.numVertices, gl.UNSIGNED_INT, gl.PtrOffset(0))
+		gl.DrawElements(gl.TRIANGLES, child.GetNumVertices(), gl.UNSIGNED_INT, gl.PtrOffset(0))
 		gl.BindVertexArray(0)
 	}
 }
