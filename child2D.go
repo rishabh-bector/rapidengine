@@ -16,6 +16,9 @@ type Child2D struct {
 
 	modelMatrix      mgl32.Mat4
 	projectionMatrix mgl32.Mat4
+
+	X float32
+	Y float32
 }
 
 func NewChild2D() Child2D {
@@ -28,9 +31,6 @@ func NewChild2D() Child2D {
 func (child2D *Child2D) PreRender(mainCamera Camera) {
 	gl.BindVertexArray(child2D.vertexArray.id)
 	gl.UseProgram(child2D.shaderProgram)
-
-	child2D.modelMatrix = mgl32.Ident4()
-	child2D.projectionMatrix = mgl32.Ident4()
 
 	gl.UniformMatrix4fv(
 		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("modelMtx\x00")),
@@ -49,6 +49,11 @@ func (child2D *Child2D) PreRender(mainCamera Camera) {
 
 	gl.BindAttribLocation(child2D.shaderProgram, 0, gl.Str("position\x00"))
 	gl.BindAttribLocation(child2D.shaderProgram, 1, gl.Str("tex\x00"))
+}
+
+func (child2D *Child2D) Update() {
+	child2D.modelMatrix = mgl32.Translate3D(-1, 1, 0)
+	child2D.projectionMatrix = mgl32.Ortho2D(-1, 1, -1, 1)
 }
 
 func (child2D *Child2D) AttachTexture(path string, coords []float32) error {
@@ -92,6 +97,11 @@ func (child2D *Child2D) AttachPrimitive(p Primitive) {
 
 func (child2D *Child2D) AttachShader(s uint32) {
 	child2D.shaderProgram = s
+}
+
+func (child2D *Child2D) SetPosition(x, y float32) {
+	child2D.X = x
+	child2D.Y = y
 }
 
 func (child2D *Child2D) GetShaderProgram() uint32 {

@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	ScreenWidth  = 1440
-	ScreenHeight = 900
+	ScreenWidth  = 1920
+	ScreenHeight = 1080
 
 	WindowTitle  = "Test"
 	PolygonLines = false
@@ -28,7 +28,7 @@ func init() {
 
 func main() {
 
-	camera := NewCamera2(mgl32.Vec3{0, 0, 0}, float32(CameraSpeed))
+	camera := NewCamera2D(mgl32.Vec3{0, 0, 0}, float32(CameraSpeed))
 	renderer := NewRenderer(render, &camera)
 	gl.UseProgram(renderer.ShaderProgram)
 
@@ -41,7 +41,7 @@ func main() {
 	///   CHILD 1    ///
 
 	child1 := NewChild2D()
-	child1.AttachPrimitive(NewRectangle(0.2, 0.2, shaders))
+	child1.AttachPrimitive(NewRectangle(0.5, 0.5, shaders))
 	child1.AttachShader(renderer.ShaderProgram)
 	child1.AttachTexture(
 		"./texture.png",
@@ -52,12 +52,13 @@ func main() {
 			-1, -1,
 		},
 	)
+	child1.SetPosition(1, 1)
 
 	renderer.Instance(&child1)
 
 	//////////////////////
 
-	renderer.startRenderer()
+	renderer.StartRenderer()
 	<-renderer.Done
 	shaders.CleanUp()
 }

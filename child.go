@@ -8,4 +8,6 @@ type Child interface {
 	GetVertexArray() *VertexArray
 
 	GetNumVertices() int32
+
+	Update()
 }

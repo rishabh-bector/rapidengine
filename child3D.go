@@ -25,7 +25,7 @@ func NewChild3D() Child3D {
 	}
 }
 
-func (child3D *Child3D) PreRender(mainCamera Camera3) {
+func (child3D *Child3D) PreRender(mainCamera Camera3D) {
 	gl.BindVertexArray(child3D.vertexArray.id)
 	gl.UseProgram(child3D.shaderProgram)
 

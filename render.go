@@ -1,11 +1,19 @@
 package main
 
+//   --------------------------------------------------
+//   Render.go contains the main render loop, as well as
+//   functions to initialize OpenGL and GLFW. A renderer
+//   has a list of "children" which it renders every frame.
+//   --------------------------------------------------
+
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	log "github.com/sirupsen/logrus"
 )
 
+// Renderer contains the information required for
+// the main render loop
 type Renderer struct {
 	Window *glfw.Window
 
@@ -20,7 +28,8 @@ type Renderer struct {
 	Done chan bool
 }
 
-func (renderer *Renderer) startRenderer() {
+// StartRenderer starts the main render loop
+func (renderer *Renderer) StartRenderer() {
 	for !renderer.Window.ShouldClose() {
 		gl.ClearColor(0.5, 0.5, 0.5, 0.5)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
@@ -37,6 +46,8 @@ func (renderer *Renderer) startRenderer() {
 	renderer.Done <- true
 }
 
+// RenderChildren binds the appropriate shaders and Vertex Array for each child,
+// and draws them to the screen using an element buffer
 func (renderer *Renderer) RenderChildren() {
 	for _, child := range renderer.Children {
 		child.PreRender(renderer.MainCamera)
@@ -49,6 +60,8 @@ func (renderer *Renderer) RenderChildren() {
 	}
 }
 
+// NewRenderer creates a new renderer, and takes in a renderFunc which
+// is called every frame, allowing the User to have frame-by-frame control
 func NewRenderer(renderFunc func(renderer *Renderer), camera Camera) Renderer {
 	r := Renderer{
 		Window:        initGLFW(),
@@ -62,6 +75,8 @@ func NewRenderer(renderFunc func(renderer *Renderer), camera Camera) Renderer {
 	return r
 }
 
+// Instance takes a child and adds it to the renderer's list,
+// so that it will be rendered every frame
 func (renderer *Renderer) Instance(child Child) {
 	child.PreRender(renderer.MainCamera)
 	renderer.Children = append(renderer.Children, child)
@@ -125,6 +140,8 @@ func initOpenGL() uint32 {
 	return prog
 }
 
+// CheckError decodes the various unhelpful error codes
+// which OpenGL sometimes creates
 func CheckError(tag string) {
 	if err := gl.GetError(); err != 0 {
 		var errString = ""
