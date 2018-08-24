@@ -41,7 +41,7 @@ func main() {
 	///   CHILD 1    ///
 
 	child1 := NewChild2D()
-	child1.AttachPrimitive(NewRectangle(0.5, 0.5, shaders))
+	child1.AttachPrimitive(NewRectangle(200, 200, shaders))
 	child1.AttachShader(renderer.ShaderProgram)
 	child1.AttachTexture(
 		"./texture.png",
@@ -52,7 +52,7 @@ func main() {
 			-1, -1,
 		},
 	)
-	child1.SetPosition(1, 1)
+	child1.SetPosition(0, 1080)
 
 	renderer.Instance(&child1)
 

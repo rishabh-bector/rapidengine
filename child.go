@@ -9,5 +9,5 @@ type Child interface {
 
 	GetNumVertices() int32
 
-	Update()
+	Update(Camera)
 }

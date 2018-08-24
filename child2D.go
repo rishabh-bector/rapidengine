@@ -51,8 +51,18 @@ func (child2D *Child2D) PreRender(mainCamera Camera) {
 	gl.BindAttribLocation(child2D.shaderProgram, 1, gl.Str("tex\x00"))
 }
 
-func (child2D *Child2D) Update() {
-	child2D.modelMatrix = mgl32.Translate3D(-1, 1, 0)
+func (child2D *Child2D) Update(mainCamera Camera) {
+	gl.UniformMatrix4fv(
+		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("viewMtx\x00")),
+		1, false, mainCamera.GetFirstViewIndex(),
+	)
+
+	gl.UniformMatrix4fv(
+		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("modelMtx\x00")),
+		1, false, &child2D.modelMatrix[0],
+	)
+
+	child2D.modelMatrix = mgl32.Translate3D(child2D.X, child2D.Y, 0)
 	child2D.projectionMatrix = mgl32.Ortho2D(-1, 1, -1, 1)
 }
 
@@ -86,6 +96,11 @@ func (child2D *Child2D) AttachTexture(path string, coords []float32) error {
 	return nil
 }
 
+func (child2D *Child2D) SetPosition(x, y float32) {
+	child2D.X = 2*(x/float32(ScreenWidth)) - 1
+	child2D.Y = 2*(y/float32(ScreenHeight)) - 1
+}
+
 func (child2D *Child2D) AttachVertexArray(vao *VertexArray, numVertices int32) {
 	child2D.vertexArray = vao
 	child2D.numVertices = numVertices
@@ -97,11 +112,6 @@ func (child2D *Child2D) AttachPrimitive(p Primitive) {
 
 func (child2D *Child2D) AttachShader(s uint32) {
 	child2D.shaderProgram = s
-}
-
-func (child2D *Child2D) SetPosition(x, y float32) {
-	child2D.X = x
-	child2D.Y = y
 }
 
 func (child2D *Child2D) GetShaderProgram() uint32 {

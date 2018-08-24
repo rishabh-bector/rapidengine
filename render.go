@@ -30,6 +30,8 @@ type Renderer struct {
 
 // StartRenderer starts the main render loop
 func (renderer *Renderer) StartRenderer() {
+	renderer.PreRenderChildren()
+
 	for !renderer.Window.ShouldClose() {
 		gl.ClearColor(0.5, 0.5, 0.5, 0.5)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
@@ -46,11 +48,19 @@ func (renderer *Renderer) StartRenderer() {
 	renderer.Done <- true
 }
 
+// PreRenderChildren calls the PreRender method of each child,
+// for initialization
+func (renderer *Renderer) PreRenderChildren() {
+	for _, child := range renderer.Children {
+		child.PreRender(renderer.MainCamera)
+	}
+}
+
 // RenderChildren binds the appropriate shaders and Vertex Array for each child,
 // and draws them to the screen using an element buffer
 func (renderer *Renderer) RenderChildren() {
 	for _, child := range renderer.Children {
-		child.PreRender(renderer.MainCamera)
+		child.Update(renderer.MainCamera)
 		gl.UseProgram(child.GetShaderProgram())
 		gl.BindVertexArray(child.GetVertexArray().id)
 		gl.EnableVertexAttribArray(0)
