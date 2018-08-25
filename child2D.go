@@ -11,6 +11,8 @@ type Child2D struct {
 	vertexArray *VertexArray
 	numVertices int32
 
+	primitive string
+
 	shaderProgram uint32
 	texture       uint32
 
@@ -62,7 +64,8 @@ func (child2D *Child2D) Update(mainCamera Camera) {
 		1, false, &child2D.modelMatrix[0],
 	)
 
-	child2D.modelMatrix = mgl32.Translate3D(child2D.X, child2D.Y, 0)
+	sX, sY := ScaleCoordinates(child2D.X, child2D.Y)
+	child2D.modelMatrix = mgl32.Translate3D(sX, sY, 0)
 	child2D.projectionMatrix = mgl32.Ortho2D(-1, 1, -1, 1)
 }
 
@@ -96,9 +99,17 @@ func (child2D *Child2D) AttachTexture(path string, coords []float32) error {
 	return nil
 }
 
+func (child2D *Child2D) AttachTexturePrimitive(path string) {
+	child2D.AttachTexture(path, GetPrimitiveCoords(child2D.primitive))
+}
+
+func ScaleCoordinates(x, y float32) (float32, float32) {
+	return 2*(x/float32(ScreenWidth)) - 1, 2*(y/float32(ScreenHeight)) - 1
+}
+
 func (child2D *Child2D) SetPosition(x, y float32) {
-	child2D.X = 2*(x/float32(ScreenWidth)) - 1
-	child2D.Y = 2*(y/float32(ScreenHeight)) - 1
+	child2D.X = x
+	child2D.Y = y
 }
 
 func (child2D *Child2D) AttachVertexArray(vao *VertexArray, numVertices int32) {
@@ -107,6 +118,7 @@ func (child2D *Child2D) AttachVertexArray(vao *VertexArray, numVertices int32) {
 }
 
 func (child2D *Child2D) AttachPrimitive(p Primitive) {
+	child2D.primitive = p.id
 	child2D.AttachVertexArray(p.vao, p.numVertices)
 }
 

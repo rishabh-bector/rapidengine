@@ -7,6 +7,7 @@ package main
 //  --------------------------------------------------
 
 type Primitive struct {
+	id          string
 	vao         *VertexArray
 	numVertices int32
 }
@@ -16,6 +17,16 @@ func NormalizeSizes(x, y float32) (float32, float32) {
 	return x / float32(ScreenWidth), y / float32(ScreenHeight)
 }
 
+// GetPrimitiveCoords returns the appropriate texture coordinates
+// for each primitive
+func GetPrimitiveCoords(id string) []float32 {
+	switch id {
+	case "rectangle":
+		return RectCoords
+	}
+	return RectCoords
+}
+
 // NewTriangle creates a new triangle based on 3 points and a shaders object
 func NewTriangle(points []float32, shaders *Shaders) Primitive {
 	indices := []uint32{}
@@ -23,6 +34,7 @@ func NewTriangle(points []float32, shaders *Shaders) Primitive {
 		indices = append(indices, uint32(i))
 	}
 	t := Primitive{
+		"triangle",
 		NewVertexArray(
 			points,
 			indices,
@@ -48,6 +60,7 @@ func NewRectangle(width, height float32, shaders *Shaders) Primitive {
 	}
 
 	r := Primitive{
+		"rectangle",
 		NewVertexArray(
 			points,
 			indices,
@@ -64,6 +77,7 @@ func NewCube(shaders *Shaders) Primitive {
 		indices = append(indices, uint32(i))
 	}
 	c := Primitive{
+		"cube",
 		NewVertexArray(
 			CubePoints,
 			indices,
@@ -71,6 +85,13 @@ func NewCube(shaders *Shaders) Primitive {
 		int32(108),
 	}
 	return c
+}
+
+var RectCoords = []float32{
+	1, 0,
+	0, 0,
+	0, 1,
+	1, 1,
 }
 
 var CubePoints = []float32{

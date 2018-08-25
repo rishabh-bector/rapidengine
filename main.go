@@ -22,6 +22,8 @@ var (
 	Dimensions = 2
 )
 
+var child1 Child2D
+
 func init() {
 	runtime.LockOSThread()
 }
@@ -40,18 +42,10 @@ func main() {
 
 	///   CHILD 1    ///
 
-	child1 := NewChild2D()
-	child1.AttachPrimitive(NewRectangle(200, 200, shaders))
+	child1 = NewChild2D()
+	child1.AttachPrimitive(NewRectangle(100, 100, shaders))
 	child1.AttachShader(renderer.ShaderProgram)
-	child1.AttachTexture(
-		"./texture.png",
-		[]float32{
-			-1, 1,
-			1, 1,
-			1, -1,
-			-1, -1,
-		},
-	)
+	child1.AttachTexturePrimitive("./texture.png")
 	child1.SetPosition(0, 1080)
 
 	renderer.Instance(&child1)
@@ -65,4 +59,5 @@ func main() {
 
 func render(renderer *Renderer) {
 	renderer.RenderChildren()
+	child1.SetPosition(child1.X+1, 1080)
 }
