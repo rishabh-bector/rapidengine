@@ -8,82 +8,97 @@ import (
 )
 
 type Child2D struct {
-	VertexArray *VertexArray
-	NumVertices int32
+	vertexArray *VertexArray
+	numVertices int32
 
-	Primitive string
+	primitive string
 
-	ShaderProgram uint32
-	Texture       uint32
+	shaderProgram uint32
+	texture       uint32
 
-	ModelMatrix      mgl32.Mat4
-	ProjectionMatrix mgl32.Mat4
+	modelMatrix      mgl32.Mat4
+	projectionMatrix mgl32.Mat4
 
 	X float32
 	Y float32
 
-	Config *EngineConfig
+	VX float32
+	VY float32
+
+	Gravity float32
+
+	Group    string
+	collider Collider
+
+	config *EngineConfig
 }
 
 func NewChild2D(config *EngineConfig) Child2D {
 	return Child2D{
-		ModelMatrix:      mgl32.Ident4(),
-		ProjectionMatrix: mgl32.Ortho2D(-1, 1, -1, 1),
-		Config:           config,
+		modelMatrix:      mgl32.Ident4(),
+		projectionMatrix: mgl32.Ortho2D(-1, 1, -1, 1),
+		config:           config,
+		VX:               0,
+		VY:               0,
+		Gravity:          0,
 	}
 }
 
 func (child2D *Child2D) PreRender(mainCamera Camera) {
-	gl.BindVertexArray(child2D.VertexArray.id)
-	gl.UseProgram(child2D.ShaderProgram)
+	gl.BindVertexArray(child2D.vertexArray.id)
+	gl.UseProgram(child2D.shaderProgram)
 
 	gl.UniformMatrix4fv(
-		gl.GetUniformLocation(child2D.ShaderProgram, gl.Str("modelMtx\x00")),
-		1, false, &child2D.ModelMatrix[0],
+		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("modelMtx\x00")),
+		1, false, &child2D.modelMatrix[0],
 	)
 
 	gl.UniformMatrix4fv(
-		gl.GetUniformLocation(child2D.ShaderProgram, gl.Str("viewMtx\x00")),
+		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("viewMtx\x00")),
 		1, false, mainCamera.GetFirstViewIndex(),
 	)
 
 	gl.UniformMatrix4fv(
-		gl.GetUniformLocation(child2D.ShaderProgram, gl.Str("projectionMtx\x00")),
-		1, false, &child2D.ProjectionMatrix[0],
+		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("projectionMtx\x00")),
+		1, false, &child2D.projectionMatrix[0],
 	)
 
-	gl.BindAttribLocation(child2D.ShaderProgram, 0, gl.Str("position\x00"))
-	gl.BindAttribLocation(child2D.ShaderProgram, 1, gl.Str("tex\x00"))
+	gl.BindAttribLocation(child2D.shaderProgram, 0, gl.Str("position\x00"))
+	gl.BindAttribLocation(child2D.shaderProgram, 1, gl.Str("tex\x00"))
 }
 
 func (child2D *Child2D) Update(mainCamera Camera) {
 	gl.UniformMatrix4fv(
-		gl.GetUniformLocation(child2D.ShaderProgram, gl.Str("viewMtx\x00")),
+		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("viewMtx\x00")),
 		1, false, mainCamera.GetFirstViewIndex(),
 	)
 
 	gl.UniformMatrix4fv(
-		gl.GetUniformLocation(child2D.ShaderProgram, gl.Str("modelMtx\x00")),
-		1, false, &child2D.ModelMatrix[0],
+		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("modelMtx\x00")),
+		1, false, &child2D.modelMatrix[0],
 	)
 
-	sX, sY := ScaleCoordinates(child2D.X, child2D.Y, float32(child2D.Config.ScreenWidth), float32(child2D.Config.ScreenHeight))
-	child2D.ModelMatrix = mgl32.Translate3D(sX, sY, 0)
-	child2D.ProjectionMatrix = mgl32.Ortho2D(-1, 1, -1, 1)
+	child2D.X += child2D.VX
+	child2D.Y += child2D.VY
+	child2D.Y -= child2D.Gravity
+
+	sX, sY := ScaleCoordinates(child2D.X, child2D.Y, float32(child2D.config.ScreenWidth), float32(child2D.config.ScreenHeight))
+	child2D.modelMatrix = mgl32.Translate3D(sX, sY, 0)
+	child2D.projectionMatrix = mgl32.Ortho2D(-1, 1, -1, 1)
 }
 
 func (child2D *Child2D) AttachTexture(path string, coords []float32) error {
-	if child2D.VertexArray == nil {
+	if child2D.vertexArray == nil {
 		return errors.New("Cannot attach texture without VertexArray")
 	}
-	if child2D.ShaderProgram == 0 {
+	if child2D.shaderProgram == 0 {
 		return errors.New("Cannot attach texture without shader program")
 	}
 
-	gl.BindVertexArray(child2D.VertexArray.id)
-	gl.UseProgram(child2D.ShaderProgram)
+	gl.BindVertexArray(child2D.vertexArray.id)
+	gl.UseProgram(child2D.shaderProgram)
 
-	child2D.VertexArray.AddVertexAttribute(coords, 1, 2)
+	child2D.vertexArray.AddVertexAttribute(coords, 1, 2)
 
 	texture, err := NewTexture(path)
 	if err != nil {
@@ -93,21 +108,30 @@ func (child2D *Child2D) AttachTexture(path string, coords []float32) error {
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, texture)
 
-	loc1 := gl.GetUniformLocation(child2D.ShaderProgram, gl.Str("texture0\x00"))
+	loc1 := gl.GetUniformLocation(child2D.shaderProgram, gl.Str("texture0\x00"))
 	gl.Uniform1i(loc1, int32(0))
 	CheckError("IGNORE")
 
-	child2D.Texture = texture
+	child2D.texture = texture
 	gl.BindVertexArray(0)
 	return nil
 }
 
 func (child2D *Child2D) AttachTexturePrimitive(path string) {
-	child2D.AttachTexture(path, GetPrimitiveCoords(child2D.Primitive))
+	child2D.AttachTexture(path, GetPrimitiveCoords(child2D.primitive))
 }
 
-func ScaleCoordinates(x, y, sw, sh float32) (float32, float32) {
-	return 2*(x/float32(sw)) - 1, 2*(y/float32(sh)) - 1
+func (child2D *Child2D) AttachCollider(x, y, w, h float32) {
+	child2D.collider = NewCollider(x, y, w, h)
+}
+
+func (child2D *Child2D) CheckCollision(other Child) bool {
+	return child2D.collider.CheckCollision(child2D.X, child2D.Y, other)
+}
+
+func (child2D *Child2D) SetVelocity(vx, vy float32) {
+	child2D.VX = vx
+	child2D.VY = vy
 }
 
 func (child2D *Child2D) SetPosition(x, y float32) {
@@ -116,31 +140,55 @@ func (child2D *Child2D) SetPosition(x, y float32) {
 }
 
 func (child2D *Child2D) AttachVertexArray(vao *VertexArray, numVertices int32) {
-	child2D.VertexArray = vao
-	child2D.NumVertices = numVertices
+	child2D.vertexArray = vao
+	child2D.numVertices = numVertices
 }
 
 func (child2D *Child2D) AttachPrimitive(p Primitive) {
-	child2D.Primitive = p.id
+	child2D.primitive = p.id
 	child2D.AttachVertexArray(p.vao, p.numVertices)
 }
 
 func (child2D *Child2D) AttachShader(s uint32) {
-	child2D.ShaderProgram = s
+	child2D.shaderProgram = s
+}
+
+func (child2D *Child2D) AttachGroup(group string) {
+	child2D.Group = group
+}
+
+func (child2D *Child2D) AttachGravity(g float32) {
+	child2D.Gravity = g
 }
 
 func (child2D *Child2D) GetShaderProgram() uint32 {
-	return child2D.ShaderProgram
+	return child2D.shaderProgram
 }
 
 func (child2D *Child2D) GetVertexArray() *VertexArray {
-	return child2D.VertexArray
+	return child2D.vertexArray
 }
 
 func (child2D *Child2D) GetNumVertices() int32 {
-	return child2D.NumVertices
+	return child2D.numVertices
 }
 
 func (child2D *Child2D) GetTexture() uint32 {
-	return child2D.Texture
+	return child2D.texture
+}
+
+func (child2D *Child2D) GetCollider() *Collider {
+	return &child2D.collider
+}
+
+func (child2D *Child2D) GetX() float32 {
+	return child2D.X
+}
+
+func (child2D *Child2D) GetY() float32 {
+	return child2D.Y
+}
+
+func ScaleCoordinates(x, y, sw, sh float32) (float32, float32) {
+	return 2*(x/float32(sw)) - 1, 2*(y/float32(sh)) - 1
 }

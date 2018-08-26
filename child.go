@@ -11,5 +11,12 @@ type Child interface {
 
 	GetTexture() uint32
 
+	GetCollider() *Collider
+
+	GetX() float32
+	GetY() float32
+
+	CheckCollision(Child) bool
+
 	Update(Camera)
 }
