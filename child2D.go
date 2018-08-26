@@ -78,9 +78,9 @@ func (child2D *Child2D) Update(mainCamera Camera) {
 		1, false, &child2D.modelMatrix[0],
 	)
 
+	child2D.VY -= child2D.Gravity
 	child2D.X += child2D.VX
 	child2D.Y += child2D.VY
-	child2D.Y -= child2D.Gravity
 
 	sX, sY := ScaleCoordinates(child2D.X, child2D.Y, float32(child2D.config.ScreenWidth), float32(child2D.config.ScreenHeight))
 	child2D.modelMatrix = mgl32.Translate3D(sX, sY, 0)
