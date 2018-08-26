@@ -1,4 +1,4 @@
-package main
+package rapidengine
 
 import (
 	"math"
@@ -7,12 +7,9 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 )
 
-var MouseX float64 = float64(ScreenWidth / 2)
-var MouseY float64 = float64(ScreenHeight / 2)
-var FirstMouse = true
-
 type Camera3D struct {
-	Speed float32
+	Speed       float32
+	Sensitivity float64
 
 	Position  mgl32.Vec3
 	UpAxis    mgl32.Vec3
@@ -21,13 +18,19 @@ type Camera3D struct {
 	Pitch float32
 	Yaw   float32
 
+	MouseX float64
+	MouseY float64
+
 	MouseLastX float64
 	MouseLastY float64
 
-	View mgl32.Mat4
+	FirstMouse bool
+
+	View   mgl32.Mat4
+	Config *EngineConfig
 }
 
-func NewCamera3D(position mgl32.Vec3, speed float32) Camera3D {
+func NewCamera3D(position mgl32.Vec3, speed float32, config *EngineConfig) Camera3D {
 	return Camera3D{
 		Position:  position,
 		UpAxis:    mgl32.Vec3{0, 1, 0},
@@ -35,6 +38,7 @@ func NewCamera3D(position mgl32.Vec3, speed float32) Camera3D {
 		Speed:     speed,
 		Yaw:       0,
 		Pitch:     0,
+		Config:    config,
 	}
 }
 
@@ -73,23 +77,23 @@ func CalculateDirection(pitch, yaw float32) mgl32.Vec3 {
 	}
 }
 
-func MouseCallback(w *glfw.Window, xpos float64, ypos float64) {
+/*func MouseCallback(w *glfw.Window, xpos float64, ypos float64) {
 	MouseX = xpos
 	MouseY = ypos
-}
+}*/
 
 func (camera3D *Camera3D) ProcessMouse() {
-	if FirstMouse {
-		camera3D.MouseLastX = MouseX
-		camera3D.MouseLastY = MouseY
-		FirstMouse = false
+	if camera3D.FirstMouse {
+		camera3D.MouseLastX = camera3D.MouseX
+		camera3D.MouseLastY = camera3D.MouseY
+		camera3D.FirstMouse = false
 	}
-	xOffset := MouseX - camera3D.MouseLastX
-	yOffset := camera3D.MouseLastY - MouseY
-	camera3D.MouseLastX = MouseX
-	camera3D.MouseLastY = MouseY
-	xOffset *= CameraSensitivity
-	yOffset *= CameraSensitivity
+	xOffset := camera3D.MouseX - camera3D.MouseLastX
+	yOffset := camera3D.MouseLastY - camera3D.MouseY
+	camera3D.MouseLastX = camera3D.MouseX
+	camera3D.MouseLastY = camera3D.MouseY
+	xOffset *= camera3D.Sensitivity
+	yOffset *= camera3D.Sensitivity
 	camera3D.Yaw += float32(xOffset)
 	camera3D.Pitch += float32(yOffset)
 	if camera3D.Pitch > 89 {

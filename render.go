@@ -1,4 +1,4 @@
-package main
+package rapidengine
 
 //   --------------------------------------------------
 //   Render.go contains the main render loop, as well as
@@ -25,6 +25,8 @@ type Renderer struct {
 
 	MainCamera Camera
 
+	Config *EngineConfig
+
 	Done chan bool
 }
 
@@ -43,6 +45,7 @@ func (renderer *Renderer) StartRenderer() {
 		renderer.MainCamera.ProcessInput(renderer.Window)
 		renderer.MainCamera.Look()
 		renderer.Window.SwapBuffers()
+		CheckError("loop")
 	}
 	glfw.Terminate()
 	renderer.Done <- true
@@ -60,11 +63,20 @@ func (renderer *Renderer) PreRenderChildren() {
 // and draws them to the screen using an element buffer
 func (renderer *Renderer) RenderChildren() {
 	for _, child := range renderer.Children {
+		// Call the child's update method to update transform matrices
 		child.Update(renderer.MainCamera)
+
+		// Bind Shader Program & Vertex Array
 		gl.UseProgram(child.GetShaderProgram())
 		gl.BindVertexArray(child.GetVertexArray().id)
 		gl.EnableVertexAttribArray(0)
 		gl.EnableVertexAttribArray(1)
+
+		// Bind child's texture
+		gl.ActiveTexture(gl.TEXTURE0)
+		gl.BindTexture(gl.TEXTURE_2D, child.GetTexture())
+
+		// Draw elements and unbind array
 		gl.DrawElements(gl.TRIANGLES, child.GetNumVertices(), gl.UNSIGNED_INT, gl.PtrOffset(0))
 		gl.BindVertexArray(0)
 	}
@@ -72,16 +84,17 @@ func (renderer *Renderer) RenderChildren() {
 
 // NewRenderer creates a new renderer, and takes in a renderFunc which
 // is called every frame, allowing the User to have frame-by-frame control
-func NewRenderer(renderFunc func(renderer *Renderer), camera Camera) Renderer {
+func NewRenderer(camera Camera, config *EngineConfig) Renderer {
 	r := Renderer{
-		Window:        initGLFW(),
-		ShaderProgram: initOpenGL(),
+		Window:        initGLFW(config),
+		ShaderProgram: initOpenGL(config),
 		Children:      []Child{},
-		RenderFunc:    renderFunc,
+		RenderFunc:    func(r *Renderer) {},
 		Done:          make(chan bool),
 		MainCamera:    camera,
+		Config:        config,
 	}
-	r.Window.SetCursorPosCallback(MouseCallback)
+	//r.Window.SetCursorPosCallback(MouseCallback)
 	return r
 }
 
@@ -92,7 +105,13 @@ func (renderer *Renderer) Instance(child Child) {
 	renderer.Children = append(renderer.Children, child)
 }
 
-func initGLFW() *glfw.Window {
+// AttachCallback attaches a callback function to the renderer,
+// to be called per-frame
+func (renderer *Renderer) AttachCallback(f func(*Renderer)) {
+	renderer.RenderFunc = f
+}
+
+func initGLFW(config *EngineConfig) *glfw.Window {
 	if err := glfw.Init(); err != nil {
 		log.Fatal(err)
 	}
@@ -105,7 +124,7 @@ func initGLFW() *glfw.Window {
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 	glfw.WindowHint(glfw.OpenGLDebugContext, glfw.True)
 
-	window, err := glfw.CreateWindow(ScreenWidth, ScreenHeight, WindowTitle, nil, nil)
+	window, err := glfw.CreateWindow(config.ScreenWidth, config.ScreenHeight, config.WindowTitle, nil, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -117,7 +136,7 @@ func initGLFW() *glfw.Window {
 	return window
 }
 
-func initOpenGL() uint32 {
+func initOpenGL(config *EngineConfig) uint32 {
 	if err := gl.Init(); err != nil {
 		log.Fatal(err)
 	}
@@ -140,7 +159,7 @@ func initOpenGL() uint32 {
 	gl.AttachShader(prog, fragmentShader)
 	gl.LinkProgram(prog)
 
-	if PolygonLines {
+	if config.PolygonLines {
 		gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
 	}
 

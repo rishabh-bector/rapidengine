@@ -1,4 +1,4 @@
-package main
+package rapidengine
 
 import (
 	"github.com/go-gl/glfw/v3.2/glfw"
@@ -15,8 +15,8 @@ type Camera2D struct {
 	View mgl32.Mat4
 }
 
-func NewCamera2D(position mgl32.Vec3, speed float32) Camera2D {
-	return Camera2D{
+func NewCamera2D(position mgl32.Vec3, speed float32) *Camera2D {
+	return &Camera2D{
 		Position:  position,
 		UpAxis:    mgl32.Vec3{0, 1, 0},
 		FrontAxis: mgl32.Vec3{0, 0, -1},

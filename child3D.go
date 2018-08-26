@@ -1,4 +1,4 @@
-package main
+package rapidengine
 
 import (
 	"errors"
@@ -16,6 +16,8 @@ type Child3D struct {
 
 	modelMatrix      mgl32.Mat4
 	projectionMatrix mgl32.Mat4
+
+	Config *EngineConfig
 }
 
 func NewChild3D() Child3D {
@@ -33,7 +35,7 @@ func (child3D *Child3D) PreRender(mainCamera Camera3D) {
 
 	child3D.projectionMatrix = mgl32.Perspective(
 		mgl32.DegToRad(45),
-		float32(ScreenWidth)/float32(ScreenHeight),
+		float32(child3D.Config.ScreenWidth)/float32(child3D.Config.ScreenHeight),
 		0.1, 100,
 	)
 

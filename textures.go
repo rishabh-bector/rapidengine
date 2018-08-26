@@ -1,4 +1,4 @@
-package main
+package rapidengine
 
 import (
 	"fmt"

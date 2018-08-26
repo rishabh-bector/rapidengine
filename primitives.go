@@ -1,4 +1,4 @@
-package main
+package rapidengine
 
 //  --------------------------------------------------
 //	Primitives.go allows easy creation of basic shapes
@@ -13,8 +13,8 @@ type Primitive struct {
 }
 
 // NormalizeSizes takes in a size in pixels and normalizes to [0, 1]
-func NormalizeSizes(x, y float32) (float32, float32) {
-	return x / float32(ScreenWidth), y / float32(ScreenHeight)
+func NormalizeSizes(x, y, sw, sh float32) (float32, float32) {
+	return x / float32(sw), y / float32(sh)
 }
 
 // GetPrimitiveCoords returns the appropriate texture coordinates
@@ -28,7 +28,7 @@ func GetPrimitiveCoords(id string) []float32 {
 }
 
 // NewTriangle creates a new triangle based on 3 points and a shaders object
-func NewTriangle(points []float32, shaders *Shaders) Primitive {
+func NewTriangle(points []float32) Primitive {
 	indices := []uint32{}
 	for i := 0; i < len(points); i++ {
 		indices = append(indices, uint32(i))
@@ -46,8 +46,8 @@ func NewTriangle(points []float32, shaders *Shaders) Primitive {
 
 // NewRectangle creates a rectangle primitive centered around the origin,
 // based on a width and height value
-func NewRectangle(width, height float32, shaders *Shaders) Primitive {
-	w, h := NormalizeSizes(width, height)
+func NewRectangle(width, height float32, config *EngineConfig) Primitive {
+	w, h := NormalizeSizes(width, height, float32(config.ScreenWidth), float32(config.ScreenHeight))
 	points := []float32{
 		0, 0, 0,
 		w, 0, 0,
@@ -71,7 +71,7 @@ func NewRectangle(width, height float32, shaders *Shaders) Primitive {
 }
 
 // NewCube creates a 3D cube primitive
-func NewCube(shaders *Shaders) Primitive {
+func NewCube() Primitive {
 	indices := []uint32{}
 	for i := 0; i < len(CubePoints); i++ {
 		indices = append(indices, uint32(i))

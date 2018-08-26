@@ -1,4 +1,4 @@
-package main
+package rapidengine
 
 type Child interface {
 	PreRender(Camera)
@@ -8,6 +8,8 @@ type Child interface {
 	GetVertexArray() *VertexArray
 
 	GetNumVertices() int32
+
+	GetTexture() uint32
 
 	Update(Camera)
 }

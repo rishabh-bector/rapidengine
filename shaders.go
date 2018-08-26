@@ -1,4 +1,4 @@
-package main
+package rapidengine
 
 import (
 	"fmt"
@@ -49,8 +49,8 @@ const FragmentShaderSource = `
 		
 	` + "\x00"
 
-func NewShaders() *Shaders {
-	return &Shaders{
+func NewShaders() Shaders {
+	return Shaders{
 		shaderList: []string{
 			VertexShaderSource,
 			FragmentShaderSource,
