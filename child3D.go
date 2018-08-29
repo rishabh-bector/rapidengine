@@ -5,6 +5,9 @@ import (
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
+
+	"rapidengine/camera"
+	"rapidengine/configuration"
 )
 
 type Child3D struct {
@@ -17,7 +20,7 @@ type Child3D struct {
 	modelMatrix      mgl32.Mat4
 	projectionMatrix mgl32.Mat4
 
-	Config *EngineConfig
+	Config *configuration.EngineConfig
 }
 
 func NewChild3D() Child3D {
@@ -27,7 +30,7 @@ func NewChild3D() Child3D {
 	}
 }
 
-func (child3D *Child3D) PreRender(mainCamera Camera3D) {
+func (child3D *Child3D) PreRender(mainCamera camera.Camera3D) {
 	gl.BindVertexArray(child3D.vertexArray.id)
 	gl.UseProgram(child3D.shaderProgram)
 

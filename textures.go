@@ -14,16 +14,16 @@ import (
 )
 
 type TextureControl struct {
-	TexMap map[string]uint32
+	TexMap map[string]*uint32
 }
 
 func NewTextureControl() TextureControl {
 	return TextureControl{
-		make(map[string]uint32),
+		make(map[string]*uint32),
 	}
 }
 
-func (textureControl *TextureControl) GetTexture(name string) uint32 {
+func (textureControl *TextureControl) GetTexture(name string) *uint32 {
 	return textureControl.TexMap[name]
 }
 
@@ -52,7 +52,7 @@ func (textureControl *TextureControl) NewTexture(path string, name string) error
 	)
 	gl.GenerateMipmap(gl.TEXTURE_2D)
 	gl.BindTexture(gl.TEXTURE_2D, 0)
-	textureControl.TexMap[name] = texture
+	textureControl.TexMap[name] = &texture
 	return nil
 }
 

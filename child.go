@@ -1,13 +1,16 @@
 package rapidengine
 
+import "rapidengine/camera"
+
 type ChildCopy struct {
-	X float32
-	Y float32
+	X   float32
+	Y   float32
+	Tex *uint32
 }
 type Child interface {
-	PreRender(Camera)
+	PreRender(camera.Camera)
 
-	RenderCopy(ChildCopy, Camera)
+	RenderCopy(ChildCopy, camera.Camera)
 
 	CheckCopyingEnabled() bool
 
@@ -17,7 +20,7 @@ type Child interface {
 
 	GetNumVertices() int32
 
-	GetTexture() uint32
+	GetTexture() *uint32
 
 	GetCollider() *Collider
 
@@ -28,5 +31,5 @@ type Child interface {
 
 	CheckCollision(Child) bool
 
-	Update(Camera)
+	Update(camera.Camera)
 }

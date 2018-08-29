@@ -6,6 +6,10 @@ package rapidengine
 //  primitive struct, which can be passed to a Child.
 //  --------------------------------------------------
 
+import (
+	"rapidengine/configuration"
+)
+
 type Primitive struct {
 	id          string
 	vao         *VertexArray
@@ -46,7 +50,7 @@ func NewTriangle(points []float32) Primitive {
 
 // NewRectangle creates a rectangle primitive centered around the origin,
 // based on a width and height value
-func NewRectangle(width, height float32, config *EngineConfig) Primitive {
+func NewRectangle(width, height float32, config *configuration.EngineConfig) Primitive {
 	w, h := NormalizeSizes(width, height, float32(config.ScreenWidth), float32(config.ScreenHeight))
 	points := []float32{
 		0, 0, 0,

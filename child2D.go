@@ -5,6 +5,9 @@ import (
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
+
+	"rapidengine/camera"
+	"rapidengine/configuration"
 )
 
 type Child2D struct {
@@ -14,7 +17,7 @@ type Child2D struct {
 	primitive string
 
 	shaderProgram uint32
-	texture       uint32
+	texture       *uint32
 
 	modelMatrix      mgl32.Mat4
 	projectionMatrix mgl32.Mat4
@@ -33,10 +36,10 @@ type Child2D struct {
 	Group    string
 	collider Collider
 
-	config *EngineConfig
+	config *configuration.EngineConfig
 }
 
-func NewChild2D(config *EngineConfig) Child2D {
+func NewChild2D(config *configuration.EngineConfig) Child2D {
 	return Child2D{
 		modelMatrix:      mgl32.Ident4(),
 		projectionMatrix: mgl32.Ortho2D(-1, 1, -1, 1),
@@ -47,7 +50,7 @@ func NewChild2D(config *EngineConfig) Child2D {
 	}
 }
 
-func (child2D *Child2D) PreRender(mainCamera Camera) {
+func (child2D *Child2D) PreRender(mainCamera camera.Camera) {
 	gl.BindVertexArray(child2D.vertexArray.id)
 	gl.UseProgram(child2D.shaderProgram)
 
@@ -68,13 +71,15 @@ func (child2D *Child2D) PreRender(mainCamera Camera) {
 
 	gl.BindAttribLocation(child2D.shaderProgram, 0, gl.Str("position\x00"))
 	gl.BindAttribLocation(child2D.shaderProgram, 1, gl.Str("tex\x00"))
+
+	gl.BindVertexArray(0)
 }
 
-func (child2D *Child2D) Update(mainCamera Camera) {
+func (child2D *Child2D) Update(mainCamera camera.Camera) {
 	child2D.Render(mainCamera)
 }
 
-func (child2D *Child2D) Render(mainCamera Camera) {
+func (child2D *Child2D) Render(mainCamera camera.Camera) {
 	child2D.VY -= child2D.Gravity
 	child2D.X += child2D.VX
 	child2D.Y += child2D.VY
@@ -94,7 +99,7 @@ func (child2D *Child2D) Render(mainCamera Camera) {
 	)
 }
 
-func (child2D *Child2D) RenderCopy(config ChildCopy, mainCamera Camera) {
+func (child2D *Child2D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
 	sX, sY := ScaleCoordinates(config.X, config.Y, float32(child2D.config.ScreenWidth), float32(child2D.config.ScreenHeight))
 	child2D.modelMatrix = mgl32.Translate3D(sX, sY, 0)
 	child2D.projectionMatrix = mgl32.Ortho2D(-1, 1, -1, 1)
@@ -108,9 +113,11 @@ func (child2D *Child2D) RenderCopy(config ChildCopy, mainCamera Camera) {
 		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("modelMtx\x00")),
 		1, false, &child2D.modelMatrix[0],
 	)
+
+	child2D.texture = config.Tex
 }
 
-func (child2D *Child2D) AttachTexture(coords []float32, texture uint32) error {
+func (child2D *Child2D) AttachTexture(coords []float32, texture *uint32) error {
 	if child2D.vertexArray == nil {
 		return errors.New("Cannot attach texture without VertexArray")
 	}
@@ -124,18 +131,17 @@ func (child2D *Child2D) AttachTexture(coords []float32, texture uint32) error {
 	child2D.vertexArray.AddVertexAttribute(coords, 1, 2)
 
 	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D, texture)
+	gl.BindTexture(gl.TEXTURE_2D, *texture)
 
 	loc1 := gl.GetUniformLocation(child2D.shaderProgram, gl.Str("texture0\x00"))
 	gl.Uniform1i(loc1, int32(0))
-	CheckError("IGNORE")
 
 	child2D.texture = texture
 	gl.BindVertexArray(0)
 	return nil
 }
 
-func (child2D *Child2D) AttachTexturePrimitive(texture uint32) {
+func (child2D *Child2D) AttachTexturePrimitive(texture *uint32) {
 	child2D.AttachTexture(GetPrimitiveCoords(child2D.primitive), texture)
 }
 
@@ -203,7 +209,7 @@ func (child2D *Child2D) GetNumVertices() int32 {
 	return child2D.numVertices
 }
 
-func (child2D *Child2D) GetTexture() uint32 {
+func (child2D *Child2D) GetTexture() *uint32 {
 	return child2D.texture
 }
 

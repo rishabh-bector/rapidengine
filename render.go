@@ -10,6 +10,9 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	log "github.com/sirupsen/logrus"
+
+	"rapidengine/camera"
+	"rapidengine/configuration"
 )
 
 // Renderer contains the information required for
@@ -23,19 +26,17 @@ type Renderer struct {
 
 	RenderFunc func(renderer *Renderer)
 
-	MainCamera Camera
+	MainCamera camera.Camera
 
 	RenderDistance float32
 
-	Config *EngineConfig
+	Config *configuration.EngineConfig
 
 	Done chan bool
 }
 
 // StartRenderer starts the main render loop
 func (renderer *Renderer) StartRenderer() {
-	renderer.PreRenderChildren()
-
 	for !renderer.Window.ShouldClose() {
 		gl.ClearColor(0.5, 0.5, 0.5, 0.5)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
@@ -85,7 +86,7 @@ func (renderer *Renderer) RenderChild(child Child) {
 
 	// Bind child's texture
 	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D, child.GetTexture())
+	gl.BindTexture(gl.TEXTURE_2D, *child.GetTexture())
 
 	// Draw elements and unbind array
 	gl.DrawElements(gl.TRIANGLES, child.GetNumVertices(), gl.UNSIGNED_INT, gl.PtrOffset(0))
@@ -116,7 +117,7 @@ func (renderer *Renderer) inBounds(x, y, camX, camY float32) bool {
 
 // NewRenderer creates a new renderer, and takes in a renderFunc which
 // is called every frame, allowing the User to have frame-by-frame control
-func NewRenderer(camera Camera, config *EngineConfig) Renderer {
+func NewRenderer(camera camera.Camera, config *configuration.EngineConfig) Renderer {
 	r := Renderer{
 		Window:         initGLFW(config),
 		ShaderProgram:  initOpenGL(config),
@@ -144,7 +145,7 @@ func (renderer *Renderer) AttachCallback(f func(*Renderer)) {
 	renderer.RenderFunc = f
 }
 
-func initGLFW(config *EngineConfig) *glfw.Window {
+func initGLFW(config *configuration.EngineConfig) *glfw.Window {
 	if err := glfw.Init(); err != nil {
 		log.Fatal(err)
 	}
@@ -169,7 +170,7 @@ func initGLFW(config *EngineConfig) *glfw.Window {
 	return window
 }
 
-func initOpenGL(config *EngineConfig) uint32 {
+func initOpenGL(config *configuration.EngineConfig) uint32 {
 	if err := gl.Init(); err != nil {
 		log.Fatal(err)
 	}

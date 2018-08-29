@@ -1,7 +1,8 @@
-package rapidengine
+package camera
 
 import (
 	"math"
+	"rapidengine/configuration"
 
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/go-gl/mathgl/mgl32"
@@ -27,10 +28,10 @@ type Camera3D struct {
 	FirstMouse bool
 
 	View   mgl32.Mat4
-	Config *EngineConfig
+	Config *configuration.EngineConfig
 }
 
-func NewCamera3D(position mgl32.Vec3, speed float32, config *EngineConfig) Camera3D {
+func NewCamera3D(position mgl32.Vec3, speed float32, config *configuration.EngineConfig) Camera3D {
 	return Camera3D{
 		Position:  position,
 		UpAxis:    mgl32.Vec3{0, 1, 0},

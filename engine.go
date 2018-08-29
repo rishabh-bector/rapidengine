@@ -1,21 +1,13 @@
 package rapidengine
 
 import (
+	"rapidengine/camera"
+	"rapidengine/configuration"
+
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/sirupsen/logrus"
 )
-
-type EngineConfig struct {
-	ScreenWidth  int
-	ScreenHeight int
-
-	WindowTitle    string
-	PolygonLines   bool
-	CollisionLines bool
-
-	Dimensions int
-}
 
 type Engine struct {
 	Renderer   Renderer
@@ -26,14 +18,14 @@ type Engine struct {
 
 	Shaders Shaders
 
-	Config EngineConfig
+	Config configuration.EngineConfig
 
 	Logger *logrus.Logger
 }
 
-func NewEngine(config EngineConfig, renderFunc func(*Renderer)) Engine {
+func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer)) Engine {
 	e := Engine{
-		Renderer:         NewRenderer(NewCamera2D(mgl32.Vec3{0, 0, 0}, float32(0.02), &config), &config),
+		Renderer:         NewRenderer(camera.NewCamera2D(mgl32.Vec3{0, 0, 0}, float32(0.02), &config), &config),
 		CollisionControl: NewCollisionControl(),
 		TextureControl:   NewTextureControl(),
 		Shaders:          NewShaders(),
@@ -53,6 +45,10 @@ func (engine *Engine) Initialize() error {
 	}
 	gl.UseProgram(engine.Renderer.ShaderProgram)
 	return nil
+}
+
+func (engine *Engine) InitializeRenderer() {
+	engine.Renderer.PreRenderChildren()
 }
 
 func (engine *Engine) Update(renderer *Renderer) {
