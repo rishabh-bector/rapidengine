@@ -50,9 +50,9 @@ func NewRectangle(width, height float32, config *EngineConfig) Primitive {
 	w, h := NormalizeSizes(width, height, float32(config.ScreenWidth), float32(config.ScreenHeight))
 	points := []float32{
 		0, 0, 0,
-		w, 0, 0,
-		w, -h, 0,
-		0, -h, 0,
+		w * 2, 0, 0,
+		w * 2, h * 2, 0,
+		0, h * 2, 0,
 	}
 	indices := []uint32{
 		0, 1, 2,

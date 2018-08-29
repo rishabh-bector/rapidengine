@@ -19,6 +19,9 @@ type Child2D struct {
 	modelMatrix      mgl32.Mat4
 	projectionMatrix mgl32.Mat4
 
+	copies         []ChildCopy
+	copyingEnabled bool
+
 	X float32
 	Y float32
 
@@ -68,6 +71,18 @@ func (child2D *Child2D) PreRender(mainCamera Camera) {
 }
 
 func (child2D *Child2D) Update(mainCamera Camera) {
+	child2D.Render(mainCamera)
+}
+
+func (child2D *Child2D) Render(mainCamera Camera) {
+	child2D.VY -= child2D.Gravity
+	child2D.X += child2D.VX
+	child2D.Y += child2D.VY
+
+	sX, sY := ScaleCoordinates(child2D.X, child2D.Y, float32(child2D.config.ScreenWidth), float32(child2D.config.ScreenHeight))
+	child2D.modelMatrix = mgl32.Translate3D(sX, sY, 0)
+	child2D.projectionMatrix = mgl32.Ortho2D(-1, 1, -1, 1)
+
 	gl.UniformMatrix4fv(
 		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("viewMtx\x00")),
 		1, false, mainCamera.GetFirstViewIndex(),
@@ -77,17 +92,25 @@ func (child2D *Child2D) Update(mainCamera Camera) {
 		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("modelMtx\x00")),
 		1, false, &child2D.modelMatrix[0],
 	)
-
-	child2D.VY -= child2D.Gravity
-	child2D.X += child2D.VX
-	child2D.Y += child2D.VY
-
-	sX, sY := ScaleCoordinates(child2D.X, child2D.Y, float32(child2D.config.ScreenWidth), float32(child2D.config.ScreenHeight))
-	child2D.modelMatrix = mgl32.Translate3D(sX, sY, 0)
-	child2D.projectionMatrix = mgl32.Ortho2D(-1, 1, -1, 1)
 }
 
-func (child2D *Child2D) AttachTexture(path string, coords []float32) error {
+func (child2D *Child2D) RenderCopy(config ChildCopy, mainCamera Camera) {
+	sX, sY := ScaleCoordinates(config.X, config.Y, float32(child2D.config.ScreenWidth), float32(child2D.config.ScreenHeight))
+	child2D.modelMatrix = mgl32.Translate3D(sX, sY, 0)
+	child2D.projectionMatrix = mgl32.Ortho2D(-1, 1, -1, 1)
+
+	gl.UniformMatrix4fv(
+		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("viewMtx\x00")),
+		1, false, mainCamera.GetFirstViewIndex(),
+	)
+
+	gl.UniformMatrix4fv(
+		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("modelMtx\x00")),
+		1, false, &child2D.modelMatrix[0],
+	)
+}
+
+func (child2D *Child2D) AttachTexture(coords []float32, texture uint32) error {
 	if child2D.vertexArray == nil {
 		return errors.New("Cannot attach texture without VertexArray")
 	}
@@ -99,11 +122,6 @@ func (child2D *Child2D) AttachTexture(path string, coords []float32) error {
 	gl.UseProgram(child2D.shaderProgram)
 
 	child2D.vertexArray.AddVertexAttribute(coords, 1, 2)
-
-	texture, err := NewTexture(path)
-	if err != nil {
-		return err
-	}
 
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, texture)
@@ -117,8 +135,8 @@ func (child2D *Child2D) AttachTexture(path string, coords []float32) error {
 	return nil
 }
 
-func (child2D *Child2D) AttachTexturePrimitive(path string) {
-	child2D.AttachTexture(path, GetPrimitiveCoords(child2D.primitive))
+func (child2D *Child2D) AttachTexturePrimitive(texture uint32) {
+	child2D.AttachTexture(GetPrimitiveCoords(child2D.primitive), texture)
 }
 
 func (child2D *Child2D) AttachCollider(x, y, w, h float32) {
@@ -137,6 +155,18 @@ func (child2D *Child2D) SetVelocity(vx, vy float32) {
 func (child2D *Child2D) SetPosition(x, y float32) {
 	child2D.X = x
 	child2D.Y = y
+}
+
+func (child2D *Child2D) EnableCopying() {
+	child2D.copyingEnabled = true
+}
+
+func (child2D *Child2D) DisableCopying() {
+	child2D.copyingEnabled = false
+}
+
+func (child2D *Child2D) AddCopy(config ChildCopy) {
+	child2D.copies = append(child2D.copies, config)
 }
 
 func (child2D *Child2D) AttachVertexArray(vao *VertexArray, numVertices int32) {
@@ -187,6 +217,14 @@ func (child2D *Child2D) GetX() float32 {
 
 func (child2D *Child2D) GetY() float32 {
 	return child2D.Y
+}
+
+func (child2D *Child2D) GetCopies() []ChildCopy {
+	return child2D.copies
+}
+
+func (child2D *Child2D) CheckCopyingEnabled() bool {
+	return child2D.copyingEnabled
 }
 
 func ScaleCoordinates(x, y, sw, sh float32) (float32, float32) {

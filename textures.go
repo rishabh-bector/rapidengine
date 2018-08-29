@@ -13,30 +13,24 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
-func loadImage(path string) (*image.RGBA, error) {
-	imgFile, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer imgFile.Close()
-
-	ct, err := detectContentType(imgFile)
-	if err != nil {
-		return nil, err
-	}
-
-	img, err := convert(imgFile, ct)
-	if err != nil {
-		return nil, err
-	}
-
-	return img, nil
+type TextureControl struct {
+	TexMap map[string]uint32
 }
 
-func NewTexture(path string) (uint32, error) {
+func NewTextureControl() TextureControl {
+	return TextureControl{
+		make(map[string]uint32),
+	}
+}
+
+func (textureControl *TextureControl) GetTexture(name string) uint32 {
+	return textureControl.TexMap[name]
+}
+
+func (textureControl *TextureControl) NewTexture(path string, name string) error {
 	rgba, err := loadImage(path)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	var texture uint32
 	gl.GenTextures(1, &texture)
@@ -58,7 +52,28 @@ func NewTexture(path string) (uint32, error) {
 	)
 	gl.GenerateMipmap(gl.TEXTURE_2D)
 	gl.BindTexture(gl.TEXTURE_2D, 0)
-	return texture, nil
+	textureControl.TexMap[name] = texture
+	return nil
+}
+
+func loadImage(path string) (*image.RGBA, error) {
+	imgFile, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer imgFile.Close()
+
+	ct, err := detectContentType(imgFile)
+	if err != nil {
+		return nil, err
+	}
+
+	img, err := convert(imgFile, ct)
+	if err != nil {
+		return nil, err
+	}
+
+	return img, nil
 }
 
 func convert(file io.Reader, contentType string) (*image.RGBA, error) {

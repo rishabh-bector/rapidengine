@@ -13,14 +13,17 @@ type Camera2D struct {
 	FrontAxis mgl32.Vec3
 
 	View mgl32.Mat4
+
+	config *EngineConfig
 }
 
-func NewCamera2D(position mgl32.Vec3, speed float32) *Camera2D {
+func NewCamera2D(position mgl32.Vec3, speed float32, config *EngineConfig) *Camera2D {
 	return &Camera2D{
 		Position:  position,
 		UpAxis:    mgl32.Vec3{0, 1, 0},
 		FrontAxis: mgl32.Vec3{0, 0, -1},
 		Speed:     speed,
+		config:    config,
 	}
 }
 
@@ -49,6 +52,19 @@ func (camera2D *Camera2D) ProcessInput(window *glfw.Window) {
 
 func (camera2D *Camera2D) GetFirstViewIndex() *float32 {
 	return &camera2D.View[0]
+}
+
+func (camera2D *Camera2D) GetPosition() (float32, float32) {
+	return ((camera2D.Position.X() / 2) * float32(camera2D.config.ScreenWidth)) + float32(camera2D.config.ScreenWidth/2),
+		((camera2D.Position.Y() / 2) * float32(camera2D.config.ScreenHeight)) + float32(camera2D.config.ScreenHeight/2)
+}
+
+func (camera2D *Camera2D) SetPosition(x, y int) {
+	camera2D.Position = mgl32.Vec3{
+		(float32(x) - float32(camera2D.config.ScreenWidth/2)) / float32(camera2D.config.ScreenWidth/2),
+		(float32(y) - float32(camera2D.config.ScreenHeight/2)) / float32(camera2D.config.ScreenHeight/2),
+		camera2D.Position.Z(),
+	}
 }
 
 func (camera2D *Camera2D) ProcessMouse() {

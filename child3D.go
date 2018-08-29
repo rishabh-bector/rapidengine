@@ -56,7 +56,7 @@ func (child3D *Child3D) PreRender(mainCamera Camera3D) {
 	gl.BindAttribLocation(child3D.shaderProgram, 1, gl.Str("tex\x00"))
 }
 
-func (child3D *Child3D) AttachTexture(path string, coords []float32) error {
+func (child3D *Child3D) AttachTexture(coords []float32, texture uint32) error {
 	if child3D.vertexArray == nil {
 		return errors.New("Cannot attach texture without VertexArray")
 	}
@@ -68,11 +68,6 @@ func (child3D *Child3D) AttachTexture(path string, coords []float32) error {
 	gl.UseProgram(child3D.shaderProgram)
 
 	child3D.vertexArray.AddVertexAttribute(coords, 1, 2)
-
-	texture, err := NewTexture(path)
-	if err != nil {
-		return err
-	}
 
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, texture)

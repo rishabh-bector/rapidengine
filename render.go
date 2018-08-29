@@ -25,6 +25,8 @@ type Renderer struct {
 
 	MainCamera Camera
 
+	RenderDistance float32
+
 	Config *EngineConfig
 
 	Done chan bool
@@ -60,39 +62,70 @@ func (renderer *Renderer) PreRenderChildren() {
 }
 
 // RenderChildren binds the appropriate shaders and Vertex Array for each child,
-// and draws them to the screen using an element buffer
+// or child copy, and draws them to the screen using an element buffer
 func (renderer *Renderer) RenderChildren() {
 	for _, child := range renderer.Children {
-		// Call the child's update method to update transform matrices
-		child.Update(renderer.MainCamera)
-
-		// Bind Shader Program & Vertex Array
-		gl.UseProgram(child.GetShaderProgram())
-		gl.BindVertexArray(child.GetVertexArray().id)
-		gl.EnableVertexAttribArray(0)
-		gl.EnableVertexAttribArray(1)
-
-		// Bind child's texture
-		gl.ActiveTexture(gl.TEXTURE0)
-		gl.BindTexture(gl.TEXTURE_2D, child.GetTexture())
-
-		// Draw elements and unbind array
-		gl.DrawElements(gl.TRIANGLES, child.GetNumVertices(), gl.UNSIGNED_INT, gl.PtrOffset(0))
-		gl.BindVertexArray(0)
+		if !child.CheckCopyingEnabled() {
+			child.Update(renderer.MainCamera)
+			renderer.RenderChild(child)
+		} else {
+			renderer.RenderChildCopy(child)
+		}
 	}
+}
+
+// RenderChild renders a single child to the screen
+func (renderer *Renderer) RenderChild(child Child) {
+
+	// Bind Shader Program & Vertex Array
+	gl.UseProgram(child.GetShaderProgram())
+	gl.BindVertexArray(child.GetVertexArray().id)
+	gl.EnableVertexAttribArray(0)
+	gl.EnableVertexAttribArray(1)
+
+	// Bind child's texture
+	gl.ActiveTexture(gl.TEXTURE0)
+	gl.BindTexture(gl.TEXTURE_2D, child.GetTexture())
+
+	// Draw elements and unbind array
+	gl.DrawElements(gl.TRIANGLES, child.GetNumVertices(), gl.UNSIGNED_INT, gl.PtrOffset(0))
+	gl.BindVertexArray(0)
+}
+
+// RenderChildCopy renders all copies of a child
+func (renderer *Renderer) RenderChildCopy(child Child) {
+	camX, camY := renderer.MainCamera.GetPosition()
+	for _, c := range child.GetCopies() {
+		if renderer.inBounds(c.X, c.Y, float32(camX), float32(camY)) {
+			child.RenderCopy(c, renderer.MainCamera)
+			renderer.RenderChild(child)
+		}
+	}
+}
+
+// InBounds checks if a particular x/y is within the camera's frame
+func (renderer *Renderer) inBounds(x, y, camX, camY float32) bool {
+	if x < camX+renderer.RenderDistance &&
+		x > camX-renderer.RenderDistance &&
+		y < camY+renderer.RenderDistance &&
+		y > camY-renderer.RenderDistance {
+		return true
+	}
+	return false
 }
 
 // NewRenderer creates a new renderer, and takes in a renderFunc which
 // is called every frame, allowing the User to have frame-by-frame control
 func NewRenderer(camera Camera, config *EngineConfig) Renderer {
 	r := Renderer{
-		Window:        initGLFW(config),
-		ShaderProgram: initOpenGL(config),
-		Children:      []Child{},
-		RenderFunc:    func(r *Renderer) {},
-		Done:          make(chan bool),
-		MainCamera:    camera,
-		Config:        config,
+		Window:         initGLFW(config),
+		ShaderProgram:  initOpenGL(config),
+		Children:       []Child{},
+		RenderFunc:     func(r *Renderer) {},
+		RenderDistance: 500,
+		Done:           make(chan bool),
+		MainCamera:     camera,
+		Config:         config,
 	}
 	//r.Window.SetCursorPosCallback(MouseCallback)
 	return r
@@ -169,6 +202,10 @@ func initOpenGL(config *EngineConfig) uint32 {
 	gl.Disable(gl.CULL_FACE)
 
 	return prog
+}
+
+func (renderer *Renderer) SetRenderDistance(distance float32) {
+	renderer.RenderDistance = distance
 }
 
 // CheckError decodes the various unhelpful error codes

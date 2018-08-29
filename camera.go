@@ -10,4 +10,7 @@ type Camera interface {
 	ProcessInput(*glfw.Window)
 
 	GetFirstViewIndex() *float32
+
+	SetPosition(int, int)
+	GetPosition() (float32, float32)
 }

@@ -22,6 +22,7 @@ type Engine struct {
 	RenderFunc func(renderer *Renderer)
 
 	CollisionControl CollisionControl
+	TextureControl   TextureControl
 
 	Shaders Shaders
 
@@ -32,8 +33,9 @@ type Engine struct {
 
 func NewEngine(config EngineConfig, renderFunc func(*Renderer)) Engine {
 	e := Engine{
-		Renderer:         NewRenderer(NewCamera2D(mgl32.Vec3{0, 0, 0}, float32(0.02)), &config),
+		Renderer:         NewRenderer(NewCamera2D(mgl32.Vec3{0, 0, 0}, float32(0.02), &config), &config),
 		CollisionControl: NewCollisionControl(),
+		TextureControl:   NewTextureControl(),
 		Shaders:          NewShaders(),
 		Config:           config,
 		Logger:           logrus.New(),
