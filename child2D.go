@@ -51,8 +51,8 @@ func NewChild2D(config *configuration.EngineConfig) Child2D {
 }
 
 func (child2D *Child2D) PreRender(mainCamera camera.Camera) {
-	gl.BindVertexArray(child2D.vertexArray.id)
-	gl.UseProgram(child2D.shaderProgram)
+	child2D.config.Logger.Info("PreRendering Children...")
+	child2D.BindChild()
 
 	gl.UniformMatrix4fv(
 		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("modelMtx\x00")),
@@ -73,6 +73,11 @@ func (child2D *Child2D) PreRender(mainCamera camera.Camera) {
 	gl.BindAttribLocation(child2D.shaderProgram, 1, gl.Str("tex\x00"))
 
 	gl.BindVertexArray(0)
+}
+
+func (child2D *Child2D) BindChild() {
+	gl.BindVertexArray(child2D.vertexArray.id)
+	gl.UseProgram(child2D.shaderProgram)
 }
 
 func (child2D *Child2D) Update(mainCamera camera.Camera) {

@@ -6,7 +6,6 @@ import (
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/sirupsen/logrus"
 )
 
 type Engine struct {
@@ -19,18 +18,15 @@ type Engine struct {
 	Shaders Shaders
 
 	Config configuration.EngineConfig
-
-	Logger *logrus.Logger
 }
 
 func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer)) Engine {
 	e := Engine{
-		Renderer:         NewRenderer(camera.NewCamera2D(mgl32.Vec3{0, 0, 0}, float32(0.02), &config), &config),
+		Renderer:         NewRenderer(camera.NewCamera2D(mgl32.Vec3{0, 0, 0}, float32(0.05), &config), &config),
 		CollisionControl: NewCollisionControl(),
 		TextureControl:   NewTextureControl(),
 		Shaders:          NewShaders(),
 		Config:           config,
-		Logger:           logrus.New(),
 		RenderFunc:       renderFunc,
 	}
 	e.Renderer.AttachCallback(e.Update)
@@ -40,7 +36,7 @@ func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer)) En
 func (engine *Engine) Initialize() error {
 	err := engine.Shaders.CompileShaders()
 	if err != nil {
-		engine.Logger.Fatal(err)
+		engine.Config.Logger.Fatal(err)
 		return err
 	}
 	gl.UseProgram(engine.Renderer.ShaderProgram)

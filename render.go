@@ -135,7 +135,7 @@ func NewRenderer(camera camera.Camera, config *configuration.EngineConfig) Rende
 // Instance takes a child and adds it to the renderer's list,
 // so that it will be rendered every frame
 func (renderer *Renderer) Instance(child Child) {
-	child.PreRender(renderer.MainCamera)
+	//child.PreRender(renderer.MainCamera)
 	renderer.Children = append(renderer.Children, child)
 }
 
