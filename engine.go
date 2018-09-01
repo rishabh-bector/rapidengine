@@ -48,7 +48,8 @@ func (engine *Engine) InitializeRenderer() {
 }
 
 func (engine *Engine) Update(renderer *Renderer) {
-	engine.CollisionControl.Update()
+	x, y := renderer.MainCamera.GetPosition()
+	engine.CollisionControl.Update(x, y)
 	engine.RenderFunc(renderer)
 }
 
@@ -60,7 +61,6 @@ func (engine *Engine) NewChild2D() Child2D {
 
 func (engine *Engine) StartRenderer() {
 	if engine.Config.CollisionLines {
-
 	}
 	engine.Renderer.StartRenderer()
 }

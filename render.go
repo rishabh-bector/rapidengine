@@ -97,7 +97,7 @@ func (renderer *Renderer) RenderChild(child Child) {
 func (renderer *Renderer) RenderChildCopy(child Child) {
 	camX, camY := renderer.MainCamera.GetPosition()
 	for _, c := range child.GetCopies() {
-		if renderer.inBounds(c.X, c.Y, float32(camX), float32(camY)) {
+		if renderer.InBounds(c.X, c.Y, float32(camX), float32(camY)) {
 			child.RenderCopy(c, renderer.MainCamera)
 			renderer.RenderChild(child)
 		}
@@ -105,7 +105,7 @@ func (renderer *Renderer) RenderChildCopy(child Child) {
 }
 
 // InBounds checks if a particular x/y is within the camera's frame
-func (renderer *Renderer) inBounds(x, y, camX, camY float32) bool {
+func (renderer *Renderer) InBounds(x, y, camX, camY float32) bool {
 	if x < camX+renderer.RenderDistance &&
 		x > camX-renderer.RenderDistance &&
 		y < camY+renderer.RenderDistance &&
