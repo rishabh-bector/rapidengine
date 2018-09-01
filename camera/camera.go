@@ -13,4 +13,5 @@ type Camera interface {
 
 	SetPosition(int, int)
 	GetPosition() (float32, float32)
+	SetSpeed(float32)
 }

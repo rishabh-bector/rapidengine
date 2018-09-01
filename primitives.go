@@ -92,10 +92,10 @@ func NewCube() Primitive {
 }
 
 var RectCoords = []float32{
-	1, 0,
-	0, 0,
 	0, 1,
 	1, 1,
+	1, 0,
+	0, 0,
 }
 
 var CubePoints = []float32{

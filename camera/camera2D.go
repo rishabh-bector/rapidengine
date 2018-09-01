@@ -69,6 +69,10 @@ func (camera2D *Camera2D) SetPosition(x, y int) {
 	}
 }
 
+func (camera2D *Camera2D) SetSpeed(s float32) {
+	camera2D.Speed = s
+}
+
 func (camera2D *Camera2D) ProcessMouse() {
 	return
 }
