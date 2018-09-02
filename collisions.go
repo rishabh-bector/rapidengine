@@ -52,15 +52,20 @@ func (c *CollisionControl) CreateCollision(child Child, group string, callback f
 }
 
 // CheckCollisionWithGroup checks if a child is colliding with
-// any of the children in the passed group.
+// any of the children in the passed group, including copies currently
+// on the screen.
 func (c *CollisionControl) CheckCollisionWithGroup(child Child, group string, camX, camY float32) bool {
 	for _, other := range c.GroupMap[group] {
-		if !child.CheckCopyingEnabled() {
+		if !other.CheckCopyingEnabled() {
 			if child.CheckCollision(other) && child != other {
 				return true
 			}
 		} else {
-
+			for _, c := range other.GetCurrentCopies() {
+				if child.CheckCollisionRaw(c.X, c.Y, other.GetCollider()) {
+					return true
+				}
+			}
 		}
 	}
 	return false
@@ -91,11 +96,11 @@ func NewCollider(x, y, w, h float32) Collider {
 }
 
 // CheckCollision checks for collision between 2 collision rects
-func (collider *Collider) CheckCollision(x, y float32, other Child) bool {
-	if x+collider.offsetX < other.GetX()+other.GetCollider().offsetX+other.GetCollider().width &&
-		x+collider.offsetX+collider.width > other.GetX()+other.GetCollider().offsetX &&
-		y+collider.offsetY < other.GetY()+other.GetCollider().offsetY+other.GetCollider().height &&
-		y+collider.offsetY+collider.height > other.GetY()+other.GetCollider().offsetY {
+func (collider *Collider) CheckCollision(x, y, otherX, otherY float32, otherCollider *Collider) bool {
+	if x+collider.offsetX < otherX+otherCollider.offsetX+otherCollider.width &&
+		x+collider.offsetX+collider.width > otherX+otherCollider.offsetX &&
+		y+collider.offsetY < otherY+otherCollider.offsetY+otherCollider.height &&
+		y+collider.offsetY+collider.height > otherY+otherCollider.offsetY {
 		return true
 	}
 	return false

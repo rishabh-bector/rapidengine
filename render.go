@@ -18,27 +18,35 @@ import (
 // Renderer contains the information required for
 // the main render loop
 type Renderer struct {
+	// GLFW Window object
 	Window *glfw.Window
 
+	// Current shader program
 	ShaderProgram uint32
 
+	// Children to be rendered
 	Children []Child
 
+	// Per-frame callback from the user
 	RenderFunc func(renderer *Renderer)
 
+	// Scene Camera
 	MainCamera camera.Camera
 
+	// Render Distance
 	RenderDistance float32
 
+	// Engine Configuration
 	Config *configuration.EngineConfig
 
+	// Termination Channel
 	Done chan bool
 }
 
 // StartRenderer starts the main render loop
 func (renderer *Renderer) StartRenderer() {
 	for !renderer.Window.ShouldClose() {
-		gl.ClearColor(0.5, 0.5, 0.5, 0.5)
+		gl.ClearColor(0.2, 0.2, 0.5, 0.5)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 		gl.Clear(gl.DEPTH_BUFFER_BIT)
 
@@ -66,6 +74,7 @@ func (renderer *Renderer) PreRenderChildren() {
 // or child copy, and draws them to the screen using an element buffer
 func (renderer *Renderer) RenderChildren() {
 	for _, child := range renderer.Children {
+		child.RemoveCurrentCopies()
 		if !child.CheckCopyingEnabled() {
 			child.Update(renderer.MainCamera)
 			renderer.RenderChild(child)
@@ -100,6 +109,7 @@ func (renderer *Renderer) RenderChildCopy(child Child) {
 		if renderer.InBounds(c.X, c.Y, float32(camX), float32(camY)) {
 			child.RenderCopy(c, renderer.MainCamera)
 			renderer.RenderChild(child)
+			child.AddCurrentCopy(c)
 		}
 	}
 }
@@ -205,6 +215,7 @@ func initOpenGL(config *configuration.EngineConfig) uint32 {
 	return prog
 }
 
+// SetRenderDistance sets the render distance
 func (renderer *Renderer) SetRenderDistance(distance float32) {
 	renderer.RenderDistance = distance
 }

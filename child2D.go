@@ -1,5 +1,11 @@
 package rapidengine
 
+// --------------------------------------------------
+// Child2D.go contains Child2D, the basic Object in
+// rapidengine. Every game object is either a Child,
+// or a copy of a Child.
+// --------------------------------------------------
+
 import (
 	"errors"
 
@@ -23,6 +29,7 @@ type Child2D struct {
 	projectionMatrix mgl32.Mat4
 
 	copies         []ChildCopy
+	currentCopies  []ChildCopy
 	copyingEnabled bool
 
 	X float32
@@ -36,10 +43,11 @@ type Child2D struct {
 	Group    string
 	collider Collider
 
-	config *configuration.EngineConfig
+	config           *configuration.EngineConfig
+	collisioncontrol *CollisionControl
 }
 
-func NewChild2D(config *configuration.EngineConfig) Child2D {
+func NewChild2D(config *configuration.EngineConfig, collision *CollisionControl) Child2D {
 	return Child2D{
 		modelMatrix:      mgl32.Ident4(),
 		projectionMatrix: mgl32.Ortho2D(-1, 1, -1, 1),
@@ -47,6 +55,8 @@ func NewChild2D(config *configuration.EngineConfig) Child2D {
 		VX:               0,
 		VY:               0,
 		Gravity:          0,
+		copyingEnabled:   false,
+		collisioncontrol: collision,
 	}
 }
 
@@ -81,14 +91,17 @@ func (child2D *Child2D) BindChild() {
 }
 
 func (child2D *Child2D) Update(mainCamera camera.Camera) {
+	cx, cy := mainCamera.GetPosition()
+	if !child2D.collisioncontrol.CheckCollisionWithGroup(child2D, "ground", cx, cy) {
+		child2D.VY -= child2D.Gravity
+		child2D.X += child2D.VX
+		child2D.Y += child2D.VY
+	}
+
 	child2D.Render(mainCamera)
 }
 
 func (child2D *Child2D) Render(mainCamera camera.Camera) {
-	child2D.VY -= child2D.Gravity
-	child2D.X += child2D.VX
-	child2D.Y += child2D.VY
-
 	sX, sY := ScaleCoordinates(child2D.X, child2D.Y, float32(child2D.config.ScreenWidth), float32(child2D.config.ScreenHeight))
 	child2D.modelMatrix = mgl32.Translate3D(sX, sY, 0)
 	child2D.projectionMatrix = mgl32.Ortho2D(-1, 1, -1, 1)
@@ -122,6 +135,18 @@ func (child2D *Child2D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
 	child2D.texture = config.Tex
 }
 
+func (child2D *Child2D) CheckCollision(other Child) bool {
+	return child2D.collider.CheckCollision(child2D.X, child2D.Y, other.GetX(), other.GetY(), other.GetCollider())
+}
+
+func (child2D *Child2D) CheckCollisionRaw(otherX, otherY float32, otherCollider *Collider) bool {
+	return child2D.collider.CheckCollision(child2D.X, child2D.Y, otherX, otherY, otherCollider)
+}
+
+//  --------------------------------------------------
+//  Component Attachers
+//  --------------------------------------------------
+
 func (child2D *Child2D) AttachTexture(coords []float32, texture *uint32) error {
 	if child2D.vertexArray == nil {
 		return errors.New("Cannot attach texture without VertexArray")
@@ -154,32 +179,6 @@ func (child2D *Child2D) AttachCollider(x, y, w, h float32) {
 	child2D.collider = NewCollider(x, y, w, h)
 }
 
-func (child2D *Child2D) CheckCollision(other Child) bool {
-	return child2D.collider.CheckCollision(child2D.X, child2D.Y, other)
-}
-
-func (child2D *Child2D) SetVelocity(vx, vy float32) {
-	child2D.VX = vx
-	child2D.VY = vy
-}
-
-func (child2D *Child2D) SetPosition(x, y float32) {
-	child2D.X = x
-	child2D.Y = y
-}
-
-func (child2D *Child2D) EnableCopying() {
-	child2D.copyingEnabled = true
-}
-
-func (child2D *Child2D) DisableCopying() {
-	child2D.copyingEnabled = false
-}
-
-func (child2D *Child2D) AddCopy(config ChildCopy) {
-	child2D.copies = append(child2D.copies, config)
-}
-
 func (child2D *Child2D) AttachVertexArray(vao *VertexArray, numVertices int32) {
 	child2D.vertexArray = vao
 	child2D.numVertices = numVertices
@@ -198,9 +197,43 @@ func (child2D *Child2D) AttachGroup(group string) {
 	child2D.Group = group
 }
 
-func (child2D *Child2D) AttachGravity(g float32) {
+//  --------------------------------------------------
+//  Setters
+//  --------------------------------------------------
+
+func (child2D *Child2D) SetVelocity(vx, vy float32) {
+	child2D.VX = vx
+	child2D.VY = vy
+}
+
+func (child2D *Child2D) SetVelocityX(vx float32) {
+	child2D.VX = vx
+}
+
+func (child2D *Child2D) SetVelocityY(vy float32) {
+	child2D.VY = vy
+}
+
+func (child2D *Child2D) SetPosition(x, y float32) {
+	child2D.X = x
+	child2D.Y = y
+}
+
+func (child2D *Child2D) SetX(x float32) {
+	child2D.X = x
+}
+
+func (child2D *Child2D) SetY(y float32) {
+	child2D.Y = y
+}
+
+func (child2D *Child2D) SetGravity(g float32) {
 	child2D.Gravity = g
 }
+
+//  --------------------------------------------------
+//  Getters
+//  --------------------------------------------------
 
 func (child2D *Child2D) GetShaderProgram() uint32 {
 	return child2D.shaderProgram
@@ -230,12 +263,40 @@ func (child2D *Child2D) GetY() float32 {
 	return child2D.Y
 }
 
+//  --------------------------------------------------
+//  Copying
+//  --------------------------------------------------
+
+func (child2D *Child2D) EnableCopying() {
+	child2D.copyingEnabled = true
+}
+
+func (child2D *Child2D) DisableCopying() {
+	child2D.copyingEnabled = false
+}
+
+func (child2D *Child2D) AddCopy(config ChildCopy) {
+	child2D.copies = append(child2D.copies, config)
+}
+
 func (child2D *Child2D) GetCopies() []ChildCopy {
 	return child2D.copies
 }
 
 func (child2D *Child2D) CheckCopyingEnabled() bool {
 	return child2D.copyingEnabled
+}
+
+func (child2D *Child2D) AddCurrentCopy(c ChildCopy) {
+	child2D.currentCopies = append(child2D.currentCopies, c)
+}
+
+func (child2D *Child2D) RemoveCurrentCopies() {
+	child2D.currentCopies = []ChildCopy{}
+}
+
+func (child2D *Child2D) GetCurrentCopies() []ChildCopy {
+	return child2D.currentCopies
 }
 
 func ScaleCoordinates(x, y, sw, sh float32) (float32, float32) {

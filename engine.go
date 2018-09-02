@@ -33,6 +33,14 @@ func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer)) En
 	return e
 }
 
+func NewEngineConfig(
+	ScreenWidth,
+	ScreenHeight,
+	Dimensions int,
+) configuration.EngineConfig {
+	return configuration.NewEngineConfig(ScreenWidth, ScreenHeight, Dimensions)
+}
+
 func (engine *Engine) Initialize() error {
 	err := engine.Shaders.CompileShaders()
 	if err != nil {
@@ -49,18 +57,19 @@ func (engine *Engine) InitializeRenderer() {
 
 func (engine *Engine) Update(renderer *Renderer) {
 	x, y := renderer.MainCamera.GetPosition()
-	engine.CollisionControl.Update(x, y)
 	engine.RenderFunc(renderer)
+	engine.CollisionControl.Update(x, y)
 }
 
 func (engine *Engine) NewChild2D() Child2D {
-	c := NewChild2D(&engine.Config)
+	c := NewChild2D(&engine.Config, &engine.CollisionControl)
 	c.AttachShader(engine.Renderer.ShaderProgram)
 	return c
 }
 
 func (engine *Engine) StartRenderer() {
 	if engine.Config.CollisionLines {
+		// TODO: Add visible collision lines
 	}
 	engine.Renderer.StartRenderer()
 }

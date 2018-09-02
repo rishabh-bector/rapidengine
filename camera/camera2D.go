@@ -61,10 +61,10 @@ func (camera2D *Camera2D) GetPosition() (float32, float32) {
 		((camera2D.Position.Y() / 2) * float32(camera2D.config.ScreenHeight)) + float32(camera2D.config.ScreenHeight/2)
 }
 
-func (camera2D *Camera2D) SetPosition(x, y int) {
+func (camera2D *Camera2D) SetPosition(x, y float32) {
 	camera2D.Position = mgl32.Vec3{
-		(float32(x) - float32(camera2D.config.ScreenWidth/2)) / float32(camera2D.config.ScreenWidth/2),
-		(float32(y) - float32(camera2D.config.ScreenHeight/2)) / float32(camera2D.config.ScreenHeight/2),
+		(x - float32(camera2D.config.ScreenWidth/2)) / float32(camera2D.config.ScreenWidth/2),
+		(y - float32(camera2D.config.ScreenHeight/2)) / float32(camera2D.config.ScreenHeight/2),
 		camera2D.Position.Z(),
 	}
 }
