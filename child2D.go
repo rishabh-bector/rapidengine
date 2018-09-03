@@ -95,9 +95,10 @@ func (child2D *Child2D) Update(mainCamera camera.Camera) {
 
 	child2D.VY -= child2D.Gravity
 
-	//println(child2D.collisioncontrol.CheckCollisionWithGroup(child2D, "ground", cx, cy))
+	b := child2D.collisioncontrol.CheckCollisionWithGroup(child2D, "ground", cx, cy)
+	println(b[0], b[1], b[2], b[3])
 
-	if child2D.VY < 0 && child2D.collisioncontrol.CheckCollisionWithGroup(child2D, "ground", cx, cy) == 4 {
+	if child2D.VY < 0 && child2D.collisioncontrol.CheckCollisionWithGroup(child2D, "ground", cx, cy)[3] {
 		child2D.VY = 0
 	}
 

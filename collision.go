@@ -28,7 +28,7 @@ type CollisionControl struct {
 // this collision happens.
 type CollisionLink struct {
 	group    string
-	callback func(int)
+	callback func([]bool)
 }
 
 // NewCollisionControl creates a new CollisionControl
@@ -51,35 +51,36 @@ func (c *CollisionControl) AddChildToGroup(child Child, group string) {
 
 // CreateCollision adds a child/collisionlink pair to the LinkMap, so that
 // collision will be checked for in Update()
-func (c *CollisionControl) CreateCollision(child Child, group string, callback func(int)) {
+func (c *CollisionControl) CreateCollision(child Child, group string, callback func([]bool)) {
 	c.LinkMap[child] = CollisionLink{group, callback}
 }
 
 // CheckCollisionWithGroup checks if a child is colliding with
 // any of the children in the passed group, including copies currently
 // on the screen.
-func (c *CollisionControl) CheckCollisionWithGroup(child Child, group string, camX, camY float32) int {
+func (c *CollisionControl) CheckCollisionWithGroup(child Child, group string, camX, camY float32) []bool {
+	out := []bool{false, false, false, false}
 	for _, other := range c.GroupMap[group] {
 		if !other.CheckCopyingEnabled() {
 			if col := child.CheckCollision(other); col != 0 && child != other {
-				return col
+				out[col+1] = true
 			}
 		} else {
 			for _, cpy := range other.GetCurrentCopies() {
 				if col := child.CheckCollisionRaw(cpy.X, cpy.Y, other.GetCollider()); col != 0 {
-					return col
+					out[col-1] = true
 				}
 			}
 		}
 	}
-	return 0
+	return out
 }
 
 // Update is called once per frame, and checks for
 // collisions of all children in the LinkMap
 func (c *CollisionControl) Update(camX, camY float32) {
 	for child, link := range c.LinkMap {
-		if col := c.CheckCollisionWithGroup(child, link.group, camX, camY); col != 0 {
+		if col := c.CheckCollisionWithGroup(child, link.group, camX, camY); col != nil {
 			link.callback(col)
 		}
 	}
@@ -124,12 +125,5 @@ func (collider *Collider) CheckCollision(x, y, otherX, otherY float32, otherColl
 		}
 		return 2
 	}
-
-	/*if x+collider.offsetX < otherX+otherCollider.offsetX+otherCollider.width &&
-		x+collider.offsetX+collider.width > otherX+otherCollider.offsetX &&
-		y+collider.offsetY < otherY+otherCollider.offsetY+otherCollider.height &&
-		y+collider.offsetY+collider.height > otherY+otherCollider.offsetY {
-		return true
-	}*/
 	return 0
 }

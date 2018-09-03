@@ -46,7 +46,7 @@ type Renderer struct {
 // StartRenderer starts the main render loop
 func (renderer *Renderer) StartRenderer() {
 	for !renderer.Window.ShouldClose() {
-		gl.ClearColor(0.2, 0.2, 0.5, 0.5)
+		gl.ClearColor(float32(44)/255, float32(213)/255, float32(247)/255, 0.9)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 		gl.Clear(gl.DEPTH_BUFFER_BIT)
 
