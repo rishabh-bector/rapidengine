@@ -205,10 +205,10 @@ func initOpenGL(config *configuration.EngineConfig) uint32 {
 		gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
 	}
 
-	gl.Enable(gl.DEPTH_TEST)
+	//gl.Enable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-	gl.Disable(gl.CULL_FACE)
+	//gl.Disable(gl.CULL_FACE)
 
 	return prog
 }
