@@ -52,8 +52,6 @@ func (renderer *Renderer) StartRenderer() {
 
 		renderer.RenderFunc(renderer)
 
-		glfw.PollEvents()
-		renderer.MainCamera.ProcessInput(renderer.Window)
 		renderer.MainCamera.Look()
 		renderer.Window.SwapBuffers()
 		CheckError("loop")
@@ -106,7 +104,7 @@ func (renderer *Renderer) RenderChild(child Child) {
 func (renderer *Renderer) RenderChildCopy(child Child) {
 	camX, camY := renderer.MainCamera.GetPosition()
 	for _, c := range child.GetCopies() {
-		if renderer.InBounds(c.X, c.Y, float32(camX), float32(camY)) {
+		if InBounds(c.X, c.Y, float32(camX), float32(camY), renderer.RenderDistance) {
 			child.RenderCopy(c, renderer.MainCamera)
 			renderer.RenderChild(child)
 			child.AddCurrentCopy(c)
@@ -114,12 +112,12 @@ func (renderer *Renderer) RenderChildCopy(child Child) {
 	}
 }
 
-// InBounds checks if a particular x/y is within the camera's frame
-func (renderer *Renderer) InBounds(x, y, camX, camY float32) bool {
-	if x < camX+renderer.RenderDistance &&
-		x > camX-renderer.RenderDistance &&
-		y < camY+renderer.RenderDistance &&
-		y > camY-renderer.RenderDistance {
+// InBounds checks if a particular x/y is within the given render distance
+func InBounds(x, y, camX, camY, renderDistance float32) bool {
+	if x < camX+renderDistance &&
+		x > camX-renderDistance &&
+		y < camY+renderDistance &&
+		y > camY-renderDistance {
 		return true
 	}
 	return false

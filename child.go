@@ -27,8 +27,8 @@ type Child interface {
 	GetCurrentCopies() []ChildCopy
 	RemoveCurrentCopies()
 
-	CheckCollision(Child) bool
-	CheckCollisionRaw(otherX float32, otherY float32, otherCollider *Collider) bool
+	CheckCollision(Child) int
+	CheckCollisionRaw(otherX float32, otherY float32, otherCollider *Collider) int
 
 	Update(camera.Camera)
 }

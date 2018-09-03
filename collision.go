@@ -1,7 +1,11 @@
 package rapidengine
 
+import (
+	"math"
+)
+
 //  --------------------------------------------------
-//  Collisions.go contains CollisionControl,
+//  Collision.go contains CollisionControl,
 //  which manages what group each Child is in and
 //  whether linked children are colliding or not. It
 //  also contains the Collider, which defines a collision
@@ -24,7 +28,7 @@ type CollisionControl struct {
 // this collision happens.
 type CollisionLink struct {
 	group    string
-	callback func()
+	callback func(int)
 }
 
 // NewCollisionControl creates a new CollisionControl
@@ -47,36 +51,36 @@ func (c *CollisionControl) AddChildToGroup(child Child, group string) {
 
 // CreateCollision adds a child/collisionlink pair to the LinkMap, so that
 // collision will be checked for in Update()
-func (c *CollisionControl) CreateCollision(child Child, group string, callback func()) {
+func (c *CollisionControl) CreateCollision(child Child, group string, callback func(int)) {
 	c.LinkMap[child] = CollisionLink{group, callback}
 }
 
 // CheckCollisionWithGroup checks if a child is colliding with
 // any of the children in the passed group, including copies currently
 // on the screen.
-func (c *CollisionControl) CheckCollisionWithGroup(child Child, group string, camX, camY float32) bool {
+func (c *CollisionControl) CheckCollisionWithGroup(child Child, group string, camX, camY float32) int {
 	for _, other := range c.GroupMap[group] {
 		if !other.CheckCopyingEnabled() {
-			if child.CheckCollision(other) && child != other {
-				return true
+			if col := child.CheckCollision(other); col != 0 && child != other {
+				return col
 			}
 		} else {
-			for _, c := range other.GetCurrentCopies() {
-				if child.CheckCollisionRaw(c.X, c.Y, other.GetCollider()) {
-					return true
+			for _, cpy := range other.GetCurrentCopies() {
+				if col := child.CheckCollisionRaw(cpy.X, cpy.Y, other.GetCollider()); col != 0 {
+					return col
 				}
 			}
 		}
 	}
-	return false
+	return 0
 }
 
 // Update is called once per frame, and checks for
 // collisions of all children in the LinkMap
 func (c *CollisionControl) Update(camX, camY float32) {
 	for child, link := range c.LinkMap {
-		if c.CheckCollisionWithGroup(child, link.group, camX, camY) {
-			link.callback()
+		if col := c.CheckCollisionWithGroup(child, link.group, camX, camY); col != 0 {
+			link.callback(col)
 		}
 	}
 }
@@ -96,12 +100,36 @@ func NewCollider(x, y, w, h float32) Collider {
 }
 
 // CheckCollision checks for collision between 2 collision rects
-func (collider *Collider) CheckCollision(x, y, otherX, otherY float32, otherCollider *Collider) bool {
-	if x+collider.offsetX < otherX+otherCollider.offsetX+otherCollider.width &&
+// 0 - None
+// 1 - Right
+// 2 - Top
+// 3 - Left
+// 4 - Bottom
+func (collider *Collider) CheckCollision(x, y, otherX, otherY float32, otherCollider *Collider) int {
+	dx := float64((x + collider.offsetX + collider.width/2) - (otherX + otherCollider.width/2))
+	dy := float64((y + collider.offsetY + collider.height/2) - (otherY + otherCollider.height/2))
+	width := float64((collider.width + otherCollider.width) / 2)
+	height := float64((collider.height + otherCollider.height) / 2)
+	crossWidth := width * dy
+	crossHeight := height * dx
+	if math.Abs(dx) <= width && math.Abs(dy) <= height {
+		if crossWidth > crossHeight {
+			if crossWidth > -crossHeight {
+				return 4
+			}
+			return 3
+		}
+		if crossWidth > -crossHeight {
+			return 1
+		}
+		return 2
+	}
+
+	/*if x+collider.offsetX < otherX+otherCollider.offsetX+otherCollider.width &&
 		x+collider.offsetX+collider.width > otherX+otherCollider.offsetX &&
 		y+collider.offsetY < otherY+otherCollider.offsetY+otherCollider.height &&
 		y+collider.offsetY+collider.height > otherY+otherCollider.offsetY {
 		return true
-	}
-	return false
+	}*/
+	return 0
 }

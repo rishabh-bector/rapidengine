@@ -1,7 +1,6 @@
 package camera
 
 import (
-	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/go-gl/mathgl/mgl32"
 
 	"rapidengine/configuration"
@@ -37,19 +36,20 @@ func (camera2D *Camera2D) Look() {
 	)
 }
 
-func (camera2D *Camera2D) ProcessInput(window *glfw.Window) {
-	if window.GetKey(glfw.KeyW) == glfw.Press {
-		camera2D.Position = camera2D.Position.Add(camera2D.UpAxis.Mul(camera2D.Speed))
-	}
-	if window.GetKey(glfw.KeyS) == glfw.Press {
-		camera2D.Position = camera2D.Position.Sub(camera2D.UpAxis.Mul(camera2D.Speed))
-	}
-	if window.GetKey(glfw.KeyA) == glfw.Press {
-		camera2D.Position = camera2D.Position.Sub(camera2D.FrontAxis.Cross(camera2D.UpAxis).Normalize().Mul(camera2D.Speed))
-	}
-	if window.GetKey(glfw.KeyD) == glfw.Press {
-		camera2D.Position = camera2D.Position.Add(camera2D.FrontAxis.Cross(camera2D.UpAxis).Normalize().Mul(camera2D.Speed))
-	}
+func (camera2D *Camera2D) MoveUp() {
+	camera2D.Position = camera2D.Position.Add(camera2D.UpAxis.Mul(camera2D.Speed))
+}
+
+func (camera2D *Camera2D) MoveDown() {
+	camera2D.Position = camera2D.Position.Sub(camera2D.UpAxis.Mul(camera2D.Speed))
+}
+
+func (camera2D *Camera2D) MoveLeft() {
+	camera2D.Position = camera2D.Position.Sub(camera2D.FrontAxis.Cross(camera2D.UpAxis).Normalize().Mul(camera2D.Speed))
+}
+
+func (camera2D *Camera2D) MoveRight() {
+	camera2D.Position = camera2D.Position.Add(camera2D.FrontAxis.Cross(camera2D.UpAxis).Normalize().Mul(camera2D.Speed))
 }
 
 func (camera2D *Camera2D) GetFirstViewIndex() *float32 {

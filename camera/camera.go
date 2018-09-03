@@ -1,13 +1,12 @@
 package camera
 
-import (
-	"github.com/go-gl/glfw/v3.2/glfw"
-)
-
 type Camera interface {
 	Look()
 
-	ProcessInput(*glfw.Window)
+	MoveUp()
+	MoveDown()
+	MoveLeft()
+	MoveRight()
 
 	GetFirstViewIndex() *float32
 
