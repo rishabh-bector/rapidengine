@@ -95,11 +95,14 @@ func (child2D *Child2D) Update(mainCamera camera.Camera) {
 
 	child2D.VY -= child2D.Gravity
 
-	b := child2D.collisioncontrol.CheckCollisionWithGroup(child2D, "ground", cx, cy)
-	println(b[0], b[1], b[2], b[3])
+	cols := child2D.collisioncontrol.CheckCollisionWithGroup(child2D, "ground", cx, cy)
+	println(cols[0], cols[1], cols[2], cols[3])
 
-	if child2D.VY < 0 && child2D.collisioncontrol.CheckCollisionWithGroup(child2D, "ground", cx, cy)[3] {
+	if (cols[3] && child2D.VY < 0) || (cols[1] && child2D.VY > 0) {
 		child2D.VY = 0
+	}
+	if (cols[0] && child2D.VX < 0) || (cols[2] && child2D.VX > 0) {
+		child2D.VX = 0
 	}
 
 	child2D.VX *= -1
@@ -144,11 +147,11 @@ func (child2D *Child2D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
 }
 
 func (child2D *Child2D) CheckCollision(other Child) int {
-	return child2D.collider.CheckCollision(child2D.X, child2D.Y, other.GetX(), other.GetY(), other.GetCollider())
+	return child2D.collider.CheckCollision(child2D.X, child2D.Y, child2D.VX, child2D.VY, other.GetX(), other.GetY(), other.GetCollider())
 }
 
 func (child2D *Child2D) CheckCollisionRaw(otherX, otherY float32, otherCollider *Collider) int {
-	return child2D.collider.CheckCollision(child2D.X, child2D.Y, otherX, otherY, otherCollider)
+	return child2D.collider.CheckCollision(child2D.X, child2D.Y, child2D.VX, child2D.VY, otherX, otherY, otherCollider)
 }
 
 //  --------------------------------------------------
@@ -184,7 +187,7 @@ func (child2D *Child2D) AttachTexturePrimitive(texture *uint32) {
 }
 
 func (child2D *Child2D) AttachCollider(x, y, w, h float32) {
-	child2D.collider = NewCollider(x, y, w, h)
+	child2D.collider = NewCollider(x, y, w, h, 5)
 }
 
 func (child2D *Child2D) AttachVertexArray(vao *VertexArray, numVertices int32) {

@@ -1,9 +1,5 @@
 package rapidengine
 
-import (
-	"math"
-)
-
 //  --------------------------------------------------
 //  Collision.go contains CollisionControl,
 //  which manages what group each Child is in and
@@ -63,7 +59,7 @@ func (c *CollisionControl) CheckCollisionWithGroup(child Child, group string, ca
 	for _, other := range c.GroupMap[group] {
 		if !other.CheckCopyingEnabled() {
 			if col := child.CheckCollision(other); col != 0 && child != other {
-				out[col+1] = true
+				out[col-1] = true
 			}
 		} else {
 			for _, cpy := range other.GetCurrentCopies() {
@@ -89,15 +85,16 @@ func (c *CollisionControl) Update(camX, camY float32) {
 // Collider contains data about a collision rect.
 // All children with collision detection need one of these.
 type Collider struct {
-	offsetX float32
-	offsetY float32
-	width   float32
-	height  float32
+	offsetX    float32
+	offsetY    float32
+	width      float32
+	height     float32
+	middleRect float32
 }
 
 // NewCollider creates a new collision rect
-func NewCollider(x, y, w, h float32) Collider {
-	return Collider{x, y, w, h}
+func NewCollider(x, y, w, h, m float32) Collider {
+	return Collider{x, y, w, h, m}
 }
 
 // CheckCollision checks for collision between 2 collision rects
@@ -106,24 +103,27 @@ func NewCollider(x, y, w, h float32) Collider {
 // 2 - Top
 // 3 - Left
 // 4 - Bottom
-func (collider *Collider) CheckCollision(x, y, otherX, otherY float32, otherCollider *Collider) int {
-	dx := float64((x + collider.offsetX + collider.width/2) - (otherX + otherCollider.width/2))
-	dy := float64((y + collider.offsetY + collider.height/2) - (otherY + otherCollider.height/2))
-	width := float64((collider.width + otherCollider.width) / 2)
-	height := float64((collider.height + otherCollider.height) / 2)
-	crossWidth := width * dy
-	crossHeight := height * dx
-	if math.Abs(dx) <= width && math.Abs(dy) <= height {
-		if crossWidth > crossHeight {
-			if crossWidth > -crossHeight {
-				return 4
-			}
-			return 3
-		}
-		if crossWidth > -crossHeight {
-			return 1
+func (collider *Collider) CheckCollision(x, y, vx, vy, otherX, otherY float32, otherCollider *Collider) int {
+
+	if x+collider.offsetX+collider.width > otherX &&
+		x+collider.offsetX < otherX+otherCollider.width &&
+		y+collider.offsetY+collider.height+vy > otherY &&
+		y+collider.offsetY+vy < otherY+otherCollider.height {
+		if vy < 0 {
+			return 4
 		}
 		return 2
 	}
+
+	if x+collider.offsetX+collider.width+(-1*vx) > otherX &&
+		x+collider.offsetX+(-1*vx) < otherX+otherCollider.width &&
+		y+collider.offsetY+collider.height > otherY &&
+		y+collider.offsetY < otherY+otherCollider.height {
+		if vx < 0 {
+			return 1
+		}
+		return 3
+	}
+
 	return 0
 }
