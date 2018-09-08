@@ -32,6 +32,12 @@ type Child2D struct {
 	currentCopies  []ChildCopy
 	copyingEnabled bool
 
+	animationTextures []*uint32
+	animationCurrent  int
+	animationFrame    int
+	animationSpeed    int
+	animationEnabled  bool
+
 	X float32
 	Y float32
 
@@ -56,12 +62,13 @@ func NewChild2D(config *configuration.EngineConfig, collision *CollisionControl)
 		VY:               0,
 		Gravity:          0,
 		copyingEnabled:   false,
+		animationEnabled: false,
+		animationCurrent: 0,
 		collisioncontrol: collision,
 	}
 }
 
 func (child2D *Child2D) PreRender(mainCamera camera.Camera) {
-	child2D.config.Logger.Info("PreRendering Children...")
 	child2D.BindChild()
 
 	gl.UniformMatrix4fv(
@@ -90,14 +97,12 @@ func (child2D *Child2D) BindChild() {
 	gl.UseProgram(child2D.shaderProgram)
 }
 
-func (child2D *Child2D) Update(mainCamera camera.Camera) {
-	cx, cy := mainCamera.GetPosition()
+func (child2D *Child2D) Update(mainCamera camera.Camera, delta float64, lastFrame float64) {
+	cx, cy, _ := mainCamera.GetPosition()
 
 	child2D.VY -= child2D.Gravity
 
 	cols := child2D.collisioncontrol.CheckCollisionWithGroup(child2D, "ground", cx, cy)
-	println(cols[0], cols[1], cols[2], cols[3])
-
 	if (cols[3] && child2D.VY < 0) || (cols[1] && child2D.VY > 0) {
 		child2D.VY = 0
 	}
@@ -105,9 +110,18 @@ func (child2D *Child2D) Update(mainCamera camera.Camera) {
 		child2D.VX = 0
 	}
 
-	child2D.VX *= -1
+	child2D.VX *= -1 //-float32(delta * 50)
+	child2D.VY *= 1  //float32(delta * 50)
 	child2D.X += child2D.VX
 	child2D.Y += child2D.VY
+
+	fps := 1 / delta
+	if child2D.animationFrame > int(fps/float64(child2D.animationSpeed)) {
+		child2D.Animate()
+		child2D.animationFrame = 0
+	} else {
+		child2D.animationFrame++
+	}
 
 	child2D.Render(mainCamera)
 }
@@ -115,7 +129,6 @@ func (child2D *Child2D) Update(mainCamera camera.Camera) {
 func (child2D *Child2D) Render(mainCamera camera.Camera) {
 	sX, sY := ScaleCoordinates(child2D.X, child2D.Y, float32(child2D.config.ScreenWidth), float32(child2D.config.ScreenHeight))
 	child2D.modelMatrix = mgl32.Translate3D(sX, sY, 0)
-	child2D.projectionMatrix = mgl32.Ortho2D(-1, 1, -1, 1)
 
 	gl.UniformMatrix4fv(
 		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("viewMtx\x00")),
@@ -312,4 +325,29 @@ func (child2D *Child2D) GetCurrentCopies() []ChildCopy {
 
 func ScaleCoordinates(x, y, sw, sh float32) (float32, float32) {
 	return 2*(x/float32(sw)) - 1, 2*(y/float32(sh)) - 1
+}
+
+//  --------------------------------------------------
+//  Animations
+//  --------------------------------------------------
+
+func (child2D *Child2D) Animate() {
+	child2D.texture = child2D.animationTextures[child2D.animationCurrent]
+	if child2D.animationCurrent < len(child2D.animationTextures)-1 {
+		child2D.animationCurrent++
+	} else {
+		child2D.animationCurrent = 0
+	}
+}
+
+func (child2D *Child2D) EnableAnimation() {
+	child2D.animationEnabled = true
+}
+
+func (child2D *Child2D) AddFrame(f *uint32) {
+	child2D.animationTextures = append(child2D.animationTextures, f)
+}
+
+func (child2D *Child2D) SetAnimationSpeed(s int) {
+	child2D.animationSpeed = s
 }

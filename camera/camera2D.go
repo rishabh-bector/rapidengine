@@ -52,16 +52,27 @@ func (camera2D *Camera2D) MoveRight() {
 	camera2D.Position = camera2D.Position.Add(camera2D.FrontAxis.Cross(camera2D.UpAxis).Normalize().Mul(camera2D.Speed))
 }
 
+func (camera2D *Camera2D) MoveForward() {
+	camera2D.Position = camera2D.Position.Add(camera2D.FrontAxis.Mul(camera2D.Speed))
+}
+
+func (camera2D *Camera2D) MoveBackward() {
+	camera2D.Position = camera2D.Position.Sub(camera2D.FrontAxis.Mul(camera2D.Speed))
+}
+
+func (camera2D *Camera2D) ChangeYaw(y float32)   {}
+func (camera2D *Camera2D) ChangePitch(p float32) {}
+
 func (camera2D *Camera2D) GetFirstViewIndex() *float32 {
 	return &camera2D.View[0]
 }
 
-func (camera2D *Camera2D) GetPosition() (float32, float32) {
+func (camera2D *Camera2D) GetPosition() (float32, float32, float32) {
 	return ((camera2D.Position.X() / 2) * float32(camera2D.config.ScreenWidth)) + float32(camera2D.config.ScreenWidth/2),
-		((camera2D.Position.Y() / 2) * float32(camera2D.config.ScreenHeight)) + float32(camera2D.config.ScreenHeight/2)
+		((camera2D.Position.Y() / 2) * float32(camera2D.config.ScreenHeight)) + float32(camera2D.config.ScreenHeight/2), 0
 }
 
-func (camera2D *Camera2D) SetPosition(x, y float32) {
+func (camera2D *Camera2D) SetPosition(x, y, z float32) {
 	camera2D.Position = mgl32.Vec3{
 		(x - float32(camera2D.config.ScreenWidth/2)) / float32(camera2D.config.ScreenWidth/2),
 		(y - float32(camera2D.config.ScreenHeight/2)) / float32(camera2D.config.ScreenHeight/2),
@@ -73,6 +84,6 @@ func (camera2D *Camera2D) SetSpeed(s float32) {
 	camera2D.Speed = s
 }
 
-func (camera2D *Camera2D) ProcessMouse() {
+func (camera2D *Camera2D) ProcessMouse(mx, my, lmx, lmy float64) {
 	return
 }

@@ -11,7 +11,7 @@ import (
 
 type Engine struct {
 	Renderer   Renderer
-	RenderFunc func(renderer *Renderer, keys map[string]bool)
+	RenderFunc func(renderer *Renderer, inputs *input.Input)
 
 	CollisionControl CollisionControl
 	TextureControl   TextureControl
@@ -22,9 +22,9 @@ type Engine struct {
 	Config configuration.EngineConfig
 }
 
-func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer, map[string]bool)) Engine {
+func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer, *input.Input)) Engine {
 	e := Engine{
-		Renderer:         NewRenderer(camera.NewCamera2D(mgl32.Vec3{0, 0, 0}, float32(0.05), &config), &config),
+		Renderer:         NewRenderer(getEngineCamera(config.Dimensions, &config), &config),
 		CollisionControl: NewCollisionControl(),
 		TextureControl:   NewTextureControl(),
 		InputControl:     input.NewInputControl(),
@@ -44,19 +44,17 @@ func NewEngineConfig(
 	return configuration.NewEngineConfig(ScreenWidth, ScreenHeight, Dimensions)
 }
 
-func (engine *Engine) Initialize() error {
+func (engine *Engine) Initialize() {
 	err := engine.Shaders.CompileShaders()
 	if err != nil {
 		engine.Config.Logger.Fatal(err)
-		return err
 	}
 	gl.UseProgram(engine.Renderer.ShaderProgram)
 	engine.Renderer.PreRenderChildren()
-	return nil
 }
 
 func (engine *Engine) Update(renderer *Renderer) {
-	x, y := renderer.MainCamera.GetPosition()
+	x, y, _ := renderer.MainCamera.GetPosition()
 	engine.RenderFunc(renderer, engine.InputControl.Update(renderer.Window))
 	engine.CollisionControl.Update(x, y)
 }
@@ -67,9 +65,14 @@ func (engine *Engine) NewChild2D() Child2D {
 	return c
 }
 
+func (engine *Engine) NewChild3D() Child3D {
+	c := NewChild3D(&engine.Config, &engine.CollisionControl)
+	c.AttachShader(engine.Renderer.ShaderProgram)
+	return c
+}
+
 func (engine *Engine) StartRenderer() {
 	if engine.Config.CollisionLines {
-		// TODO: Add visible collision lines
 	}
 	engine.Renderer.StartRenderer()
 }
@@ -80,4 +83,14 @@ func (engine *Engine) Instance(c Child) {
 
 func (engine *Engine) Done() chan bool {
 	return engine.Renderer.Done
+}
+
+func getEngineCamera(dimension int, config *configuration.EngineConfig) camera.Camera {
+	if dimension == 2 {
+		return camera.NewCamera2D(mgl32.Vec3{0, 0, 0}, float32(0.05), config)
+	}
+	if dimension == 3 {
+		return camera.NewCamera3D(mgl32.Vec3{0, 0, 0}, float32(0.05), config)
+	}
+	return nil
 }

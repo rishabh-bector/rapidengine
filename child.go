@@ -30,5 +30,5 @@ type Child interface {
 	CheckCollision(Child) int
 	CheckCollisionRaw(otherX float32, otherY float32, otherCollider *Collider) int
 
-	Update(camera.Camera)
+	Update(camera.Camera, float64, float64)
 }

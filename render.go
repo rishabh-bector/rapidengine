@@ -13,6 +13,7 @@ import (
 
 	"rapidengine/camera"
 	"rapidengine/configuration"
+	"rapidengine/input"
 )
 
 // Renderer contains the information required for
@@ -39,6 +40,10 @@ type Renderer struct {
 	// Engine Configuration
 	Config *configuration.EngineConfig
 
+	// FrameTime
+	DeltaFrameTime float64
+	LastFrameTime  float64
+
 	// Termination Channel
 	Done chan bool
 }
@@ -51,10 +56,14 @@ func (renderer *Renderer) StartRenderer() {
 		gl.Clear(gl.DEPTH_BUFFER_BIT)
 
 		renderer.RenderFunc(renderer)
+		renderer.RenderChildren()
 
 		renderer.MainCamera.Look()
 		renderer.Window.SwapBuffers()
-		CheckError("loop")
+
+		currentFrame := glfw.GetTime()
+		renderer.DeltaFrameTime = currentFrame - renderer.LastFrameTime
+		renderer.LastFrameTime = currentFrame
 	}
 	glfw.Terminate()
 	renderer.Done <- true
@@ -72,9 +81,9 @@ func (renderer *Renderer) PreRenderChildren() {
 // or child copy, and draws them to the screen using an element buffer
 func (renderer *Renderer) RenderChildren() {
 	for _, child := range renderer.Children {
-		child.RemoveCurrentCopies()
+		go child.RemoveCurrentCopies()
 		if !child.CheckCopyingEnabled() {
-			child.Update(renderer.MainCamera)
+			child.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.LastFrameTime)
 			renderer.RenderChild(child)
 		} else {
 			renderer.RenderChildCopy(child)
@@ -102,7 +111,7 @@ func (renderer *Renderer) RenderChild(child Child) {
 
 // RenderChildCopy renders all copies of a child
 func (renderer *Renderer) RenderChildCopy(child Child) {
-	camX, camY := renderer.MainCamera.GetPosition()
+	camX, camY, _ := renderer.MainCamera.GetPosition()
 	for _, c := range child.GetCopies() {
 		if InBounds(c.X, c.Y, float32(camX), float32(camY), renderer.RenderDistance) {
 			child.RenderCopy(c, renderer.MainCamera)
@@ -131,12 +140,12 @@ func NewRenderer(camera camera.Camera, config *configuration.EngineConfig) Rende
 		ShaderProgram:  initOpenGL(config),
 		Children:       []Child{},
 		RenderFunc:     func(r *Renderer) {},
-		RenderDistance: 500,
+		RenderDistance: 1000,
 		Done:           make(chan bool),
 		MainCamera:     camera,
 		Config:         config,
 	}
-	//r.Window.SetCursorPosCallback(MouseCallback)
+	r.Window.SetCursorPosCallback(input.MouseCallback)
 	return r
 }
 
@@ -171,7 +180,7 @@ func initGLFW(config *configuration.EngineConfig) *glfw.Window {
 		log.Fatal(err)
 	}
 
-	//window.SetInputMode(glfw.CursorMode, glfw.CursorDisabled)
+	window.SetInputMode(glfw.CursorMode, glfw.CursorDisabled)
 
 	window.MakeContextCurrent()
 
@@ -205,10 +214,10 @@ func initOpenGL(config *configuration.EngineConfig) uint32 {
 		gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
 	}
 
-	//gl.Enable(gl.DEPTH_TEST)
+	gl.Enable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-	//gl.Disable(gl.CULL_FACE)
+	gl.Disable(gl.CULL_FACE)
 
 	return prog
 }
