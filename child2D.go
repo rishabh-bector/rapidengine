@@ -115,12 +115,14 @@ func (child2D *Child2D) Update(mainCamera camera.Camera, delta float64, lastFram
 	child2D.X += child2D.VX
 	child2D.Y += child2D.VY
 
-	fps := 1 / delta
-	if child2D.animationFrame > int(fps/float64(child2D.animationSpeed)) {
-		child2D.Animate()
-		child2D.animationFrame = 0
-	} else {
-		child2D.animationFrame++
+	if child2D.animationEnabled {
+		fps := 1 / delta
+		if child2D.animationFrame > int(fps/float64(child2D.animationSpeed)) {
+			child2D.Animate()
+			child2D.animationFrame = 0
+		} else {
+			child2D.animationFrame++
+		}
 	}
 
 	child2D.Render(mainCamera)
