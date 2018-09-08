@@ -1,11 +1,12 @@
 package rapidengine
 
 import (
+	"math/rand"
 	"rapidengine/camera"
 	"rapidengine/configuration"
 	"rapidengine/input"
+	"time"
 
-	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 )
 
@@ -16,8 +17,7 @@ type Engine struct {
 	CollisionControl CollisionControl
 	TextureControl   TextureControl
 	InputControl     input.InputControl
-
-	Shaders Shaders
+	ShaderControl    ShaderControl
 
 	Config configuration.EngineConfig
 }
@@ -28,10 +28,11 @@ func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer, *in
 		CollisionControl: NewCollisionControl(),
 		TextureControl:   NewTextureControl(),
 		InputControl:     input.NewInputControl(),
-		Shaders:          NewShaders(),
+		ShaderControl:    NewShaderControl(),
 		Config:           config,
 		RenderFunc:       renderFunc,
 	}
+	e.ShaderControl.Initialize()
 	e.Renderer.AttachCallback(e.Update)
 	return e
 }
@@ -45,11 +46,7 @@ func NewEngineConfig(
 }
 
 func (engine *Engine) Initialize() {
-	err := engine.Shaders.CompileShaders()
-	if err != nil {
-		engine.Config.Logger.Fatal(err)
-	}
-	gl.UseProgram(engine.Renderer.ShaderProgram)
+	rand.Seed(time.Now().UTC().UnixNano())
 	engine.Renderer.PreRenderChildren()
 }
 

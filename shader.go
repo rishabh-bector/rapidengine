@@ -7,77 +7,47 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
-type Shaders struct {
-	shaderList []string
-	typeList   []uint32
-	idList     []uint32
+type ShaderControl struct {
+	programs map[string]*ShaderProgram
 }
 
-const VertexShaderSource = `
+type ShaderProgram struct {
+	id             uint32
+	vertexShader   string
+	fragmentShader string
+}
 
-		#version 410
+func (shaderProgram *ShaderProgram) Compile() {
+	vertexShader, err := CompileShader(shaderProgram.vertexShader, gl.VERTEX_SHADER)
+	if err != nil {
+		panic(err)
+	}
 
-		uniform mat4 modelMtx;
-		uniform mat4 viewMtx;
-		uniform mat4 projectionMtx;
+	fragmentShader, err := CompileShader(shaderProgram.fragmentShader, gl.FRAGMENT_SHADER)
+	if err != nil {
+		panic(err)
+	}
+	shaderProgram.id = gl.CreateProgram()
+	gl.AttachShader(shaderProgram.id, vertexShader)
+	gl.AttachShader(shaderProgram.id, fragmentShader)
+	gl.LinkProgram(shaderProgram.id)
+}
 
-		layout (location = 0) in vec3 position;
-		layout (location = 1) in vec2 tex;
+func NewShaderControl() ShaderControl {
+	return ShaderControl{make(map[string]*ShaderProgram)}
+}
 
-		out vec2 texCoord;
-		
-		void main() {
-			texCoord = tex;
-			gl_Position = projectionMtx * viewMtx * modelMtx * vec4(position, 1.0);
-		}
-	
-	` + "\x00"
-
-const FragmentShaderSource = `
-
-		#version 410
-
-		uniform sampler2D texture0;
-
-		in vec2 texCoord;
-
-		out vec4 outColor;
-
-		void main() {
-			outColor = texture(texture0, texCoord);
-		}
-		
-	` + "\x00"
-
-func NewShaders() Shaders {
-	return Shaders{
-		shaderList: []string{
-			VertexShaderSource,
-			FragmentShaderSource,
-		},
-		typeList: []uint32{
-			gl.VERTEX_SHADER,
-			gl.FRAGMENT_SHADER,
-		},
-		idList: []uint32{},
+func (shaderControl *ShaderControl) Initialize() {
+	shaderControl.programs = map[string]*ShaderProgram{
+		"texture": &TextureProgram,
+	}
+	for _, prog := range shaderControl.programs {
+		prog.Compile()
 	}
 }
 
-func (shaders *Shaders) CompileShaders() error {
-	for i := 0; i < len(shaders.shaderList); i++ {
-		s, err := CompileShader(shaders.shaderList[i], shaders.typeList[i])
-		if err != nil {
-			return err
-		}
-		shaders.idList = append(shaders.idList, s)
-	}
-	return nil
-}
-
-func (shaders *Shaders) CleanUp() {
-	for _, ind := range shaders.idList {
-		gl.DeleteShader(ind)
-	}
+func (shaderControl *ShaderControl) GetShader(name string) uint32 {
+	return shaderControl.programs[name].id
 }
 
 func CompileShader(source string, shaderType uint32) (uint32, error) {

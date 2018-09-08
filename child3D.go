@@ -1,8 +1,6 @@
 package rapidengine
 
 import (
-	"errors"
-
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
@@ -17,7 +15,9 @@ type Child3D struct {
 	primitive string
 
 	shaderProgram uint32
-	texture       *uint32
+
+	textureEnabled bool
+	texture        *uint32
 
 	modelMatrix      mgl32.Mat4
 	projectionMatrix mgl32.Mat4
@@ -53,6 +53,7 @@ func NewChild3D(config *configuration.EngineConfig, collision *CollisionControl)
 		),
 		config:           config,
 		Gravity:          0,
+		textureEnabled:   false,
 		copyingEnabled:   false,
 		collisionControl: collision,
 	}
@@ -111,12 +112,12 @@ func (child3D *Child3D) Render(mainCamera camera.Camera) {
 	)
 }
 
-func (child3D *Child3D) AttachTexture(coords []float32, texture *uint32) error {
+func (child3D *Child3D) AttachTexture(coords []float32, texture *uint32) {
 	if child3D.vertexArray == nil {
-		return errors.New("Cannot attach texture without VertexArray")
+		panic("Cannot attach texture without VertexArray")
 	}
 	if child3D.shaderProgram == 0 {
-		return errors.New("Cannot attach texture without shader program")
+		panic("Cannot attach texture without shader program")
 	}
 
 	gl.BindVertexArray(child3D.vertexArray.id)
@@ -131,9 +132,9 @@ func (child3D *Child3D) AttachTexture(coords []float32, texture *uint32) error {
 	gl.Uniform1i(loc1, int32(0))
 	CheckError("IGNORE")
 
+	child3D.textureEnabled = true
 	child3D.texture = texture
 	gl.BindVertexArray(0)
-	return nil
 }
 
 func (child3D *Child3D) SetPosition(x, y, z float32) {
@@ -181,6 +182,10 @@ func (child3D *Child3D) GetNumVertices() int32 {
 
 func (child3D *Child3D) GetTexture() *uint32 {
 	return child3D.texture
+}
+
+func (child3D *Child3D) GetTextureEnabled() bool {
+	return child3D.textureEnabled
 }
 
 func (child3D *Child3D) GetCollider() *Collider {

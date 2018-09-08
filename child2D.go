@@ -23,7 +23,9 @@ type Child2D struct {
 	primitive string
 
 	shaderProgram uint32
-	texture       *uint32
+
+	texture        *uint32
+	textureEnabled bool
 
 	modelMatrix      mgl32.Mat4
 	projectionMatrix mgl32.Mat4
@@ -193,6 +195,7 @@ func (child2D *Child2D) AttachTexture(coords []float32, texture *uint32) error {
 	gl.Uniform1i(loc1, int32(0))
 
 	child2D.texture = texture
+	child2D.textureEnabled = true
 	gl.BindVertexArray(0)
 	return nil
 }
@@ -275,6 +278,10 @@ func (child2D *Child2D) GetNumVertices() int32 {
 
 func (child2D *Child2D) GetTexture() *uint32 {
 	return child2D.texture
+}
+
+func (child2D *Child2D) GetTextureEnabled() bool {
+	return child2D.textureEnabled
 }
 
 func (child2D *Child2D) GetCollider() *Collider {

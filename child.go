@@ -17,6 +17,7 @@ type Child interface {
 	GetVertexArray() *VertexArray
 	GetNumVertices() int32
 	GetTexture() *uint32
+	GetTextureEnabled() bool
 	GetCollider() *Collider
 	GetCopies() []ChildCopy
 

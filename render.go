@@ -51,7 +51,7 @@ type Renderer struct {
 // StartRenderer starts the main render loop
 func (renderer *Renderer) StartRenderer() {
 	for !renderer.Window.ShouldClose() {
-		gl.ClearColor(float32(44)/255, float32(213)/255, float32(247)/255, 0.9)
+		gl.ClearColor(float32(0)/255, float32(0)/255, float32(0)/255, 0.9)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 		gl.Clear(gl.DEPTH_BUFFER_BIT)
 
@@ -64,7 +64,10 @@ func (renderer *Renderer) StartRenderer() {
 		currentFrame := glfw.GetTime()
 		renderer.DeltaFrameTime = currentFrame - renderer.LastFrameTime
 		renderer.LastFrameTime = currentFrame
+
+		//CheckError("FRAME")
 	}
+	renderer.Config.Logger.Info("Terminating...")
 	glfw.Terminate()
 	renderer.Done <- true
 }
@@ -101,8 +104,10 @@ func (renderer *Renderer) RenderChild(child Child) {
 	gl.EnableVertexAttribArray(1)
 
 	// Bind child's texture
-	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D, *child.GetTexture())
+	if child.GetTextureEnabled() {
+		gl.ActiveTexture(gl.TEXTURE0)
+		gl.BindTexture(gl.TEXTURE_2D, *child.GetTexture())
+	}
 
 	// Draw elements and unbind array
 	gl.DrawElements(gl.TRIANGLES, child.GetNumVertices(), gl.UNSIGNED_INT, gl.PtrOffset(0))
@@ -195,31 +200,19 @@ func initOpenGL(config *configuration.EngineConfig) uint32 {
 	version := gl.GoStr(gl.GetString(gl.VERSION))
 	log.Info("Using OpenGL Version ", version)
 
-	vertexShader, err := CompileShader(VertexShaderSource, gl.VERTEX_SHADER)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fragmentShader, err := CompileShader(FragmentShaderSource, gl.FRAGMENT_SHADER)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	prog := gl.CreateProgram()
-	gl.AttachShader(prog, vertexShader)
-	gl.AttachShader(prog, fragmentShader)
-	gl.LinkProgram(prog)
-
 	if config.PolygonLines {
 		gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
 	}
 
-	//gl.Enable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-	//gl.Disable(gl.CULL_FACE)
 
-	return prog
+	if config.Dimensions == 3 {
+		gl.Enable(gl.DEPTH_TEST)
+		gl.Disable(gl.CULL_FACE)
+	}
+
+	return 0
 }
 
 // SetRenderDistance sets the render distance
