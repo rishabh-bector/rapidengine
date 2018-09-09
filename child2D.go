@@ -112,10 +112,8 @@ func (child2D *Child2D) Update(mainCamera camera.Camera, delta float64, lastFram
 		child2D.VX = 0
 	}
 
-	child2D.VX *= -1 //-float32(delta * 50)
-	child2D.VY *= 1  //float32(delta * 50)
-	child2D.X += child2D.VX
-	child2D.Y += child2D.VY
+	child2D.X += child2D.VX * -float32(delta*30)
+	child2D.Y += child2D.VY * float32(delta*30)
 
 	if child2D.animationEnabled {
 		fps := 1 / delta

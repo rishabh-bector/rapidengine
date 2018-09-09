@@ -26,9 +26,9 @@ func NormalizeSizes(x, y, sw, sh float32) (float32, float32) {
 func GetPrimitiveCoords(id string) []float32 {
 	switch id {
 	case "rectangle":
-		return RectCoords
+		return RectTextures
 	}
-	return RectCoords
+	return RectTextures
 }
 
 // NewTriangle creates a new triangle based on 3 points and a shaders object
@@ -91,7 +91,7 @@ func NewCube() Primitive {
 	return c
 }
 
-var RectCoords = []float32{
+var RectTextures = []float32{
 	0, 1,
 	1, 1,
 	1, 0,
@@ -140,6 +140,50 @@ var CubePoints = []float32{
 	0.5, 0.5, 0.5,
 	-0.5, 0.5, 0.5,
 	-0.5, 0.5, -0.5,
+}
+
+var CubeNormals = []float32{
+	0, 0, -1,
+	0, 0, -1,
+	0, 0, -1,
+	0, 0, -1,
+	0, 0, -1,
+	0, 0, -1,
+
+	0, 0, 1,
+	0, 0, 1,
+	0, 0, 1,
+	0, 0, 1,
+	0, 0, 1,
+	0, 0, 1,
+
+	-1, 0, 0,
+	-1, 0, 0,
+	-1, 0, 0,
+	-1, 0, 0,
+	-1, 0, 0,
+	-1, 0, 0,
+
+	1, 0, 0,
+	1, 0, 0,
+	1, 0, 0,
+	1, 0, 0,
+	1, 0, 0,
+	1, 0, 0,
+
+	0, -1, 0,
+	0, -1, 0,
+	0, -1, 0,
+	0, -1, 0,
+	0, -1, 0,
+	0, -1, 0,
+
+	0, 1, 0,
+	0, 1, 0,
+	0, 1, 0,
+	0, 1, 0,
+	0, 1, 0,
+	0, 1, 0,
 }
 
 var CubeTextures = []float32{

@@ -1,11 +1,9 @@
 package rapidengine
 
 import (
-	"math/rand"
 	"rapidengine/camera"
 	"rapidengine/configuration"
 	"rapidengine/input"
-	"time"
 
 	"github.com/go-gl/mathgl/mgl32"
 )
@@ -46,7 +44,6 @@ func NewEngineConfig(
 }
 
 func (engine *Engine) Initialize() {
-	rand.Seed(time.Now().UTC().UnixNano())
 	engine.Renderer.PreRenderChildren()
 }
 
