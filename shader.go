@@ -39,7 +39,9 @@ func NewShaderControl() ShaderControl {
 
 func (shaderControl *ShaderControl) Initialize() {
 	shaderControl.programs = map[string]*ShaderProgram{
-		"texture": &TextureProgram,
+		"texture":       &TextureProgram,
+		"colorLighting": &ColorLightingProgram,
+		"color":         &ColorProgram,
 	}
 	for _, prog := range shaderControl.programs {
 		prog.Compile()

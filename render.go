@@ -85,6 +85,8 @@ func (renderer *Renderer) PreRenderChildren() {
 func (renderer *Renderer) RenderChildren() {
 	for _, child := range renderer.Children {
 		go child.RemoveCurrentCopies()
+		gl.UseProgram(child.GetShaderProgram())
+		gl.BindVertexArray(child.GetVertexArray().id)
 		if !child.CheckCopyingEnabled() {
 			child.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.LastFrameTime)
 			renderer.RenderChild(child)
@@ -96,12 +98,9 @@ func (renderer *Renderer) RenderChildren() {
 
 // RenderChild renders a single child to the screen
 func (renderer *Renderer) RenderChild(child Child) {
-
-	// Bind Shader Program & Vertex Array
-	gl.UseProgram(child.GetShaderProgram())
-	gl.BindVertexArray(child.GetVertexArray().id)
 	gl.EnableVertexAttribArray(0)
 	gl.EnableVertexAttribArray(1)
+	gl.EnableVertexAttribArray(2)
 
 	// Bind child's texture
 	if child.GetTextureEnabled() {
@@ -117,8 +116,10 @@ func (renderer *Renderer) RenderChild(child Child) {
 // RenderChildCopy renders all copies of a child
 func (renderer *Renderer) RenderChildCopy(child Child) {
 	camX, camY, _ := renderer.MainCamera.GetPosition()
+	gl.UseProgram(child.GetShaderProgram())
 	for _, c := range child.GetCopies() {
 		if InBounds(c.X, c.Y, float32(camX), float32(camY), renderer.RenderDistance) {
+			gl.BindVertexArray(child.GetVertexArray().id)
 			child.RenderCopy(c, renderer.MainCamera)
 			renderer.RenderChild(child)
 			child.AddCurrentCopy(c)

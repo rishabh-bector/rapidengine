@@ -19,6 +19,9 @@ type Child3D struct {
 	textureEnabled bool
 	texture        *uint32
 
+	colorEnabled bool
+	color        []float32
+
 	modelMatrix      mgl32.Mat4
 	projectionMatrix mgl32.Mat4
 
@@ -78,7 +81,10 @@ func (child3D *Child3D) PreRender(mainCamera camera.Camera) {
 	)
 
 	gl.BindAttribLocation(child3D.shaderProgram, 0, gl.Str("position\x00"))
-	gl.BindAttribLocation(child3D.shaderProgram, 1, gl.Str("tex\x00"))
+
+	if child3D.textureEnabled {
+		gl.BindAttribLocation(child3D.shaderProgram, 1, gl.Str("tex\x00"))
+	}
 
 	gl.BindVertexArray(0)
 }
@@ -110,6 +116,10 @@ func (child3D *Child3D) Render(mainCamera camera.Camera) {
 		gl.GetUniformLocation(child3D.shaderProgram, gl.Str("modelMtx\x00")),
 		1, false, &child3D.modelMatrix[0],
 	)
+
+	if child3D.colorEnabled {
+		gl.Uniform3fv(gl.GetUniformLocation(child3D.shaderProgram, gl.Str("color\x00")), 1, &child3D.color[0])
+	}
 }
 
 func (child3D *Child3D) AttachTexture(coords []float32, texture *uint32) {
@@ -137,6 +147,14 @@ func (child3D *Child3D) AttachTexture(coords []float32, texture *uint32) {
 	gl.BindVertexArray(0)
 }
 
+func (child3D *Child3D) AttachColor(rgb []float32) {
+	child3D.color = rgb
+}
+
+func (child3D *Child3D) EnableColor() {
+	child3D.colorEnabled = true
+}
+
 func (child3D *Child3D) SetPosition(x, y, z float32) {
 	child3D.X = x
 	child3D.Y = y
@@ -150,6 +168,7 @@ func (child3D *Child3D) AttachVertexArray(vao *VertexArray, numVertices int32) {
 
 func (child3D *Child3D) AttachPrimitive(p Primitive) {
 	child3D.AttachVertexArray(p.vao, p.numVertices)
+	child3D.vertexArray.AddVertexAttribute(CubeNormals, 2, 3)
 }
 
 func (child3D *Child3D) AttachShader(s uint32) {

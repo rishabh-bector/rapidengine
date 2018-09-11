@@ -16,6 +16,7 @@ type Engine struct {
 	TextureControl   TextureControl
 	InputControl     input.InputControl
 	ShaderControl    ShaderControl
+	LightControl     LightControl
 
 	Config configuration.EngineConfig
 }
@@ -27,10 +28,12 @@ func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer, *in
 		TextureControl:   NewTextureControl(),
 		InputControl:     input.NewInputControl(),
 		ShaderControl:    NewShaderControl(),
+		LightControl:     NewLightControl(),
 		Config:           config,
 		RenderFunc:       renderFunc,
 	}
 	e.ShaderControl.Initialize()
+	e.LightControl.Initialize()
 	e.Renderer.AttachCallback(e.Update)
 	return e
 }
@@ -48,8 +51,9 @@ func (engine *Engine) Initialize() {
 }
 
 func (engine *Engine) Update(renderer *Renderer) {
-	x, y, _ := renderer.MainCamera.GetPosition()
+	x, y, z := renderer.MainCamera.GetPosition()
 	engine.RenderFunc(renderer, engine.InputControl.Update(renderer.Window))
+	engine.LightControl.Update(x, y, z)
 	engine.CollisionControl.Update(x, y)
 }
 
@@ -73,6 +77,10 @@ func (engine *Engine) StartRenderer() {
 
 func (engine *Engine) Instance(c Child) {
 	engine.Renderer.Instance(c)
+}
+
+func (engine *Engine) InstanceLight(l Light) {
+	engine.LightControl.InstanceLight(l, 0)
 }
 
 func (engine *Engine) Done() chan bool {
