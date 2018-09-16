@@ -1,7 +1,11 @@
 package camera
 
+import "rapidengine/input"
+
 type Camera interface {
 	Look()
+
+	DefaultControls(*input.Input)
 
 	MoveUp()
 	MoveDown()

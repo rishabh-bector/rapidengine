@@ -3,6 +3,7 @@ package camera
 import (
 	"math"
 	"rapidengine/configuration"
+	"rapidengine/input"
 
 	"github.com/go-gl/mathgl/mgl32"
 )
@@ -54,6 +55,28 @@ func (camera3D *Camera3D) Look() {
 //  --------------------------------------------------
 //  Movement
 //  --------------------------------------------------
+
+func (camera3D *Camera3D) DefaultControls(inputs *input.Input) {
+	if inputs.Keys["w"] {
+		camera3D.MoveForward()
+	}
+	if inputs.Keys["s"] {
+		camera3D.MoveBackward()
+	}
+	if inputs.Keys["a"] {
+		camera3D.MoveLeft()
+	}
+	if inputs.Keys["d"] {
+		camera3D.MoveRight()
+	}
+	if inputs.Keys["space"] {
+		camera3D.MoveUp()
+	}
+	if inputs.Keys["shift"] {
+		camera3D.MoveDown()
+	}
+	camera3D.ProcessMouse(inputs.MouseX, inputs.MouseY, inputs.LastMouseX, inputs.LastMouseY)
+}
 
 func (camera3D *Camera3D) ProcessMouse(mouseX, mouseY, lastMouseX, lastMouseY float64) {
 	xOffset := (mouseX - lastMouseX) * camera3D.Sensitivity

@@ -16,8 +16,7 @@ type Child interface {
 	GetShaderProgram() uint32
 	GetVertexArray() *VertexArray
 	GetNumVertices() int32
-	GetTexture() *uint32
-	GetTextureEnabled() bool
+
 	GetCollider() *Collider
 	GetCopies() []ChildCopy
 

@@ -4,6 +4,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"rapidengine/configuration"
+	"rapidengine/input"
 )
 
 type Camera2D struct {
@@ -58,6 +59,28 @@ func (camera2D *Camera2D) MoveForward() {
 
 func (camera2D *Camera2D) MoveBackward() {
 	camera2D.Position = camera2D.Position.Sub(camera2D.FrontAxis.Mul(camera2D.Speed))
+}
+
+func (camera2D *Camera2D) DefaultControls(inputs *input.Input) {
+	if inputs.Keys["w"] {
+		camera2D.MoveForward()
+	}
+	if inputs.Keys["s"] {
+		camera2D.MoveBackward()
+	}
+	if inputs.Keys["a"] {
+		camera2D.MoveLeft()
+	}
+	if inputs.Keys["d"] {
+		camera2D.MoveRight()
+	}
+	if inputs.Keys["space"] {
+		camera2D.MoveUp()
+	}
+	if inputs.Keys["shift"] {
+		camera2D.MoveDown()
+	}
+	camera2D.ProcessMouse(inputs.MouseX, inputs.MouseY, inputs.LastMouseX, inputs.LastMouseY)
 }
 
 func (camera2D *Camera2D) ChangeYaw(y float32)   {}

@@ -103,13 +103,10 @@ func (renderer *Renderer) RenderChild(child Child) {
 	gl.EnableVertexAttribArray(2)
 
 	// Bind child's texture
-	if child.GetTextureEnabled() {
-		gl.ActiveTexture(gl.TEXTURE0)
-		gl.BindTexture(gl.TEXTURE_2D, *child.GetTexture())
-	}
 
 	// Draw elements and unbind array
 	gl.DrawElements(gl.TRIANGLES, child.GetNumVertices(), gl.UNSIGNED_INT, gl.PtrOffset(0))
+
 	gl.BindVertexArray(0)
 }
 
@@ -120,6 +117,7 @@ func (renderer *Renderer) RenderChildCopy(child Child) {
 	for _, c := range child.GetCopies() {
 		if InBounds(c.X, c.Y, float32(camX), float32(camY), renderer.RenderDistance) {
 			gl.BindVertexArray(child.GetVertexArray().id)
+			//gl.BindTexture(gl.TEXTURE_2D, *child.GetText)
 			child.RenderCopy(c, renderer.MainCamera)
 			renderer.RenderChild(child)
 			child.AddCurrentCopy(c)

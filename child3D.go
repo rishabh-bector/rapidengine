@@ -15,12 +15,7 @@ type Child3D struct {
 	primitive string
 
 	shaderProgram uint32
-
-	textureEnabled bool
-	texture        *uint32
-
-	colorEnabled bool
-	color        []float32
+	material      *Material
 
 	modelMatrix      mgl32.Mat4
 	projectionMatrix mgl32.Mat4
@@ -56,7 +51,6 @@ func NewChild3D(config *configuration.EngineConfig, collision *CollisionControl)
 		),
 		config:           config,
 		Gravity:          0,
-		textureEnabled:   false,
 		copyingEnabled:   false,
 		collisionControl: collision,
 	}
@@ -82,9 +76,7 @@ func (child3D *Child3D) PreRender(mainCamera camera.Camera) {
 
 	gl.BindAttribLocation(child3D.shaderProgram, 0, gl.Str("position\x00"))
 
-	if child3D.textureEnabled {
-		gl.BindAttribLocation(child3D.shaderProgram, 1, gl.Str("tex\x00"))
-	}
+	child3D.material.PreRender()
 
 	gl.BindVertexArray(0)
 }
@@ -117,12 +109,10 @@ func (child3D *Child3D) Render(mainCamera camera.Camera) {
 		1, false, &child3D.modelMatrix[0],
 	)
 
-	if child3D.colorEnabled {
-		gl.Uniform3fv(gl.GetUniformLocation(child3D.shaderProgram, gl.Str("color\x00")), 1, &child3D.color[0])
-	}
+	child3D.material.Render()
 }
 
-func (child3D *Child3D) AttachTexture(coords []float32, texture *uint32) {
+func (child3D *Child3D) AttachTextureCoords(coords []float32) {
 	if child3D.vertexArray == nil {
 		panic("Cannot attach texture without VertexArray")
 	}
@@ -132,33 +122,18 @@ func (child3D *Child3D) AttachTexture(coords []float32, texture *uint32) {
 
 	gl.BindVertexArray(child3D.vertexArray.id)
 	gl.UseProgram(child3D.shaderProgram)
-
 	child3D.vertexArray.AddVertexAttribute(coords, 1, 2)
-
-	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D, *texture)
-
-	loc1 := gl.GetUniformLocation(child3D.shaderProgram, gl.Str("texture0\x00"))
-	gl.Uniform1i(loc1, int32(0))
-	CheckError("IGNORE")
-
-	child3D.textureEnabled = true
-	child3D.texture = texture
 	gl.BindVertexArray(0)
-}
-
-func (child3D *Child3D) AttachColor(rgb []float32) {
-	child3D.color = rgb
-}
-
-func (child3D *Child3D) EnableColor() {
-	child3D.colorEnabled = true
 }
 
 func (child3D *Child3D) SetPosition(x, y, z float32) {
 	child3D.X = x
 	child3D.Y = y
 	child3D.Z = z
+}
+
+func (child3D *Child3D) AttachMaterial(m *Material) {
+	child3D.material = m
 }
 
 func (child3D *Child3D) AttachVertexArray(vao *VertexArray, numVertices int32) {
@@ -200,11 +175,7 @@ func (child3D *Child3D) GetNumVertices() int32 {
 }
 
 func (child3D *Child3D) GetTexture() *uint32 {
-	return child3D.texture
-}
-
-func (child3D *Child3D) GetTextureEnabled() bool {
-	return child3D.textureEnabled
+	return child3D.material.GetTexture()
 }
 
 func (child3D *Child3D) GetCollider() *Collider {
