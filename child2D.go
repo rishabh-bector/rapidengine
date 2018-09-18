@@ -7,8 +7,6 @@ package rapidengine
 // --------------------------------------------------
 
 import (
-	"errors"
-
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
@@ -23,9 +21,7 @@ type Child2D struct {
 	primitive string
 
 	shaderProgram uint32
-
-	texture        *uint32
-	textureEnabled bool
+	material      *Material
 
 	modelMatrix      mgl32.Mat4
 	projectionMatrix mgl32.Mat4
@@ -118,7 +114,7 @@ func (child2D *Child2D) Update(mainCamera camera.Camera, delta float64, lastFram
 	if child2D.animationEnabled {
 		fps := 1 / delta
 		if child2D.animationFrame > int(fps/float64(child2D.animationSpeed)) {
-			child2D.Animate()
+			//child2D.Animate()
 			child2D.animationFrame = 0
 		} else {
 			child2D.animationFrame++
@@ -141,6 +137,8 @@ func (child2D *Child2D) Render(mainCamera camera.Camera) {
 		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("modelMtx\x00")),
 		1, false, &child2D.modelMatrix[0],
 	)
+
+	child2D.material.Render()
 }
 
 func (child2D *Child2D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
@@ -158,7 +156,7 @@ func (child2D *Child2D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
 		1, false, &child2D.modelMatrix[0],
 	)
 
-	child2D.texture = config.Tex
+	config.Material.Render()
 }
 
 func (child2D *Child2D) CheckCollision(other Child) int {
@@ -173,33 +171,22 @@ func (child2D *Child2D) CheckCollisionRaw(otherX, otherY float32, otherCollider 
 //  Component Attachers
 //  --------------------------------------------------
 
-func (child2D *Child2D) AttachTexture(coords []float32, texture *uint32) error {
+func (child2D *Child2D) AttachTextureCoords(coords []float32) {
 	if child2D.vertexArray == nil {
-		return errors.New("Cannot attach texture without VertexArray")
+		panic("Cannot attach texture without VertexArray")
 	}
 	if child2D.shaderProgram == 0 {
-		return errors.New("Cannot attach texture without shader program")
+		panic("Cannot attach texture without shader program")
 	}
 
 	gl.BindVertexArray(child2D.vertexArray.id)
 	gl.UseProgram(child2D.shaderProgram)
-
 	child2D.vertexArray.AddVertexAttribute(coords, 1, 2)
-
-	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D, *texture)
-
-	loc1 := gl.GetUniformLocation(child2D.shaderProgram, gl.Str("texture0\x00"))
-	gl.Uniform1i(loc1, int32(0))
-
-	child2D.texture = texture
-	child2D.textureEnabled = true
 	gl.BindVertexArray(0)
-	return nil
 }
 
-func (child2D *Child2D) AttachTexturePrimitive(texture *uint32) {
-	child2D.AttachTexture(GetPrimitiveCoords(child2D.primitive), texture)
+func (child2D *Child2D) AttachTextureCoordsPrimitive() {
+	child2D.AttachTextureCoords(GetPrimitiveCoords(child2D.primitive))
 }
 
 func (child2D *Child2D) AttachCollider(x, y, w, h float32) {
@@ -214,6 +201,11 @@ func (child2D *Child2D) AttachVertexArray(vao *VertexArray, numVertices int32) {
 func (child2D *Child2D) AttachPrimitive(p Primitive) {
 	child2D.primitive = p.id
 	child2D.AttachVertexArray(p.vao, p.numVertices)
+	child2D.vertexArray.AddVertexAttribute(RectNormals, 2, 3)
+}
+
+func (child2D *Child2D) AttachMaterial(m *Material) {
+	child2D.material = m
 }
 
 func (child2D *Child2D) AttachShader(s uint32) {
@@ -275,11 +267,7 @@ func (child2D *Child2D) GetNumVertices() int32 {
 }
 
 func (child2D *Child2D) GetTexture() *uint32 {
-	return child2D.texture
-}
-
-func (child2D *Child2D) GetTextureEnabled() bool {
-	return child2D.textureEnabled
+	return child2D.material.GetTexture()
 }
 
 func (child2D *Child2D) GetCollider() *Collider {
@@ -338,14 +326,14 @@ func ScaleCoordinates(x, y, sw, sh float32) (float32, float32) {
 //  Animations
 //  --------------------------------------------------
 
-func (child2D *Child2D) Animate() {
+/*func (child2D *Child2D) Animate() {
 	child2D.texture = child2D.animationTextures[child2D.animationCurrent]
 	if child2D.animationCurrent < len(child2D.animationTextures)-1 {
 		child2D.animationCurrent++
 	} else {
 		child2D.animationCurrent = 0
 	}
-}
+}*/
 
 func (child2D *Child2D) EnableAnimation() {
 	child2D.animationEnabled = true

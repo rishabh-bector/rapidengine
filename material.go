@@ -40,8 +40,10 @@ func (material *Material) Render() {
 		gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("textureEnabled\x00")), 0)
 		gl.Uniform1f(gl.GetUniformLocation(material.shaderProgram, gl.Str("shine\x00")), material.shine)
 	case SHADER_TEXTURE:
+		gl.UseProgram(material.shaderProgram)
 		gl.ActiveTexture(gl.TEXTURE0)
 		gl.BindTexture(gl.TEXTURE_2D, *material.texture)
+		gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("diffuseMap\x00")), 0) //int32(*material.texture)-1)
 		gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("textureEnabled\x00")), 1)
 		gl.Uniform1f(gl.GetUniformLocation(material.shaderProgram, gl.Str("shine\x00")), material.shine)
 	}

@@ -38,10 +38,10 @@ func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer, *in
 
 	l := NewDirectionLight(
 		e.ShaderControl.GetShader("colorLighting"),
-		[]float32{0.3, 0.3, 0.3},
-		[]float32{0.7, 0.7, 0.7},
-		[]float32{0.3, 0.3, 0.3},
-		[]float32{0, 1, 1},
+		[]float32{0, 0, 0},
+		[]float32{0, 0, 0},
+		[]float32{0, 0, 0},
+		[]float32{0, 0, -1},
 	)
 	e.LightControl.SetDirectionLight(&l)
 
@@ -89,7 +89,7 @@ func (engine *Engine) Instance(c Child) {
 	engine.Renderer.Instance(c)
 }
 
-func (engine *Engine) InstanceLight(l PointLight) {
+func (engine *Engine) InstanceLight(l *PointLight) {
 	engine.LightControl.InstanceLight(l, 0)
 }
 

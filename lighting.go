@@ -7,13 +7,13 @@ import (
 type LightControl struct {
 	lightingEnabled map[int]bool
 	directionLight  map[int]*DirectionLight
-	pointLightMap   map[int]PointLight
+	pointLightMap   map[int]*PointLight
 }
 
 func NewLightControl() LightControl {
 	return LightControl{
 		lightingEnabled: make(map[int]bool),
-		pointLightMap:   make(map[int]PointLight),
+		pointLightMap:   make(map[int]*PointLight),
 		directionLight:  make(map[int]*DirectionLight),
 	}
 }
@@ -40,7 +40,7 @@ func (lightControl *LightControl) PreRender() {
 	}
 }
 
-func (lightControl *LightControl) InstanceLight(l PointLight, ind int) {
+func (lightControl *LightControl) InstanceLight(l *PointLight, ind int) {
 	lightControl.pointLightMap[ind] = l
 }
 
@@ -179,6 +179,41 @@ func (light *PointLight) UpdateShader(cx, cy, cz float32, ind int) {
 	)
 
 	gl.Uniform3fv(
+		gl.GetUniformLocation(light.program, gl.Str("lmao.ambient"+"\x00")),
+		1, &light.ambient[0],
+	)
+
+	gl.Uniform3fv(
+		gl.GetUniformLocation(light.program, gl.Str("lmao.diffuse"+"\x00")),
+		1, &light.diffuse[0],
+	)
+
+	gl.Uniform3fv(
+		gl.GetUniformLocation(light.program, gl.Str("lmao.specular"+"\x00")),
+		1, &light.specular[0],
+	)
+
+	gl.Uniform1f(
+		gl.GetUniformLocation(light.program, gl.Str("lmao.constant"+"\x00")),
+		light.constant,
+	)
+
+	gl.Uniform1f(
+		gl.GetUniformLocation(light.program, gl.Str("lmao.linear"+"\x00")),
+		light.linear,
+	)
+
+	gl.Uniform1f(
+		gl.GetUniformLocation(light.program, gl.Str("lmao.quadratic"+"\x00")),
+		light.quadratic,
+	)
+
+	gl.Uniform3fv(
+		gl.GetUniformLocation(light.program, gl.Str("lmao.position"+"\x00")),
+		1, &light.position[0],
+	)
+
+	gl.Uniform3fv(
 		gl.GetUniformLocation(light.program, gl.Str("viewPos"+"\x00")),
 		1, &c[0],
 	)
@@ -186,4 +221,9 @@ func (light *PointLight) UpdateShader(cx, cy, cz float32, ind int) {
 
 func (light *PointLight) SetPosition(pos []float32) {
 	light.position = pos
+}
+
+func (light *PointLight) SetLevels(linear, quad float32) {
+	light.linear = linear
+	light.quadratic = quad
 }

@@ -98,6 +98,15 @@ var RectTextures = []float32{
 	0, 0,
 }
 
+var RectNormals = []float32{
+	0, 0, 1,
+	0, 0, 1,
+	0, 0, 1,
+	0, 0, 1,
+	0, 0, 1,
+	0, 0, 1,
+}
+
 var CubePoints = []float32{
 	-0.5, -0.5, -0.5,
 	0.5, -0.5, -0.5,

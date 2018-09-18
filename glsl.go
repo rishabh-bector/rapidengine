@@ -171,6 +171,7 @@ const ShaderColorLightingFragment = `
 	const int NR_POINT_LIGHTS = 1;
 	uniform DirLight dirLight;
 	uniform PointLight pointLights[NR_POINT_LIGHTS];
+	uniform PointLight lmao;
 	uniform SpotLight spotLight;
 
 	// Function prototypes
@@ -182,20 +183,13 @@ const ShaderColorLightingFragment = `
 		// properties
 		vec3 norm = normalize(Normal);
 		vec3 viewDir = normalize(viewPos - FragPos);
-		
-		// == =====================================================
-		// Our lighting is set up in 3 phases: directional, point lights and an optional flashlight
-		// For each phase, a calculate function is defined that calculates the corresponding color
-		// per lamp. In the main() function we take all the calculated colors and sum them up for
-		// this fragment's final color.
-		// == =====================================================
 
 		// phase 1: directional lighting
 		vec3 result = CalcDirLight(dirLight, norm, viewDir);
 
 		// phase 2: point lights
 		for(int i = 0; i < NR_POINT_LIGHTS; i++) {
-			result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);    
+			result += CalcPointLight(lmao, norm, FragPos, viewDir);    
 		}
 
 		// phase 3: spot light
@@ -225,9 +219,9 @@ const ShaderColorLightingFragment = `
 			diffuse = light.diffuse * diff * color;
 			specular = light.specular * spec * color;
 		} else {
-			//ambient = light.ambient * vec3(texture(diffuseMap, TexCoords));
-			//diffuse = light.diffuse * diff * vec3(texture(diffuseMap, TexCoords));
-			//specular = light.specular * spec * vec3(texture(diffuseMap, TexCoords));
+			ambient = light.ambient * vec3(texture(diffuseMap, TexCoords));
+			diffuse = light.diffuse * diff * vec3(texture(diffuseMap, TexCoords));
+			specular = light.specular * spec * vec3(texture(diffuseMap, TexCoords));
 		}
 
 		return ambient + diffuse + specular;
@@ -246,8 +240,13 @@ const ShaderColorLightingFragment = `
 
 		// attenuation
 		float distance = length(light.position - fragPos);
-		float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance)); 
-		   
+
+		if(distance > 1.05) {
+			//return vec3(0, 0, 0);
+		}
+
+		float attenuation = 1.0 / ((light.constant) + (light.linear * distance) + (light.quadratic * (distance * distance))); 
+
 		// combine results
 		vec3 ambient = vec3(1, 1, 1);
 		vec3 diffuse = vec3(1, 1, 1);
@@ -258,9 +257,9 @@ const ShaderColorLightingFragment = `
 			diffuse = light.diffuse * diff * color;
 			specular = light.specular * spec * color;
 		} else {
-			//ambient = light.ambient * vec3(texture(diffuseMap, TexCoords));
-			//diffuse = light.diffuse * diff * vec3(texture(diffuseMap, TexCoords));
-			//specular = light.specular * spec * vec3(texture(diffuseMap, TexCoords));
+			ambient = light.ambient * vec3(texture(diffuseMap, TexCoords));
+			diffuse = light.diffuse * diff * vec3(texture(diffuseMap, TexCoords));
+			specular = light.specular * spec * vec3(texture(diffuseMap, TexCoords));
 		}
 
 		ambient *= attenuation;

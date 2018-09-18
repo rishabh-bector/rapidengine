@@ -3,9 +3,9 @@ package rapidengine
 import "rapidengine/camera"
 
 type ChildCopy struct {
-	X   float32
-	Y   float32
-	Tex *uint32
+	X        float32
+	Y        float32
+	Material *Material
 }
 type Child interface {
 	PreRender(camera.Camera)
