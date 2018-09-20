@@ -5,6 +5,7 @@ import "rapidengine/camera"
 type ChildCopy struct {
 	X        float32
 	Y        float32
+	Z        float32
 	Material *Material
 }
 type Child interface {

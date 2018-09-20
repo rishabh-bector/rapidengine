@@ -5,22 +5,27 @@ import (
 )
 
 type LightControl struct {
-	lightingEnabled map[int]bool
-	directionLight  map[int]*DirectionLight
-	pointLightMap   map[int]*PointLight
+	lightingEnabled    map[int]bool
+	directionalEnabled map[int]bool
+
+	directionLight map[int]*DirectionLight
+	pointLightMap  map[int]*PointLight
 }
 
 func NewLightControl() LightControl {
-	return LightControl{
-		lightingEnabled: make(map[int]bool),
-		pointLightMap:   make(map[int]*PointLight),
-		directionLight:  make(map[int]*DirectionLight),
+	l := LightControl{
+		lightingEnabled:    make(map[int]bool),
+		directionalEnabled: make(map[int]bool),
+		pointLightMap:      make(map[int]*PointLight),
+		directionLight:     make(map[int]*DirectionLight),
 	}
+	l.EnableDirectionalLighting()
+	return l
 }
 
 func (lightControl *LightControl) Update(cx, cy, cz float32) {
 	if lightControl.lightingEnabled[0] {
-		if lightControl.directionLight[0] != nil {
+		if lightControl.directionLight[0] != nil && lightControl.directionalEnabled[0] {
 			lightControl.directionLight[0].UpdateShader(cx, cy, cz)
 		}
 		for ind, light := range lightControl.pointLightMap {
@@ -31,7 +36,7 @@ func (lightControl *LightControl) Update(cx, cy, cz float32) {
 
 func (lightControl *LightControl) PreRender() {
 	if lightControl.lightingEnabled[0] {
-		if lightControl.directionLight[0] != nil {
+		if lightControl.directionLight[0] != nil && lightControl.directionalEnabled[0] {
 			lightControl.directionLight[0].PreRender()
 		}
 		for _, light := range lightControl.pointLightMap {
@@ -44,7 +49,7 @@ func (lightControl *LightControl) InstanceLight(l *PointLight, ind int) {
 	lightControl.pointLightMap[ind] = l
 }
 
-func (lightControl *LightControl) SetDirectionLight(light *DirectionLight) {
+func (lightControl *LightControl) SetDirectionalLight(light *DirectionLight) {
 	lightControl.directionLight[0] = light
 }
 
@@ -54,6 +59,14 @@ func (lightControl *LightControl) EnableLighting() {
 
 func (lightControl *LightControl) DisableLighting() {
 	lightControl.lightingEnabled[0] = false
+}
+
+func (lightControl *LightControl) EnableDirectionalLighting() {
+	lightControl.directionalEnabled[0] = true
+}
+
+func (lightControl *LightControl) DisableDirectionalLighting() {
+	lightControl.directionalEnabled[0] = false
 }
 
 type DirectionLight struct {

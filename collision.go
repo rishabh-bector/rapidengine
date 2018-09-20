@@ -104,7 +104,6 @@ func NewCollider(x, y, w, h, m float32) Collider {
 // 3 - Left
 // 4 - Bottom
 func (collider *Collider) CheckCollision(x, y, vx, vy, otherX, otherY float32, otherCollider *Collider) int {
-
 	if x+collider.offsetX+collider.width > otherX &&
 		x+collider.offsetX < otherX+otherCollider.width &&
 		y+collider.offsetY+collider.height+vy > otherY &&

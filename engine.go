@@ -36,14 +36,26 @@ func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer, *in
 	e.ShaderControl.Initialize()
 	e.Renderer.AttachCallback(e.Update)
 
-	l := NewDirectionLight(
-		e.ShaderControl.GetShader("colorLighting"),
-		[]float32{0, 0, 0},
-		[]float32{0, 0, 0},
-		[]float32{0, 0, 0},
-		[]float32{0, 0, -1},
-	)
-	e.LightControl.SetDirectionLight(&l)
+	if e.Config.Dimensions == 2 {
+		l := NewDirectionLight(
+			e.ShaderControl.GetShader("colorLighting"),
+			[]float32{0, 0, 0},
+			[]float32{0, 0, 0},
+			[]float32{0, 0, 0},
+			[]float32{0, 0, -1},
+		)
+		e.LightControl.SetDirectionalLight(&l)
+	}
+	if e.Config.Dimensions == 3 {
+		l := NewDirectionLight(
+			e.ShaderControl.GetShader("colorLighting"),
+			[]float32{0.1, 0.1, 0.1},
+			[]float32{0.6, 0.6, 0.6},
+			[]float32{0.8, 0.8, 0.8},
+			[]float32{1, 1, -0.5},
+		)
+		e.LightControl.SetDirectionalLight(&l)
+	}
 
 	return e
 }
@@ -93,8 +105,8 @@ func (engine *Engine) InstanceLight(l *PointLight) {
 	engine.LightControl.InstanceLight(l, 0)
 }
 
-func (engine *Engine) SetDirectionLight(l *DirectionLight) {
-	engine.LightControl.SetDirectionLight(l)
+func (engine *Engine) SetDirectionalLight(l *DirectionLight) {
+	engine.LightControl.SetDirectionalLight(l)
 }
 
 func (engine *Engine) EnableLighting() {

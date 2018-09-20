@@ -168,7 +168,7 @@ func (child2D *Child2D) CheckCollisionRaw(otherX, otherY float32, otherCollider 
 }
 
 //  --------------------------------------------------
-//  Component Attachers
+//  Component Attachment
 //  --------------------------------------------------
 
 func (child2D *Child2D) AttachTextureCoords(coords []float32) {

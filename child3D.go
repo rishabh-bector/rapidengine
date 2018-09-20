@@ -112,6 +112,22 @@ func (child3D *Child3D) Render(mainCamera camera.Camera) {
 	child3D.material.Render()
 }
 
+func (child3D *Child3D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
+	child3D.modelMatrix = mgl32.Translate3D(config.X, config.Y, config.Z)
+
+	gl.UniformMatrix4fv(
+		gl.GetUniformLocation(child3D.shaderProgram, gl.Str("viewMtx\x00")),
+		1, false, mainCamera.GetFirstViewIndex(),
+	)
+
+	gl.UniformMatrix4fv(
+		gl.GetUniformLocation(child3D.shaderProgram, gl.Str("modelMtx\x00")),
+		1, false, &child3D.modelMatrix[0],
+	)
+
+	config.Material.Render()
+}
+
 func (child3D *Child3D) AttachTextureCoords(coords []float32) {
 	if child3D.vertexArray == nil {
 		panic("Cannot attach texture without VertexArray")
@@ -182,11 +198,46 @@ func (child3D *Child3D) GetCollider() *Collider {
 	return nil
 }
 
-func (child3D *Child3D) RenderCopy(c ChildCopy, cam camera.Camera)       {}
-func (child3D *Child3D) AddCurrentCopy(c ChildCopy)                      {}
-func (child3D *Child3D) GetCurrentCopies() []ChildCopy                   { return nil }
-func (child3D *Child3D) GetCopies() []ChildCopy                          { return nil }
-func (child3D *Child3D) RemoveCurrentCopies()                            {}
-func (child3D *Child3D) CheckCopyingEnabled() bool                       { return false }
-func (child3D *Child3D) CheckCollision(c Child) int                      { return 0 }
-func (child3D *Child3D) CheckCollisionRaw(x, y float32, c *Collider) int { return 0 }
+//  --------------------------------------------------
+//  Copying
+//  --------------------------------------------------
+
+func (child3D *Child3D) EnableCopying() {
+	child3D.copyingEnabled = true
+}
+
+func (child3D *Child3D) DisableCopying() {
+	child3D.copyingEnabled = false
+}
+
+func (child3D *Child3D) AddCopy(config ChildCopy) {
+	child3D.copies = append(child3D.copies, config)
+}
+
+func (child3D *Child3D) GetCopies() []ChildCopy {
+	return child3D.copies
+}
+
+func (child3D *Child3D) GetCurrentCopies() []ChildCopy {
+	return child3D.currentCopies
+}
+
+func (child3D *Child3D) CheckCopyingEnabled() bool {
+	return child3D.copyingEnabled
+}
+
+func (child3D *Child3D) AddCurrentCopy(c ChildCopy) {
+	child3D.currentCopies = append(child3D.currentCopies, c)
+}
+
+func (child3D *Child3D) RemoveCurrentCopies() {
+	child3D.currentCopies = []ChildCopy{}
+}
+
+func (child3D *Child3D) CheckCollision(other Child) int {
+	return child3D.collider.CheckCollision(child3D.X, child3D.Y, child3D.VX, child3D.VY, other.GetX(), other.GetY(), other.GetCollider())
+}
+
+func (child3D *Child3D) CheckCollisionRaw(otherX, otherY float32, otherCollider *Collider) int {
+	return child3D.collider.CheckCollision(child3D.X, child3D.Y, child3D.VX, child3D.VY, otherX, otherY, otherCollider)
+}
