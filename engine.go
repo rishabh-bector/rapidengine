@@ -51,10 +51,19 @@ func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer, *in
 			e.ShaderControl.GetShader("colorLighting"),
 			[]float32{0.1, 0.1, 0.1},
 			[]float32{0.6, 0.6, 0.6},
-			[]float32{0.8, 0.8, 0.8},
-			[]float32{1, 1, -0.5},
+			[]float32{0.2, 0.2, 0.2},
+			[]float32{1, -1, 1},
 		)
 		e.LightControl.SetDirectionalLight(&l)
+
+		NewSkyBox(
+			"../rapidengine/skybox/right.jpg",
+			"../rapidengine/skybox/left.jpg",
+			"../rapidengine/skybox/top.jpg",
+			"../rapidengine/skybox/bottom.jpg",
+			"../rapidengine/skybox/front.jpg",
+			"../rapidengine/skybox/back.jpg", &e,
+		)
 	}
 
 	return e

@@ -32,13 +32,17 @@ func (textureControl *TextureControl) NewTexture(path string, name string) error
 	if err != nil {
 		return err
 	}
+
 	var texture uint32
+
 	gl.GenTextures(1, &texture)
 	gl.BindTexture(gl.TEXTURE_2D, texture)
+
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
+
 	gl.TexImage2D(
 		gl.TEXTURE_2D,
 		0,
@@ -50,10 +54,39 @@ func (textureControl *TextureControl) NewTexture(path string, name string) error
 		gl.UNSIGNED_BYTE,
 		gl.Ptr(rgba.Pix),
 	)
+
 	gl.GenerateMipmap(gl.TEXTURE_2D)
 	gl.BindTexture(gl.TEXTURE_2D, 0)
 	textureControl.TexMap[name] = &texture
 	return nil
+}
+
+func (textureControl *TextureControl) NewCubeMap(right, left, top, bottom, front, back, name string) {
+	var cubeMap uint32
+
+	gl.GenTextures(1, &cubeMap)
+	gl.BindTexture(gl.TEXTURE_CUBE_MAP, cubeMap)
+
+	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE)
+
+	paths := []string{right, left, top, bottom, front, back}
+
+	for i, path := range paths {
+		rgba, err := loadImage(path)
+		if err != nil {
+			panic(err)
+		}
+
+		gl.TexImage2D(uint32(gl.TEXTURE_CUBE_MAP_POSITIVE_X+i), 0, gl.RGBA,
+			int32(rgba.Rect.Size().X), int32(rgba.Rect.Size().Y),
+			0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(rgba.Pix))
+	}
+
+	textureControl.TexMap[name] = &cubeMap
 }
 
 func loadImage(path string) (*image.RGBA, error) {

@@ -42,6 +42,7 @@ func (shaderControl *ShaderControl) Initialize() {
 		"texture":       &TextureProgram,
 		"colorLighting": &ColorLightingProgram,
 		"color":         &ColorProgram,
+		"skybox":        &SkyBoxProgram,
 	}
 	for _, prog := range shaderControl.programs {
 		prog.Compile()

@@ -37,6 +37,10 @@ type Renderer struct {
 	// Render Distance
 	RenderDistance float32
 
+	// Skybox
+	SkyBoxEnabled bool
+	SkyBox        *SkyBox
+
 	// Engine Configuration
 	Config *configuration.EngineConfig
 
@@ -55,8 +59,11 @@ func (renderer *Renderer) StartRenderer() {
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 		gl.Clear(gl.DEPTH_BUFFER_BIT)
 
-		renderer.RenderFunc(renderer)
+		if renderer.SkyBoxEnabled {
+			renderer.SkyBox.Render(renderer.MainCamera)
+		}
 		renderer.RenderChildren()
+		renderer.RenderFunc(renderer)
 
 		renderer.MainCamera.Look()
 		renderer.Window.SwapBuffers()
@@ -64,7 +71,6 @@ func (renderer *Renderer) StartRenderer() {
 		currentFrame := glfw.GetTime()
 		renderer.DeltaFrameTime = currentFrame - renderer.LastFrameTime
 		renderer.LastFrameTime = currentFrame
-
 		//CheckError("FRAME")
 	}
 	renderer.Config.Logger.Info("Terminating...")
@@ -154,7 +160,6 @@ func NewRenderer(camera camera.Camera, config *configuration.EngineConfig) Rende
 // Instance takes a child and adds it to the renderer's list,
 // so that it will be rendered every frame
 func (renderer *Renderer) Instance(child Child) {
-	//child.PreRender(renderer.MainCamera)
 	renderer.Children = append(renderer.Children, child)
 }
 

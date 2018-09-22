@@ -138,7 +138,7 @@ func (child3D *Child3D) AttachTextureCoords(coords []float32) {
 
 	gl.BindVertexArray(child3D.vertexArray.id)
 	gl.UseProgram(child3D.shaderProgram)
-	child3D.vertexArray.AddVertexAttribute(coords, 1, 2)
+	child3D.vertexArray.AddVertexAttribute(coords, 1, 3)
 	gl.BindVertexArray(0)
 }
 

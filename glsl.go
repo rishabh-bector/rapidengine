@@ -15,6 +15,11 @@ var ColorLightingProgram = ShaderProgram{
 	fragmentShader: ShaderColorLightingFragment,
 }
 
+var SkyBoxProgram = ShaderProgram{
+	vertexShader:   ShaderSkyBoxVertex,
+	fragmentShader: ShaderSkyBoxFragment,
+}
+
 const ShaderTextureVertex = `
 
 		#version 410
@@ -24,9 +29,9 @@ const ShaderTextureVertex = `
 		uniform mat4 projectionMtx;
 
 		layout (location = 0) in vec3 position;
-		layout (location = 1) in vec2 tex;
+		layout (location = 1) in vec3 tex;
 
-		out vec2 texCoord;
+		out vec3 texCoord;
 		
 		void main() {
 			texCoord = tex;
@@ -41,12 +46,12 @@ const ShaderTextureFragment = `
 
 		uniform sampler2D texture0;
 
-		in vec2 texCoord;
+		in vec3 texCoord;
 
 		out vec4 outColor;
 
 		void main() {
-			outColor = texture(texture0, texCoord);
+			outColor = texture(texture0, texCoord.xy);
 		}
 		
 	` + "\x00"
@@ -87,10 +92,10 @@ const ShaderColorLightingVertex = `
 
 	out vec3 Normal;
 	out vec3 FragPos;
-	out vec2 TexCoords;
+	out vec3 TexCoords;
 
 	layout (location = 0) in vec3 position;
-	layout (location = 1) in vec2 tex;
+	layout (location = 1) in vec3 tex;
 	layout (location = 2) in vec3 normal;
 
 	uniform mat4 modelMtx;
@@ -155,14 +160,15 @@ const ShaderColorLightingFragment = `
 
 	in vec3 Normal;
 	in vec3 FragPos;
-	in vec2 TexCoords;
+	in vec3 TexCoords;
 	
-	// Object's material
-	uniform vec3 color;		
-	uniform float shine;
-
-	uniform int textureEnabled;
+	// Object Material
+	// Solid, Texture, or CubeMap
+	uniform vec3 materialType;
+	uniform vec3 color;
 	uniform sampler2D diffuseMap;
+	uniform samplerCube cubeMap;
+	uniform float shine;
 
 	// Camera position
 	uniform vec3 viewPos;
@@ -214,16 +220,27 @@ const ShaderColorLightingFragment = `
 		vec3 diffuse = vec3(1, 1, 1);
 		vec3 specular = vec3(1, 1, 1);
 
-		if(textureEnabled == 0) {
+		if(materialType.x > 0) {
 			ambient = light.ambient * color;
 			diffuse = light.diffuse * diff * color;
 			specular = light.specular * spec * color;
-		} else {
-			ambient = light.ambient * vec3(texture(diffuseMap, TexCoords));
-			diffuse = light.diffuse * diff * vec3(texture(diffuseMap, TexCoords));
-			specular = light.specular * spec * vec3(texture(diffuseMap, TexCoords));
+			return ambient + diffuse + specular;
 		}
 
+		if(materialType.y > 0) {
+			ambient = light.ambient * vec3(texture(diffuseMap, TexCoords.xy));
+			diffuse = light.diffuse * diff * vec3(texture(diffuseMap, TexCoords.xy));
+			specular = light.specular * spec * vec3(texture(diffuseMap, TexCoords.xy));
+			return ambient + diffuse + specular;
+		}
+		
+		if(materialType.z > 0) {
+			//ambient = light.ambient * vec3(texture(cubeMap, TexCoords));
+			//diffuse = light.diffuse * diff * vec3(texture(cubeMap, TexCoords));
+			//specular = light.specular * spec * vec3(texture(cubeMap, TexCoords));
+			//return ambient + diffuse + specular;
+		} 
+		
 		return ambient + diffuse + specular;
 	}
 
@@ -252,14 +269,18 @@ const ShaderColorLightingFragment = `
 		vec3 diffuse = vec3(1, 1, 1);
 		vec3 specular = vec3(1, 1, 1);
 
-		if(textureEnabled == 0) {
+		if(materialType.x > 0) {
 			ambient = light.ambient * color;
 			diffuse = light.diffuse * diff * color;
 			specular = light.specular * spec * color;
-		} else {
-			ambient = light.ambient * vec3(texture(diffuseMap, TexCoords));
-			diffuse = light.diffuse * diff * vec3(texture(diffuseMap, TexCoords));
-			specular = light.specular * spec * vec3(texture(diffuseMap, TexCoords));
+		} else if(materialType.y > 0) {
+			ambient = light.ambient * vec3(texture(diffuseMap, TexCoords.xy));
+			diffuse = light.diffuse * diff * vec3(texture(diffuseMap, TexCoords.xy));
+			specular = light.specular * spec * vec3(texture(diffuseMap, TexCoords.xy));
+		} else if(materialType.z > 0) {
+			//ambient = light.ambient * vec3(texture(cubeMap, TexCoords));
+			//diffuse = light.diffuse * diff * vec3(texture(cubeMap, TexCoords));
+			//specular = light.specular * spec * vec3(texture(cubeMap, TexCoords));
 		}
 
 		ambient *= attenuation;
@@ -269,6 +290,7 @@ const ShaderColorLightingFragment = `
 		return ambient + diffuse + specular;
 	}
 
+	/*
 	// Calculates the color when using a spot light
 	vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
 		vec3 lightDir = normalize(light.position - fragPos);
@@ -309,6 +331,42 @@ const ShaderColorLightingFragment = `
 		specular *= attenuation * intensity;
 
 		return (ambient + diffuse + specular);
+	}
+	*/
+
+` + "\x00"
+
+const ShaderSkyBoxVertex = `
+
+	#version 410
+
+	layout (location = 0) in vec3 position;
+
+	out vec3 texCoord;
+
+	uniform mat4 viewMtx;
+	uniform mat4 projectionMtx;
+	uniform mat4 modelMtx;
+	
+	void main() {
+		texCoord = position;
+		gl_Position = projectionMtx * viewMtx * modelMtx * vec4(position, 1.0);
+	}
+
+` + "\x00"
+
+const ShaderSkyBoxFragment = `
+
+	#version 410
+
+	out vec4 FragColor;
+
+	in vec3 texCoord;
+
+	uniform samplerCube cubeMap;
+
+	void main() {
+		FragColor = texture(cubeMap, texCoord);
 	}
 
 ` + "\x00"
