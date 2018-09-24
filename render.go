@@ -116,11 +116,12 @@ func (renderer *Renderer) RenderChild(child Child) {
 
 // RenderChildCopy renders all copies of a child
 func (renderer *Renderer) RenderChildCopy(child Child) {
-	camX, camY, _ := renderer.MainCamera.GetPosition()
+	camX, camY, camZ := renderer.MainCamera.GetPosition()
 	gl.UseProgram(child.GetShaderProgram())
 
 	for _, c := range child.GetCopies() {
-		if InBounds(c.X, c.Y, float32(camX), float32(camY), renderer.RenderDistance) {
+		if (renderer.Config.Dimensions == 2 && InBounds2D(c.X, c.Y, float32(camX), float32(camY), renderer.RenderDistance)) ||
+			(renderer.Config.Dimensions == 3 && InBounds3D(c.X, c.Y, c.Z, float32(camX), float32(camY), float32(camZ), renderer.RenderDistance)) {
 			gl.BindVertexArray(child.GetVertexArray().id)
 			child.RenderCopy(c, renderer.MainCamera)
 			renderer.RenderChild(child)
@@ -129,12 +130,25 @@ func (renderer *Renderer) RenderChildCopy(child Child) {
 	}
 }
 
-// InBounds checks if a particular x/y is within the given render distance
-func InBounds(x, y, camX, camY, renderDistance float32) bool {
+// InBounds2D checks if a particular x/y is within the given render distance
+func InBounds2D(x, y, camX, camY, renderDistance float32) bool {
 	if x < camX+renderDistance &&
 		x > camX-renderDistance &&
 		y < camY+renderDistance &&
 		y > camY-renderDistance {
+		return true
+	}
+	return false
+}
+
+// InBounds3D checks if a particular x/y/z is within the given render distance
+func InBounds3D(x, y, z, camX, camY, camZ, renderDistance float32) bool {
+	if x < camX+renderDistance &&
+		x > camX-renderDistance &&
+		y < camY+renderDistance &&
+		y > camY-renderDistance &&
+		z < camZ+renderDistance &&
+		z > camZ-renderDistance {
 		return true
 	}
 	return false
@@ -187,7 +201,9 @@ func initGLFW(config *configuration.EngineConfig) *glfw.Window {
 		log.Fatal(err)
 	}
 
-	//window.SetInputMode(glfw.CursorMode, glfw.CursorDisabled)
+	if config.Dimensions == 3 {
+		window.SetInputMode(glfw.CursorMode, glfw.CursorDisabled)
+	}
 
 	window.MakeContextCurrent()
 

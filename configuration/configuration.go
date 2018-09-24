@@ -12,6 +12,8 @@ type EngineConfig struct {
 
 	Dimensions int
 
+	Profiling bool
+
 	Logger *logrus.Logger
 }
 
@@ -27,6 +29,7 @@ func NewEngineConfig(
 		PolygonLines:   false,
 		CollisionLines: false,
 		Dimensions:     Dimensions,
+		Profiling:      false,
 		Logger:         logrus.New(),
 	}
 }

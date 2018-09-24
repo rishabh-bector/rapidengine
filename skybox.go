@@ -1,6 +1,7 @@
 package rapidengine
 
 import (
+	"fmt"
 	"rapidengine/camera"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
@@ -17,11 +18,19 @@ type SkyBox struct {
 	modelMatrix      mgl32.Mat4
 }
 
-func NewSkyBox(right, left, top, bottom, front, back string, engine *Engine) {
+func NewSkyBox(path string, engine *Engine) {
 	gl.UseProgram(engine.ShaderControl.GetShader("skybox"))
 	gl.BindAttribLocation(engine.ShaderControl.GetShader("skybox"), 0, gl.Str("position\x00"))
 
-	engine.TextureControl.NewCubeMap(right, left, top, bottom, front, back, "skybox")
+	engine.TextureControl.NewCubeMap(
+		fmt.Sprintf("../rapidengine/skybox/%s/%s_LF.png", path, path),
+		fmt.Sprintf("../rapidengine/skybox/%s/%s_RT.png", path, path),
+		fmt.Sprintf("../rapidengine/skybox/%s/%s_UP.png", path, path),
+		fmt.Sprintf("../rapidengine/skybox/%s/%s_DN.png", path, path),
+		fmt.Sprintf("../rapidengine/skybox/%s/%s_FR.png", path, path),
+		fmt.Sprintf("../rapidengine/skybox/%s/%s_BK.png", path, path),
+		"skybox")
+
 	material := NewMaterial(engine.ShaderControl.GetShader("skybox"))
 	material.BecomeCubemap(engine.TextureControl.GetTexture("skybox"))
 
@@ -80,6 +89,7 @@ func (skyBox *SkyBox) Render(mainCamera camera.Camera) {
 }
 
 var skyBoxVertices = []float32{
+
 	-1.0, 1.0, -1.0,
 	-1.0, -1.0, -1.0,
 	1.0, -1.0, -1.0,
@@ -87,6 +97,7 @@ var skyBoxVertices = []float32{
 	1.0, 1.0, -1.0,
 	-1.0, 1.0, -1.0,
 
+	// R1
 	-1.0, -1.0, 1.0,
 	-1.0, -1.0, -1.0,
 	-1.0, 1.0, -1.0,
@@ -101,12 +112,12 @@ var skyBoxVertices = []float32{
 	1.0, 1.0, -1.0,
 	1.0, -1.0, -1.0,
 
-	-1.0, -1.0, 1.0,
-	-1.0, 1.0, 1.0,
-	1.0, 1.0, 1.0,
-	1.0, 1.0, 1.0,
 	1.0, -1.0, 1.0,
+	1.0, 1.0, 1.0,
+	-1.0, 1.0, 1.0,
+	-1.0, 1.0, 1.0,
 	-1.0, -1.0, 1.0,
+	1.0, -1.0, 1.0,
 
 	-1.0, 1.0, -1.0,
 	1.0, 1.0, -1.0,

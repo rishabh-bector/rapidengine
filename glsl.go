@@ -167,7 +167,7 @@ const ShaderColorLightingFragment = `
 	uniform vec3 materialType;
 	uniform vec3 color;
 	uniform sampler2D diffuseMap;
-	uniform samplerCube cubeMap;
+	uniform samplerCube cubeDiffuseMap;
 	uniform float shine;
 
 	// Camera position
@@ -219,27 +219,25 @@ const ShaderColorLightingFragment = `
 		vec3 ambient = vec3(1, 1, 1);
 		vec3 diffuse = vec3(1, 1, 1);
 		vec3 specular = vec3(1, 1, 1);
-
+		
 		if(materialType.x > 0) {
 			ambient = light.ambient * color;
 			diffuse = light.diffuse * diff * color;
 			specular = light.specular * spec * color;
-			return ambient + diffuse + specular;
 		}
 
 		if(materialType.y > 0) {
 			ambient = light.ambient * vec3(texture(diffuseMap, TexCoords.xy));
 			diffuse = light.diffuse * diff * vec3(texture(diffuseMap, TexCoords.xy));
 			specular = light.specular * spec * vec3(texture(diffuseMap, TexCoords.xy));
-			return ambient + diffuse + specular;
 		}
-		
+
 		if(materialType.z > 0) {
-			//ambient = light.ambient * vec3(texture(cubeMap, TexCoords));
-			//diffuse = light.diffuse * diff * vec3(texture(cubeMap, TexCoords));
-			//specular = light.specular * spec * vec3(texture(cubeMap, TexCoords));
-			//return ambient + diffuse + specular;
-		} 
+			ambient = light.ambient * vec3(texture(cubeDiffuseMap, TexCoords));
+			diffuse = light.diffuse * diff * vec3(texture(cubeDiffuseMap, TexCoords));
+			specular = light.specular * spec * vec3(texture(cubeDiffuseMap, TexCoords));
+		}
+
 		
 		return ambient + diffuse + specular;
 	}
@@ -269,18 +267,23 @@ const ShaderColorLightingFragment = `
 		vec3 diffuse = vec3(1, 1, 1);
 		vec3 specular = vec3(1, 1, 1);
 
+		// combine results	
 		if(materialType.x > 0) {
 			ambient = light.ambient * color;
 			diffuse = light.diffuse * diff * color;
 			specular = light.specular * spec * color;
-		} else if(materialType.y > 0) {
+		}
+
+		if(materialType.y > 0) {
 			ambient = light.ambient * vec3(texture(diffuseMap, TexCoords.xy));
 			diffuse = light.diffuse * diff * vec3(texture(diffuseMap, TexCoords.xy));
 			specular = light.specular * spec * vec3(texture(diffuseMap, TexCoords.xy));
-		} else if(materialType.z > 0) {
-			//ambient = light.ambient * vec3(texture(cubeMap, TexCoords));
-			//diffuse = light.diffuse * diff * vec3(texture(cubeMap, TexCoords));
-			//specular = light.specular * spec * vec3(texture(cubeMap, TexCoords));
+		}
+
+		if(materialType.z > 0) {
+			ambient = light.ambient * vec3(texture(cubeDiffuseMap, TexCoords));
+			diffuse = light.diffuse * diff * vec3(texture(cubeDiffuseMap, TexCoords));
+			specular = light.specular * spec * vec3(texture(cubeDiffuseMap, TexCoords));
 		}
 
 		ambient *= attenuation;
@@ -363,10 +366,10 @@ const ShaderSkyBoxFragment = `
 
 	in vec3 texCoord;
 
-	uniform samplerCube cubeMap;
+	uniform samplerCube cubeDiffuseMap;
 
 	void main() {
-		FragColor = texture(cubeMap, texCoord);
+		FragColor = texture(cubeDiffuseMap, texCoord);
 	}
 
 ` + "\x00"

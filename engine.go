@@ -1,6 +1,7 @@
 package rapidengine
 
 import (
+	"net/http"
 	"rapidengine/camera"
 	"rapidengine/configuration"
 	"rapidengine/input"
@@ -33,6 +34,11 @@ func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer, *in
 		RenderFunc:       renderFunc,
 	}
 
+	if e.Config.Profiling {
+		http.HandleFunc("/", profileEndpoint)
+		go http.ListenAndServe(":8080", nil)
+	}
+
 	e.ShaderControl.Initialize()
 	e.Renderer.AttachCallback(e.Update)
 
@@ -49,21 +55,14 @@ func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer, *in
 	if e.Config.Dimensions == 3 {
 		l := NewDirectionLight(
 			e.ShaderControl.GetShader("colorLighting"),
-			[]float32{0.1, 0.1, 0.1},
-			[]float32{0.6, 0.6, 0.6},
-			[]float32{0.2, 0.2, 0.2},
+			[]float32{0.3, 0.3, 0.3},
+			[]float32{0.8, 0.8, 0.8},
+			[]float32{0, 0, 0},
 			[]float32{1, -1, 1},
 		)
 		e.LightControl.SetDirectionalLight(&l)
 
-		NewSkyBox(
-			"../rapidengine/skybox/right.jpg",
-			"../rapidengine/skybox/left.jpg",
-			"../rapidengine/skybox/top.jpg",
-			"../rapidengine/skybox/bottom.jpg",
-			"../rapidengine/skybox/front.jpg",
-			"../rapidengine/skybox/back.jpg", &e,
-		)
+		NewSkyBox("TropicalSunnyDay", &e)
 	}
 
 	return e
@@ -138,4 +137,8 @@ func getEngineCamera(dimension int, config *configuration.EngineConfig) camera.C
 		return camera.NewCamera3D(mgl32.Vec3{0, 0, 0}, float32(0.05), config)
 	}
 	return nil
+}
+
+func profileEndpoint(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("test"))
 }
