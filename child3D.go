@@ -78,6 +78,17 @@ func (child3D *Child3D) PreRender(mainCamera camera.Camera) {
 
 	child3D.material.PreRender()
 
+	/*
+		if child3D.copyingEnabled {
+			vData := []float32{}
+			for _, c := range child3D.GetCopies() {
+				vData = append(vData, c.X, c.Y, c.Z)
+			}
+			child3D.vertexArray.AddVertexAttribute(vData, 3, 3)
+			gl.VertexAttribDivisor(3, 1)
+		}
+		gl.BindAttribLocation(child3D.shaderProgram, 3, gl.Str("copyPosition\x00"))*/
+
 	gl.BindVertexArray(0)
 }
 
@@ -123,6 +134,12 @@ func (child3D *Child3D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
 	gl.UniformMatrix4fv(
 		gl.GetUniformLocation(child3D.shaderProgram, gl.Str("modelMtx\x00")),
 		1, false, &child3D.modelMatrix[0],
+	)
+
+	c := []float32{1, 0, 0}
+	gl.Uniform3fv(
+		gl.GetUniformLocation(child3D.shaderProgram, gl.Str("copyingEnabled\x00")),
+		1, &c[0],
 	)
 
 	config.Material.Render()

@@ -98,13 +98,22 @@ const ShaderColorLightingVertex = `
 	layout (location = 1) in vec3 tex;
 	layout (location = 2) in vec3 normal;
 
+	
+	// Child copying
+	uniform vec3 copyingEnabled;
+	layout (location = 3) in vec3 copyPosition;
+
 	uniform mat4 modelMtx;
 	uniform mat4 viewMtx;
 	uniform mat4 projectionMtx;
 
 	void main() {
 		//	Vertex position
-		gl_Position = projectionMtx * viewMtx * modelMtx * vec4(position, 1.0);
+		if(copyingEnabled.x > 0) {
+			gl_Position = projectionMtx * viewMtx * modelMtx * vec4(position + gl_InstanceID, 1.0);
+		} else {
+			gl_Position = projectionMtx * viewMtx * modelMtx * vec4(position, 1.0);
+		}
 
 		// Normal vector
 		Normal = mat3(transpose(inverse(modelMtx))) * normal;
@@ -227,6 +236,10 @@ const ShaderColorLightingFragment = `
 		}
 
 		if(materialType.y > 0) {
+			if(texture(diffuseMap, TexCoords.xy).a != 1.0f) {
+				discard;
+			}
+
 			ambient = light.ambient * vec3(texture(diffuseMap, TexCoords.xy));
 			diffuse = light.diffuse * diff * vec3(texture(diffuseMap, TexCoords.xy));
 			specular = light.specular * spec * vec3(texture(diffuseMap, TexCoords.xy));

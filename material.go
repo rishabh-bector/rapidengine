@@ -38,7 +38,6 @@ func (material *Material) PreRender() {
 }
 
 func (material *Material) Render() {
-	gl.UseProgram(material.shaderProgram)
 	switch material.shaderType {
 
 	case SHADER_COLOR:

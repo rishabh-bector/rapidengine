@@ -28,11 +28,19 @@ type Renderer struct {
 	// Children to be rendered
 	Children []Child
 
+	// Render all children every frame (default)
+	AutomaticRendering bool
+
 	// Per-frame callback from the user
 	RenderFunc func(renderer *Renderer)
 
 	// Scene Camera
 	MainCamera camera.Camera
+
+	// Current camera position
+	camX float32
+	camY float32
+	camZ float32
 
 	// Render Distance
 	RenderDistance float32
@@ -52,27 +60,41 @@ type Renderer struct {
 	Done chan bool
 }
 
-// StartRenderer starts the main render loop
+// StartRenderer contains the main render loop
 func (renderer *Renderer) StartRenderer() {
 	for !renderer.Window.ShouldClose() {
+
+		// Clear screen buffers
 		gl.ClearColor(float32(0)/255, float32(0)/255, float32(0)/255, 0.9)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 		gl.Clear(gl.DEPTH_BUFFER_BIT)
 
+		// Render skybox
 		if renderer.SkyBoxEnabled {
 			renderer.SkyBox.Render(renderer.MainCamera)
 		}
-		renderer.RenderChildren()
+
+		// Render children
+		if renderer.AutomaticRendering {
+			renderer.RenderChildren()
+		}
+
+		// Call user render loop
 		renderer.RenderFunc(renderer)
 
+		// Update camera
 		renderer.MainCamera.Look()
+		renderer.camX, renderer.camY, renderer.camZ = renderer.MainCamera.GetPosition()
+
+		// Update window buffers
 		renderer.Window.SwapBuffers()
 
+		// Frame logic
 		currentFrame := glfw.GetTime()
 		renderer.DeltaFrameTime = currentFrame - renderer.LastFrameTime
 		renderer.LastFrameTime = currentFrame
-		//CheckError("FRAME")
 	}
+
 	renderer.Config.Logger.Info("Terminating...")
 	glfw.Terminate()
 	renderer.Done <- true
@@ -91,43 +113,66 @@ func (renderer *Renderer) PreRenderChildren() {
 func (renderer *Renderer) RenderChildren() {
 	for _, child := range renderer.Children {
 		go child.RemoveCurrentCopies()
-		gl.UseProgram(child.GetShaderProgram())
-		gl.BindVertexArray(child.GetVertexArray().id)
 		if !child.CheckCopyingEnabled() {
-			child.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.LastFrameTime)
 			renderer.RenderChild(child)
 		} else {
-			renderer.RenderChildCopy(child)
+			renderer.RenderChildCopies(child)
 		}
 	}
 }
 
 // RenderChild renders a single child to the screen
 func (renderer *Renderer) RenderChild(child Child) {
-	gl.EnableVertexAttribArray(0)
-	gl.EnableVertexAttribArray(1)
-	gl.EnableVertexAttribArray(2)
+	renderer.BindChild(child)
 
-	// Draw elements and unbind array
-	gl.DrawElements(gl.TRIANGLES, child.GetNumVertices(), gl.UNSIGNED_INT, gl.PtrOffset(0))
+	child.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.LastFrameTime)
+	renderer.DrawChild(child)
 
 	gl.BindVertexArray(0)
 }
 
-// RenderChildCopy renders all copies of a child
-func (renderer *Renderer) RenderChildCopy(child Child) {
-	camX, camY, camZ := renderer.MainCamera.GetPosition()
-	gl.UseProgram(child.GetShaderProgram())
+// DrawChild draws the child's vertices to the screen
+func (renderer *Renderer) DrawChild(child Child) {
+	gl.DrawElements(gl.TRIANGLES, child.GetNumVertices(), gl.UNSIGNED_INT, gl.PtrOffset(0))
+}
 
+// RenderChildCopies renders all copies of a child
+func (renderer *Renderer) RenderChildCopies(child Child) {
+
+	/*child.RenderCopy(child.GetCopies()[0], renderer.MainCamera)
+
+	gl.EnableVertexAttribArray(0)
+	gl.EnableVertexAttribArray(1)
+	gl.EnableVertexAttribArray(2)
+	gl.EnableVertexAttribArray(3)
+
+	gl.DrawElementsInstanced(gl.TRIANGLES, child.GetNumVertices(), gl.UNSIGNED_INT, gl.PtrOffset(0), int32(len(child.GetCopies())))
+	*/
+	renderer.BindChild(child)
 	for _, c := range child.GetCopies() {
-		if (renderer.Config.Dimensions == 2 && InBounds2D(c.X, c.Y, float32(camX), float32(camY), renderer.RenderDistance)) ||
-			(renderer.Config.Dimensions == 3 && InBounds3D(c.X, c.Y, c.Z, float32(camX), float32(camY), float32(camZ), renderer.RenderDistance)) {
-			gl.BindVertexArray(child.GetVertexArray().id)
-			child.RenderCopy(c, renderer.MainCamera)
-			renderer.RenderChild(child)
-			child.AddCurrentCopy(c)
-		}
+		renderer.RenderCopy(child, c)
 	}
+}
+
+// RenderCopy renders a single copy of a child
+func (renderer *Renderer) RenderCopy(child Child, c ChildCopy) {
+	if (renderer.Config.Dimensions == 2 && InBounds2D(c.X, c.Y, float32(renderer.camX), float32(renderer.camY), renderer.RenderDistance)) ||
+		(renderer.Config.Dimensions == 3 && InBounds3D(c.X, c.Y, c.Z, float32(renderer.camX), float32(renderer.camY), float32(renderer.camZ), renderer.RenderDistance)) {
+		//gl.BindVertexArray(child.GetVertexArray().id)
+		child.RenderCopy(c, renderer.MainCamera)
+		renderer.DrawChild(child)
+		child.AddCurrentCopy(c)
+	}
+}
+
+// BindChild binds the VAO and shader of a child
+func (renderer *Renderer) BindChild(child Child) {
+	gl.UseProgram(child.GetShaderProgram())
+	gl.BindVertexArray(child.GetVertexArray().id)
+	gl.EnableVertexAttribArray(0)
+	gl.EnableVertexAttribArray(1)
+	gl.EnableVertexAttribArray(2)
+
 }
 
 // InBounds2D checks if a particular x/y is within the given render distance
@@ -158,14 +203,15 @@ func InBounds3D(x, y, z, camX, camY, camZ, renderDistance float32) bool {
 // is called every frame, allowing the User to have frame-by-frame control
 func NewRenderer(camera camera.Camera, config *configuration.EngineConfig) Renderer {
 	r := Renderer{
-		Window:         initGLFW(config),
-		ShaderProgram:  initOpenGL(config),
-		Children:       []Child{},
-		RenderFunc:     func(r *Renderer) {},
-		RenderDistance: 1000,
-		Done:           make(chan bool),
-		MainCamera:     camera,
-		Config:         config,
+		Window:             initGLFW(config),
+		ShaderProgram:      initOpenGL(config),
+		Children:           []Child{},
+		AutomaticRendering: true,
+		RenderFunc:         func(r *Renderer) {},
+		RenderDistance:     1000,
+		Done:               make(chan bool),
+		MainCamera:         camera,
+		Config:             config,
 	}
 	r.Window.SetCursorPosCallback(input.MouseCallback)
 	return r
