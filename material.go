@@ -16,16 +16,20 @@ type Material struct {
 
 	texture *uint32
 
+	transparencyEnabled bool
+	transparencyTexture *uint32
+
 	color []float32
 	shine float32
 }
 
 func NewMaterial(program uint32) Material {
 	return Material{
-		shaderProgram: program,
-		shaderType:    SHADER_COLOR,
-		color:         []float32{1, 1, 1},
-		shine:         0.8,
+		shaderProgram:       program,
+		shaderType:          SHADER_COLOR,
+		color:               []float32{1, 1, 1},
+		shine:               0.8,
+		transparencyEnabled: false,
 	}
 }
 
@@ -52,6 +56,14 @@ func (material *Material) Render() {
 		gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("diffuseMap\x00")), 0)
 		gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("cubeDiffuseMap\x00")), 1)
 		gl.Uniform1f(gl.GetUniformLocation(material.shaderProgram, gl.Str("shine\x00")), material.shine)
+		if material.transparencyEnabled {
+			gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("transparencyEnabled\x00")), 1)
+			gl.ActiveTexture(gl.TEXTURE2)
+			gl.BindTexture(gl.TEXTURE_2D, *material.transparencyTexture)
+			gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("transparencyMap\x00")), 2)
+		} else {
+			gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("transparencyEnabled\x00")), 0)
+		}
 
 	case SHADER_CUBEMAP:
 		gl.ActiveTexture(gl.TEXTURE1)
@@ -82,6 +94,16 @@ func (material *Material) BecomeCubemap(c *uint32) {
 
 func (material *Material) AttachShader(s uint32) {
 	material.shaderProgram = s
+}
+
+func (material *Material) AttachTransparency(texture *uint32) {
+	material.transparencyEnabled = true
+	material.transparencyTexture = texture
+}
+
+func (material *Material) RemoveTransparency() {
+	material.transparencyEnabled = false
+	material.transparencyTexture = nil
 }
 
 func (materal *Material) GetColor() []float32 {

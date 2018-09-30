@@ -174,10 +174,14 @@ const ShaderColorLightingFragment = `
 	// Object Material
 	// Solid, Texture, or CubeMap
 	uniform vec3 materialType;
-	uniform vec3 color;
 	uniform sampler2D diffuseMap;
 	uniform samplerCube cubeDiffuseMap;
+
+	uniform vec3 color;
 	uniform float shine;
+
+	uniform int transparencyEnabled;
+	uniform sampler2D transparencyMap;
 
 	// Camera position
 	uniform vec3 viewPos;
@@ -237,6 +241,9 @@ const ShaderColorLightingFragment = `
 
 		if(materialType.y > 0) {
 			if(texture(diffuseMap, TexCoords.xy).a != 1.0f) {
+				discard;
+			}
+			if(transparencyEnabled == 1 && texture(transparencyMap, TexCoords.xy).x == 0.0f) {
 				discard;
 			}
 
