@@ -244,7 +244,7 @@ const ShaderColorLightingFragment = `
 				discard;
 			}
 			if(transparencyEnabled == 1 && texture(transparencyMap, TexCoords.xy).x == 0.0f) {
-				discard;
+				return vec3(0, 0, 0);
 			}
 
 			ambient = light.ambient * vec3(texture(diffuseMap, TexCoords.xy));
@@ -295,6 +295,9 @@ const ShaderColorLightingFragment = `
 		}
 
 		if(materialType.y > 0) {
+			if(transparencyEnabled == 1 && texture(transparencyMap, TexCoords.xy).x == 0.0f) {
+				discard;
+			}
 			ambient = light.ambient * vec3(texture(diffuseMap, TexCoords.xy));
 			diffuse = light.diffuse * diff * vec3(texture(diffuseMap, TexCoords.xy));
 			specular = light.specular * spec * vec3(texture(diffuseMap, TexCoords.xy));

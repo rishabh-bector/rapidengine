@@ -1,6 +1,10 @@
 package rapidengine
 
-import "github.com/go-gl/gl/v4.1-core/gl"
+import (
+	"rapidengine/configuration"
+
+	"github.com/go-gl/gl/v4.1-core/gl"
+)
 
 const SHADER_COLOR = "SHADER_COLOR"
 const SHADER_TEXTURE = "SHADER_TEXTURE"
@@ -21,16 +25,22 @@ type Material struct {
 
 	color []float32
 	shine float32
+
+	off bool
 }
 
-func NewMaterial(program uint32) Material {
-	return Material{
+func NewMaterial(program uint32, config *configuration.EngineConfig) Material {
+	m := Material{
 		shaderProgram:       program,
 		shaderType:          SHADER_COLOR,
 		color:               []float32{1, 1, 1},
 		shine:               0.8,
 		transparencyEnabled: false,
 	}
+	if config.SingleMaterial {
+		m.off = true
+	}
+	return m
 }
 
 func (material *Material) PreRender() {
@@ -42,6 +52,9 @@ func (material *Material) PreRender() {
 }
 
 func (material *Material) Render() {
+	if material.off {
+		return
+	}
 	switch material.shaderType {
 
 	case SHADER_COLOR:

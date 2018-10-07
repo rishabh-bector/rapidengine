@@ -26,6 +26,7 @@ type Child2D struct {
 	modelMatrix      mgl32.Mat4
 	projectionMatrix mgl32.Mat4
 
+	numCopies      int
 	copies         []ChildCopy
 	currentCopies  []ChildCopy
 	copyingEnabled bool
@@ -295,11 +296,22 @@ func (child2D *Child2D) DisableCopying() {
 }
 
 func (child2D *Child2D) AddCopy(config ChildCopy) {
+	child2D.numCopies += 1
 	child2D.copies = append(child2D.copies, config)
 }
 
-func (child2D *Child2D) GetCopies() []ChildCopy {
-	return child2D.copies
+func (child2D *Child2D) GetCopies() *[]ChildCopy {
+	return &child2D.copies
+}
+
+func (child2D *Child2D) IterCopies(f func(Child, ChildCopy)) {
+	for _, copy := range child2D.copies {
+		f(child2D, copy)
+	}
+}
+
+func (child2D *Child2D) GetNumCopies() int {
+	return child2D.numCopies
 }
 
 func (child2D *Child2D) CheckCopyingEnabled() bool {

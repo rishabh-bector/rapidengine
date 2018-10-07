@@ -63,10 +63,10 @@ func (camera2D *Camera2D) MoveBackward() {
 
 func (camera2D *Camera2D) DefaultControls(inputs *input.Input) {
 	if inputs.Keys["w"] {
-		camera2D.MoveForward()
+		camera2D.MoveUp()
 	}
 	if inputs.Keys["s"] {
-		camera2D.MoveBackward()
+		camera2D.MoveDown()
 	}
 	if inputs.Keys["a"] {
 		camera2D.MoveLeft()

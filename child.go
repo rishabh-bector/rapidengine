@@ -19,7 +19,9 @@ type Child interface {
 	GetNumVertices() int32
 
 	GetCollider() *Collider
-	GetCopies() []ChildCopy
+	GetCopies() *[]ChildCopy
+	GetNumCopies() int
+	IterCopies(func(Child, ChildCopy))
 
 	GetX() float32
 	GetY() float32

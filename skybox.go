@@ -31,7 +31,7 @@ func NewSkyBox(path string, engine *Engine) {
 		fmt.Sprintf("../rapidengine/skybox/%s/%s_BK.png", path, path),
 		"skybox")
 
-	material := NewMaterial(engine.ShaderControl.GetShader("skybox"))
+	material := NewMaterial(engine.ShaderControl.GetShader("skybox"), &engine.Config)
 	material.BecomeCubemap(engine.TextureControl.GetTexture("skybox"))
 
 	indices := []uint32{}

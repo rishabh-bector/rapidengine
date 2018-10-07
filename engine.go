@@ -40,6 +40,7 @@ func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer, *in
 	}
 
 	e.ShaderControl.Initialize()
+	e.Renderer.Initialize(&e)
 	e.Renderer.AttachCallback(e.Update)
 
 	if e.Config.Dimensions == 2 {

@@ -52,6 +52,9 @@ type Renderer struct {
 	// Engine Configuration
 	Config *configuration.EngineConfig
 
+	// Default Material
+	DefaultMaterial Material
+
 	// FrameTime
 	DeltaFrameTime float64
 	LastFrameTime  float64
@@ -62,6 +65,10 @@ type Renderer struct {
 
 // StartRenderer contains the main render loop
 func (renderer *Renderer) StartRenderer() {
+	if renderer.Config.Profiling {
+		//defer profile.Start().Stop()
+	}
+
 	for !renderer.Window.ShouldClose() {
 
 		// Clear screen buffers
@@ -93,6 +100,7 @@ func (renderer *Renderer) StartRenderer() {
 		currentFrame := glfw.GetTime()
 		renderer.DeltaFrameTime = currentFrame - renderer.LastFrameTime
 		renderer.LastFrameTime = currentFrame
+		//println(int(renderer.DeltaFrameTime * 1000))
 	}
 
 	renderer.Config.Logger.Info("Terminating...")
@@ -103,6 +111,9 @@ func (renderer *Renderer) StartRenderer() {
 // PreRenderChildren calls the PreRender method of each child,
 // for initialization
 func (renderer *Renderer) PreRenderChildren() {
+	if renderer.Config.SingleMaterial {
+		renderer.DefaultMaterial.PreRender()
+	}
 	for _, child := range renderer.Children {
 		child.PreRender(renderer.MainCamera)
 	}
@@ -111,6 +122,9 @@ func (renderer *Renderer) PreRenderChildren() {
 // RenderChildren binds the appropriate shaders and Vertex Array for each child,
 // or child copy, and draws them to the screen using an element buffer
 func (renderer *Renderer) RenderChildren() {
+	if renderer.Config.SingleMaterial {
+		renderer.DefaultMaterial.Render()
+	}
 	for _, child := range renderer.Children {
 		go child.RemoveCurrentCopies()
 		if !child.CheckCopyingEnabled() {
@@ -123,7 +137,7 @@ func (renderer *Renderer) RenderChildren() {
 
 // RenderChild renders a single child to the screen
 func (renderer *Renderer) RenderChild(child Child) {
-	renderer.BindChild(child)
+	BindChild(child)
 
 	child.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.LastFrameTime)
 	renderer.DrawChild(child)
@@ -138,37 +152,35 @@ func (renderer *Renderer) DrawChild(child Child) {
 
 // RenderChildCopies renders all copies of a child
 func (renderer *Renderer) RenderChildCopies(child Child) {
-
-	/*child.RenderCopy(child.GetCopies()[0], renderer.MainCamera)
-
-	gl.EnableVertexAttribArray(0)
-	gl.EnableVertexAttribArray(1)
-	gl.EnableVertexAttribArray(2)
-	gl.EnableVertexAttribArray(3)
-
-	gl.DrawElementsInstanced(gl.TRIANGLES, child.GetNumVertices(), gl.UNSIGNED_INT, gl.PtrOffset(0), int32(len(child.GetCopies())))
-	*/
-	renderer.BindChild(child)
-	for _, c := range child.GetCopies() {
-		renderer.RenderCopy(child, c)
+	BindChild(child)
+	copies := *(child.GetCopies())
+	for x := 0; x < child.GetNumCopies(); x++ {
+		renderer.RenderCopy(child, copies[x])
 	}
 }
 
 // RenderCopy renders a single copy of a child
 func (renderer *Renderer) RenderCopy(child Child, c ChildCopy) {
-	if (renderer.Config.Dimensions == 2 && InBounds2D(c.X, c.Y, float32(renderer.camX), float32(renderer.camY), renderer.RenderDistance)) ||
-		(renderer.Config.Dimensions == 3 && InBounds3D(c.X, c.Y, c.Z, float32(renderer.camX), float32(renderer.camY), float32(renderer.camZ), renderer.RenderDistance)) {
-		//gl.BindVertexArray(child.GetVertexArray().id)
-		child.RenderCopy(c, renderer.MainCamera)
-		renderer.DrawChild(child)
-		child.AddCurrentCopy(c)
+	if renderer.Config.Dimensions == 2 {
+		if InBounds2D(c.X, c.Y, float32(renderer.camX), float32(renderer.camY), renderer.RenderDistance) {
+			child.RenderCopy(c, renderer.MainCamera)
+			renderer.DrawChild(child)
+			child.AddCurrentCopy(c)
+		}
+	}
+	if renderer.Config.Dimensions == 3 {
+		if InBounds3D(c.X, c.Y, c.Z, float32(renderer.camX), float32(renderer.camY), float32(renderer.camZ), renderer.RenderDistance) {
+			child.RenderCopy(c, renderer.MainCamera)
+			renderer.DrawChild(child)
+			child.AddCurrentCopy(c)
+		}
 	}
 }
 
-// BindChild binds the VAO and shader of a child
-func (renderer *Renderer) BindChild(child Child) {
-	gl.UseProgram(child.GetShaderProgram())
+// BindChild binds the VAO of a child
+func BindChild(child Child) {
 	gl.BindVertexArray(child.GetVertexArray().id)
+	gl.UseProgram(child.GetShaderProgram())
 	gl.EnableVertexAttribArray(0)
 	gl.EnableVertexAttribArray(1)
 	gl.EnableVertexAttribArray(2)
@@ -214,7 +226,16 @@ func NewRenderer(camera camera.Camera, config *configuration.EngineConfig) Rende
 		Config:             config,
 	}
 	r.Window.SetCursorPosCallback(input.MouseCallback)
+
 	return r
+}
+
+func (renderer *Renderer) Initialize(engine *Engine) {
+	engine.TextureControl.NewTexture("../rapidengine/border.png", "default")
+	dm := NewMaterial(engine.ShaderControl.GetShader("colorLighting"), &engine.Config)
+	//dm.BecomeTexture(engine.TextureControl.GetTexture("default"))
+	dm.BecomeColor([]float32{0.2, 0.7, 0.4})
+	renderer.DefaultMaterial = dm
 }
 
 // Instance takes a child and adds it to the renderer's list,
@@ -242,7 +263,14 @@ func initGLFW(config *configuration.EngineConfig) *glfw.Window {
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 	glfw.WindowHint(glfw.OpenGLDebugContext, glfw.True)
 
-	window, err := glfw.CreateWindow(config.ScreenWidth, config.ScreenHeight, config.WindowTitle, nil, nil)
+	var m *glfw.Monitor
+	if config.FullScreen {
+		m = glfw.GetPrimaryMonitor()
+	} else {
+		m = nil
+	}
+
+	window, err := glfw.CreateWindow(config.ScreenWidth, config.ScreenHeight, config.WindowTitle, m, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
