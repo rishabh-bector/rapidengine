@@ -295,8 +295,12 @@ const ShaderColorLightingFragment = `
 		}
 
 		if(materialType.y > 0) {
-			if(transparencyEnabled == 1 && texture(transparencyMap, TexCoords.xy).x == 0.0f) {
-				discard;
+			if(transparencyEnabled == 1) {
+				if(texture(transparencyMap, TexCoords.xy).x == 0.0f) {
+					discard;
+				} else if(texture(transparencyMap, TexCoords.xy).x != 1.0f) {
+					return vec3(0, 0, 0);
+				}
 			}
 			ambient = light.ambient * vec3(texture(diffuseMap, TexCoords.xy));
 			diffuse = light.diffuse * diff * vec3(texture(diffuseMap, TexCoords.xy));
