@@ -162,7 +162,8 @@ func (renderer *Renderer) RenderChildCopies(child Child) {
 // RenderCopy renders a single copy of a child
 func (renderer *Renderer) RenderCopy(child Child, c ChildCopy) {
 	if renderer.Config.Dimensions == 2 {
-		if InBounds2D(c.X, c.Y, float32(renderer.camX), float32(renderer.camY), renderer.RenderDistance) {
+		if (child.GetSpecificRenderDistance() != 0 && InBounds2D(c.X, c.Y, float32(renderer.camX), float32(renderer.camY), child.GetSpecificRenderDistance())) ||
+			InBounds2D(c.X, c.Y, float32(renderer.camX), float32(renderer.camY), renderer.RenderDistance) {
 			child.RenderCopy(c, renderer.MainCamera)
 			renderer.DrawChild(child)
 			child.AddCurrentCopy(c)

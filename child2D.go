@@ -31,6 +31,8 @@ type Child2D struct {
 	currentCopies  []ChildCopy
 	copyingEnabled bool
 
+	specificRenderDistance float32
+
 	animationTextures []*uint32
 	animationCurrent  int
 	animationFrame    int
@@ -54,16 +56,17 @@ type Child2D struct {
 
 func NewChild2D(config *configuration.EngineConfig, collision *CollisionControl) Child2D {
 	return Child2D{
-		modelMatrix:      mgl32.Ident4(),
-		projectionMatrix: mgl32.Ortho2D(-1, 1, -1, 1),
-		config:           config,
-		VX:               0,
-		VY:               0,
-		Gravity:          0,
-		copyingEnabled:   false,
-		animationEnabled: false,
-		animationCurrent: 0,
-		collisioncontrol: collision,
+		modelMatrix:            mgl32.Ident4(),
+		projectionMatrix:       mgl32.Ortho2D(-1, 1, -1, 1),
+		config:                 config,
+		VX:                     0,
+		VY:                     0,
+		Gravity:                0,
+		copyingEnabled:         false,
+		animationEnabled:       false,
+		animationCurrent:       0,
+		collisioncontrol:       collision,
+		specificRenderDistance: 0,
 	}
 }
 
@@ -251,6 +254,10 @@ func (child2D *Child2D) SetGravity(g float32) {
 	child2D.Gravity = g
 }
 
+func (child2D *Child2D) SetSpecificRenderDistance(d float32) {
+	child2D.specificRenderDistance = d
+}
+
 //  --------------------------------------------------
 //  Getters
 //  --------------------------------------------------
@@ -281,6 +288,10 @@ func (child2D *Child2D) GetX() float32 {
 
 func (child2D *Child2D) GetY() float32 {
 	return child2D.Y
+}
+
+func (child2D *Child2D) GetSpecificRenderDistance() float32 {
+	return child2D.specificRenderDistance
 }
 
 //  --------------------------------------------------

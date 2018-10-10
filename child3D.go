@@ -37,6 +37,8 @@ type Child3D struct {
 	Group    string
 	collider Collider
 
+	specificRenderDistance float32
+
 	config           *configuration.EngineConfig
 	collisionControl *CollisionControl
 }
@@ -49,10 +51,11 @@ func NewChild3D(config *configuration.EngineConfig, collision *CollisionControl)
 			float32(config.ScreenWidth)/float32(config.ScreenHeight),
 			0.1, 100,
 		),
-		config:           config,
-		Gravity:          0,
-		copyingEnabled:   false,
-		collisionControl: collision,
+		config:                 config,
+		Gravity:                0,
+		copyingEnabled:         false,
+		collisionControl:       collision,
+		specificRenderDistance: 0,
 	}
 }
 
@@ -257,4 +260,12 @@ func (child3D *Child3D) CheckCollision(other Child) int {
 
 func (child3D *Child3D) CheckCollisionRaw(otherX, otherY float32, otherCollider *Collider) int {
 	return child3D.collider.CheckCollision(child3D.X, child3D.Y, child3D.VX, child3D.VY, otherX, otherY, otherCollider)
+}
+
+func (child3D *Child3D) SetSpecificRenderDistance(d float32) {
+	child3D.specificRenderDistance = d
+}
+
+func (child3D *Child3D) GetSpecificRenderDistance() float32 {
+	return child3D.specificRenderDistance
 }
