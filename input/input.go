@@ -8,13 +8,17 @@ var MouseX float64
 var MouseY float64
 var LastMouseX float64
 var LastMouseY float64
+var LeftMouseButton bool
+var RightMouseButton bool
 
 type Input struct {
-	Keys       map[string]bool
-	MouseX     float64
-	MouseY     float64
-	LastMouseX float64
-	LastMouseY float64
+	Keys             map[string]bool
+	MouseX           float64
+	MouseY           float64
+	LastMouseX       float64
+	LastMouseY       float64
+	LeftMouseButton  bool
+	RightMouseButton bool
 }
 
 type InputControl struct {
@@ -32,12 +36,17 @@ func (inputControl *InputControl) Update(window *glfw.Window) *Input {
 	for name, key := range inputControl.keyMap {
 		current[name] = (window.GetKey(key) == glfw.Press)
 	}
-	return &Input{current, MouseX, MouseY, LastMouseX, LastMouseY}
+	return &Input{current, MouseX, MouseY, LastMouseX, LastMouseY, LeftMouseButton, RightMouseButton}
 }
 
 func MouseCallback(w *glfw.Window, xpos float64, ypos float64) {
 	MouseX = xpos
 	MouseY = ypos
+}
+
+func MouseButtonCallback(w *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
+	LeftMouseButton = (button == 0 && action == glfw.Press)
+	RightMouseButton = (button == 1 && action == glfw.Press)
 }
 
 func swapMousePositions() {

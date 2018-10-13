@@ -26,6 +26,12 @@ type Material struct {
 	color []float32
 	shine float32
 
+	animationTextures []*uint32
+	animationCurrent  int
+	animationFrame    float64
+	animationFPS      float64
+	animationEnabled  bool
+
 	off bool
 }
 
@@ -36,6 +42,8 @@ func NewMaterial(program uint32, config *configuration.EngineConfig) Material {
 		color:               []float32{1, 1, 1},
 		shine:               0.8,
 		transparencyEnabled: false,
+		animationEnabled:    false,
+		animationCurrent:    0,
 	}
 	if config.SingleMaterial {
 		m.off = true
@@ -51,10 +59,25 @@ func (material *Material) PreRender() {
 	}
 }
 
-func (material *Material) Render() {
+func (material *Material) Render(delta float64) {
 	if material.off {
 		return
 	}
+
+	if material.animationEnabled {
+		if material.animationFrame > 1/material.animationFPS {
+			material.texture = material.animationTextures[material.animationCurrent]
+			if material.animationCurrent < len(material.animationTextures)-1 {
+				material.animationCurrent++
+			} else {
+				material.animationCurrent = 0
+			}
+			material.animationFrame = 0
+		} else {
+			material.animationFrame += delta
+		}
+	}
+
 	switch material.shaderType {
 
 	case SHADER_COLOR:
@@ -125,4 +148,16 @@ func (materal *Material) GetColor() []float32 {
 
 func (material *Material) GetTexture() *uint32 {
 	return material.texture
+}
+
+func (material *Material) EnableAnimation() {
+	material.animationEnabled = true
+}
+
+func (material *Material) AddFrame(f *uint32) {
+	material.animationTextures = append(material.animationTextures, f)
+}
+
+func (material *Material) SetAnimationFPS(s float64) {
+	material.animationFPS = s
 }

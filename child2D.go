@@ -33,12 +33,6 @@ type Child2D struct {
 
 	specificRenderDistance float32
 
-	animationTextures []*uint32
-	animationCurrent  int
-	animationFrame    int
-	animationSpeed    int
-	animationEnabled  bool
-
 	X float32
 	Y float32
 
@@ -47,8 +41,9 @@ type Child2D struct {
 
 	Gravity float32
 
-	Group    string
-	collider Collider
+	Group          string
+	collider       Collider
+	mouseCollision func(bool)
 
 	config           *configuration.EngineConfig
 	collisioncontrol *CollisionControl
@@ -63,8 +58,6 @@ func NewChild2D(config *configuration.EngineConfig, collision *CollisionControl)
 		VY:                     0,
 		Gravity:                0,
 		copyingEnabled:         false,
-		animationEnabled:       false,
-		animationCurrent:       0,
 		collisioncontrol:       collision,
 		specificRenderDistance: 0,
 	}
@@ -115,20 +108,10 @@ func (child2D *Child2D) Update(mainCamera camera.Camera, delta float64, lastFram
 	child2D.X += child2D.VX * -float32(delta*30)
 	child2D.Y += child2D.VY * float32(delta*30)
 
-	if child2D.animationEnabled {
-		fps := 1 / delta
-		if child2D.animationFrame > int(fps/float64(child2D.animationSpeed)) {
-			//child2D.Animate()
-			child2D.animationFrame = 0
-		} else {
-			child2D.animationFrame++
-		}
-	}
-
-	child2D.Render(mainCamera)
+	child2D.Render(mainCamera, delta)
 }
 
-func (child2D *Child2D) Render(mainCamera camera.Camera) {
+func (child2D *Child2D) Render(mainCamera camera.Camera, delta float64) {
 	sX, sY := ScaleCoordinates(child2D.X, child2D.Y, float32(child2D.config.ScreenWidth), float32(child2D.config.ScreenHeight))
 	child2D.modelMatrix = mgl32.Translate3D(sX, sY, 0)
 
@@ -142,7 +125,7 @@ func (child2D *Child2D) Render(mainCamera camera.Camera) {
 		1, false, &child2D.modelMatrix[0],
 	)
 
-	child2D.material.Render()
+	child2D.material.Render(delta)
 }
 
 func (child2D *Child2D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
@@ -160,7 +143,7 @@ func (child2D *Child2D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
 		1, false, &child2D.modelMatrix[0],
 	)
 
-	config.Material.Render()
+	config.Material.Render(0)
 }
 
 func (child2D *Child2D) CheckCollision(other Child) int {
@@ -194,7 +177,7 @@ func (child2D *Child2D) AttachTextureCoordsPrimitive() {
 }
 
 func (child2D *Child2D) AttachCollider(x, y, w, h float32) {
-	child2D.collider = NewCollider(x, y, w, h, 5)
+	child2D.collider = NewCollider(x, y, w, h)
 }
 
 func (child2D *Child2D) AttachVertexArray(vao *VertexArray, numVertices int32) {
@@ -341,31 +324,18 @@ func (child2D *Child2D) GetCurrentCopies() []ChildCopy {
 	return child2D.currentCopies
 }
 
+//  --------------------------------------------------
+//  Mouse Collision
+//  --------------------------------------------------
+
+func (child2D *Child2D) SetMouseFunc(r func(bool)) {
+	child2D.mouseCollision = r
+}
+
+func (child2D *Child2D) MouseCollisionFunc(c bool) {
+	child2D.mouseCollision(c)
+}
+
 func ScaleCoordinates(x, y, sw, sh float32) (float32, float32) {
 	return 2*(x/float32(sw)) - 1, 2*(y/float32(sh)) - 1
-}
-
-//  --------------------------------------------------
-//  Animations
-//  --------------------------------------------------
-
-/*func (child2D *Child2D) Animate() {
-	child2D.texture = child2D.animationTextures[child2D.animationCurrent]
-	if child2D.animationCurrent < len(child2D.animationTextures)-1 {
-		child2D.animationCurrent++
-	} else {
-		child2D.animationCurrent = 0
-	}
-}*/
-
-func (child2D *Child2D) EnableAnimation() {
-	child2D.animationEnabled = true
-}
-
-func (child2D *Child2D) AddFrame(f *uint32) {
-	child2D.animationTextures = append(child2D.animationTextures, f)
-}
-
-func (child2D *Child2D) SetAnimationSpeed(s int) {
-	child2D.animationSpeed = s
 }

@@ -1,5 +1,10 @@
 package rapidengine
 
+import (
+	"rapidengine/configuration"
+	"rapidengine/input"
+)
+
 //  --------------------------------------------------
 //  Collision.go contains CollisionControl,
 //  which manages what group each Child is in and
@@ -16,6 +21,12 @@ package rapidengine
 type CollisionControl struct {
 	GroupMap map[string][]Child
 	LinkMap  map[Child]CollisionLink
+
+	MouseChildren    map[int]Child
+	NumMouseChildren int
+	MouseCollider    Collider
+
+	config *configuration.EngineConfig
 }
 
 // CollisionLink contains the data for a single collision
@@ -28,10 +39,14 @@ type CollisionLink struct {
 }
 
 // NewCollisionControl creates a new CollisionControl
-func NewCollisionControl() CollisionControl {
+func NewCollisionControl(config *configuration.EngineConfig) CollisionControl {
 	return CollisionControl{
-		make(map[string][]Child),
-		make(map[Child]CollisionLink),
+		GroupMap:         make(map[string][]Child),
+		LinkMap:          make(map[Child]CollisionLink),
+		MouseChildren:    make(map[int]Child),
+		NumMouseChildren: 0,
+		MouseCollider:    Collider{0, 0, 5, 5},
+		config:           config,
 	}
 }
 
@@ -49,6 +64,12 @@ func (c *CollisionControl) AddChildToGroup(child Child, group string) {
 // collision will be checked for in Update()
 func (c *CollisionControl) CreateCollision(child Child, group string, callback func([]bool)) {
 	c.LinkMap[child] = CollisionLink{group, callback}
+}
+
+// CreateMouseCollision adds a child to the MouseChildren list to be checked against mouse coordinates
+func (c *CollisionControl) CreateMouseCollision(child Child) {
+	c.MouseChildren[c.NumMouseChildren] = child
+	c.NumMouseChildren++
 }
 
 // CheckCollisionWithGroup checks if a child is colliding with
@@ -73,28 +94,37 @@ func (c *CollisionControl) CheckCollisionWithGroup(child Child, group string, ca
 }
 
 // Update is called once per frame, and checks for
-// collisions of all children in the LinkMap
-func (c *CollisionControl) Update(camX, camY float32) {
+// collisions of all children in the LinkMap. It also
+// checks for collisions with the mouse with all
+// children in the MouseChildren map
+func (c *CollisionControl) Update(camX, camY float32, inputs *input.Input) {
 	for child, link := range c.LinkMap {
 		if col := c.CheckCollisionWithGroup(child, link.group, camX, camY); col != nil {
 			link.callback(col)
 		}
 	}
+	mx, my := c.ScaleMouseCoords(inputs.MouseX, inputs.MouseY, camX, camY)
+	for _, child := range c.MouseChildren {
+		child.MouseCollisionFunc(child.CheckCollisionRaw(mx, my, &c.MouseCollider) != 0)
+	}
+}
+
+func (c *CollisionControl) ScaleMouseCoords(x, y float64, camX, camY float32) (float32, float32) {
+	return float32(x) + camX - float32(c.config.ScreenWidth/2), -1 * (float32(y) + camY - float32(c.config.ScreenHeight/2))
 }
 
 // Collider contains data about a collision rect.
 // All children with collision detection need one of these.
 type Collider struct {
-	offsetX    float32
-	offsetY    float32
-	width      float32
-	height     float32
-	middleRect float32
+	offsetX float32
+	offsetY float32
+	width   float32
+	height  float32
 }
 
 // NewCollider creates a new collision rect
-func NewCollider(x, y, w, h, m float32) Collider {
-	return Collider{x, y, w, h, m}
+func NewCollider(x, y, w, h float32) Collider {
+	return Collider{x, y, w, h}
 }
 
 // CheckCollision checks for collision between 2 collision rects

@@ -36,5 +36,7 @@ type Child interface {
 	CheckCollision(Child) int
 	CheckCollisionRaw(otherX float32, otherY float32, otherCollider *Collider) int
 
+	MouseCollisionFunc(bool)
+
 	Update(camera.Camera, float64, float64)
 }

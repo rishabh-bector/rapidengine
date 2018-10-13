@@ -123,7 +123,7 @@ func (renderer *Renderer) PreRenderChildren() {
 // or child copy, and draws them to the screen using an element buffer
 func (renderer *Renderer) RenderChildren() {
 	if renderer.Config.SingleMaterial {
-		renderer.DefaultMaterial.Render()
+		renderer.DefaultMaterial.Render(0)
 	}
 	for _, child := range renderer.Children {
 		go child.RemoveCurrentCopies()
@@ -227,6 +227,7 @@ func NewRenderer(camera camera.Camera, config *configuration.EngineConfig) Rende
 		Config:             config,
 	}
 	r.Window.SetCursorPosCallback(input.MouseCallback)
+	r.Window.SetMouseButtonCallback(input.MouseButtonCallback)
 
 	return r
 }

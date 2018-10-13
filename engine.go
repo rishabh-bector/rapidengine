@@ -18,6 +18,7 @@ type Engine struct {
 	InputControl     input.InputControl
 	ShaderControl    ShaderControl
 	LightControl     LightControl
+	UIControl        UIControl
 
 	Config configuration.EngineConfig
 }
@@ -25,11 +26,12 @@ type Engine struct {
 func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer, *input.Input)) Engine {
 	e := Engine{
 		Renderer:         NewRenderer(getEngineCamera(config.Dimensions, &config), &config),
-		CollisionControl: NewCollisionControl(),
+		CollisionControl: NewCollisionControl(&config),
 		TextureControl:   NewTextureControl(),
 		InputControl:     input.NewInputControl(),
 		ShaderControl:    NewShaderControl(),
 		LightControl:     NewLightControl(),
+		UIControl:        NewUIControl(),
 		Config:           config,
 		RenderFunc:       renderFunc,
 	}
@@ -82,10 +84,19 @@ func (engine *Engine) Initialize() {
 }
 
 func (engine *Engine) Update(renderer *Renderer) {
+	// Get camera position
 	x, y, z := renderer.MainCamera.GetPosition()
-	engine.RenderFunc(renderer, engine.InputControl.Update(renderer.Window))
+
+	// Get user inputs
+	inputs := engine.InputControl.Update(renderer.Window)
+
+	// Call user frame function
+	engine.RenderFunc(renderer, inputs)
+
+	// Update controllers
 	engine.LightControl.Update(x, y, z)
-	engine.CollisionControl.Update(x, y)
+	engine.CollisionControl.Update(x, y, inputs)
+	engine.UIControl.Update(inputs)
 }
 
 func (engine *Engine) NewChild2D() Child2D {
