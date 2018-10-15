@@ -123,7 +123,7 @@ func (child3D *Child3D) Render(mainCamera camera.Camera) {
 		1, false, &child3D.modelMatrix[0],
 	)
 
-	child3D.material.Render(0)
+	child3D.material.Render(0, 1)
 }
 
 func (child3D *Child3D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
@@ -145,7 +145,7 @@ func (child3D *Child3D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
 		1, &c[0],
 	)
 
-	config.Material.Render(0)
+	config.Material.Render(0, 1)
 }
 
 func (child3D *Child3D) AttachTextureCoords(coords []float32) {

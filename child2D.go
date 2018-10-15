@@ -125,7 +125,7 @@ func (child2D *Child2D) Render(mainCamera camera.Camera, delta float64) {
 		1, false, &child2D.modelMatrix[0],
 	)
 
-	child2D.material.Render(delta)
+	child2D.material.Render(delta, 1)
 }
 
 func (child2D *Child2D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
@@ -143,7 +143,7 @@ func (child2D *Child2D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
 		1, false, &child2D.modelMatrix[0],
 	)
 
-	config.Material.Render(0)
+	config.Material.Render(0, config.Darkness)
 }
 
 func (child2D *Child2D) CheckCollision(other Child) int {

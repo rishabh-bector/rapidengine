@@ -123,7 +123,7 @@ func (renderer *Renderer) PreRenderChildren() {
 // or child copy, and draws them to the screen using an element buffer
 func (renderer *Renderer) RenderChildren() {
 	if renderer.Config.SingleMaterial {
-		renderer.DefaultMaterial.Render(0)
+		renderer.DefaultMaterial.Render(0, 1)
 	}
 	for _, child := range renderer.Children {
 		go child.RemoveCurrentCopies()

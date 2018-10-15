@@ -59,7 +59,7 @@ func (material *Material) PreRender() {
 	}
 }
 
-func (material *Material) Render(delta float64) {
+func (material *Material) Render(delta float64, darkness float32) {
 	if material.off {
 		return
 	}
@@ -84,6 +84,7 @@ func (material *Material) Render(delta float64) {
 		gl.Uniform3fv(gl.GetUniformLocation(material.shaderProgram, gl.Str("materialType\x00")), 1, &SHADER_COLOR_UNI[0])
 		gl.Uniform3fv(gl.GetUniformLocation(material.shaderProgram, gl.Str("color\x00")), 1, &material.color[0])
 		gl.Uniform1f(gl.GetUniformLocation(material.shaderProgram, gl.Str("shine\x00")), material.shine)
+		gl.Uniform1f(gl.GetUniformLocation(material.shaderProgram, gl.Str("darkness\x00")), darkness)
 
 	case SHADER_TEXTURE:
 		gl.ActiveTexture(gl.TEXTURE0)
@@ -100,6 +101,7 @@ func (material *Material) Render(delta float64) {
 		} else {
 			gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("transparencyEnabled\x00")), 0)
 		}
+		gl.Uniform1f(gl.GetUniformLocation(material.shaderProgram, gl.Str("darkness\x00")), darkness)
 
 	case SHADER_CUBEMAP:
 		gl.ActiveTexture(gl.TEXTURE1)

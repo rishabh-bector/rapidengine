@@ -7,6 +7,7 @@ type ChildCopy struct {
 	Y        float32
 	Z        float32
 	Material *Material
+	Darkness float32
 }
 type Child interface {
 	PreRender(camera.Camera)

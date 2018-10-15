@@ -179,6 +179,7 @@ const ShaderColorLightingFragment = `
 
 	uniform vec3 color;
 	uniform float shine;
+	uniform float darkness;
 
 	uniform int transparencyEnabled;
 	uniform sampler2D transparencyMap;
@@ -211,6 +212,7 @@ const ShaderColorLightingFragment = `
 			result += CalcPointLight(lmao, norm, FragPos, viewDir);    
 		}
 
+		result *= darkness;
 		// phase 3: spot light
 		// result += CalcSpotLight(spotLight, norm, FragPos, viewDir);    
 		
