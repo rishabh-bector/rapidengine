@@ -23,12 +23,12 @@ func NewSkyBox(path string, engine *Engine) {
 	gl.BindAttribLocation(engine.ShaderControl.GetShader("skybox"), 0, gl.Str("position\x00"))
 
 	engine.TextureControl.NewCubeMap(
-		fmt.Sprintf("../rapidengine/skybox/%s/%s_LF.png", path, path),
-		fmt.Sprintf("../rapidengine/skybox/%s/%s_RT.png", path, path),
-		fmt.Sprintf("../rapidengine/skybox/%s/%s_UP.png", path, path),
-		fmt.Sprintf("../rapidengine/skybox/%s/%s_DN.png", path, path),
-		fmt.Sprintf("../rapidengine/skybox/%s/%s_FR.png", path, path),
-		fmt.Sprintf("../rapidengine/skybox/%s/%s_BK.png", path, path),
+		fmt.Sprintf("../rapidengine/assets/skybox/%s/%s_LF.png", path, path),
+		fmt.Sprintf("../rapidengine/assets/skybox/%s/%s_RT.png", path, path),
+		fmt.Sprintf("../rapidengine/assets/skybox/%s/%s_UP.png", path, path),
+		fmt.Sprintf("../rapidengine/assets/skybox/%s/%s_DN.png", path, path),
+		fmt.Sprintf("../rapidengine/assets/skybox/%s/%s_FR.png", path, path),
+		fmt.Sprintf("../rapidengine/assets/skybox/%s/%s_BK.png", path, path),
 		"skybox")
 
 	material := NewMaterial(engine.ShaderControl.GetShader("skybox"), &engine.Config)

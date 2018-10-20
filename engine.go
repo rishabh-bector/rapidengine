@@ -1,6 +1,7 @@
 package rapidengine
 
 import (
+	"fmt"
 	"net/http"
 	"rapidengine/camera"
 	"rapidengine/configuration"
@@ -19,7 +20,9 @@ type Engine struct {
 	ShaderControl    ShaderControl
 	LightControl     LightControl
 	UIControl        UIControl
-	TextControl      TextControl
+
+	TextControl TextControl
+	FPSBox      *TextBox
 
 	Config configuration.EngineConfig
 }
@@ -41,6 +44,13 @@ func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer, *in
 	if e.Config.Profiling {
 		http.HandleFunc("/", profileEndpoint)
 		go http.ListenAndServe(":8080", nil)
+	}
+
+	if e.Config.ShowFPS {
+		e.TextControl.LoadFont("../rapidengine/assets/azonix.ttf", "azonix")
+		e.FPSBox = e.TextControl.NewTextBox("Rapid Engine", "azonix", float32(e.Config.ScreenWidth/2-100), float32(e.Config.ScreenHeight/2-50), 0.5, [3]float32{1, 1, 1})
+		//e.FPSBox.SetPosition(0, 0)
+		e.TextControl.AddTextBox(e.FPSBox)
 	}
 
 	e.ShaderControl.Initialize()
@@ -94,6 +104,11 @@ func (engine *Engine) Update(renderer *Renderer) {
 
 	// Call user frame function
 	engine.RenderFunc(renderer, inputs)
+
+	// Update FPS
+	if engine.Config.ShowFPS {
+		engine.FPSBox.SetText(fmt.Sprintf("FPS: %v", int(1/renderer.DeltaFrameTime)))
+	}
 
 	// Update controllers
 	engine.LightControl.Update(x, y, z)

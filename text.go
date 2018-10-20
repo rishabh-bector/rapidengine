@@ -36,9 +36,10 @@ func (tc *TextControl) Update() {
 }
 
 func (tc *TextControl) NewTextBox(text string, font string, x, y, scale float32, color [3]float32) *TextBox {
-	t := v41.NewText(tc.Fonts[font], 1.0, 1.1)
+	t := v41.NewText(tc.Fonts[font], 0.01, 11)
 	t.SetString(text)
 	t.SetColor(mgl32.Vec3{1, 1, 1})
+	t.AddScale(scale)
 
 	return &TextBox{
 		text:    text,
@@ -56,7 +57,7 @@ func (tc *TextControl) AddTextBox(tb *TextBox) {
 	tc.numTexts++
 }
 
-func (tc *TextControl) LoadFont(path string, size int32, name string) {
+func (tc *TextControl) LoadFont(path string, name string) {
 	var font *v41.Font
 	config, err := gltext.LoadTruetypeFontConfig("fontconfigs", name)
 	if err == nil {
@@ -82,7 +83,7 @@ func (tc *TextControl) LoadFont(path string, size int32, name string) {
 		runeRanges = append(runeRanges, gltext.RuneRange{Low: 0x4e00, High: 0x9faf})
 		runeRanges = append(runeRanges, gltext.RuneRange{Low: 0xff00, High: 0xffef})
 
-		scale := fixed.Int26_6(size)
+		scale := fixed.Int26_6(48)
 		runesPerRow := fixed.Int26_6(128)
 		config, err = gltext.NewTruetypeFontConfig(fd, scale, runeRanges, runesPerRow)
 		if err != nil {
@@ -122,4 +123,22 @@ func (t *TextBox) Update(tc *TextControl) {
 	t.textObj.SetScale(t.scale)
 	t.textObj.SetColor(mgl32.Vec3(t.color))
 	t.textObj.Draw()
+}
+
+func (t *TextBox) SetText(text string) {
+	t.text = text
+}
+
+func (t *TextBox) SetPosition(x, y float32) {
+	t.x = x
+	t.y = y
+}
+
+func (t *TextBox) SetColor(color [3]float32) {
+	t.color = color
+}
+
+func (t *TextBox) SetScale(scale float32) {
+	t.textObj.AddScale(scale)
+	t.scale = scale
 }

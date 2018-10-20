@@ -12,6 +12,8 @@ type EngineConfig struct {
 	PolygonLines   bool
 	CollisionLines bool
 
+	ShowFPS bool
+
 	Dimensions int
 
 	Profiling      bool
@@ -32,6 +34,7 @@ func NewEngineConfig(
 		WindowTitle:    "game",
 		PolygonLines:   false,
 		CollisionLines: false,
+		ShowFPS:        false,
 		Dimensions:     Dimensions,
 		Profiling:      false,
 		SingleMaterial: false,
