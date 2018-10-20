@@ -68,11 +68,10 @@ func (renderer *Renderer) StartRenderer() {
 	if renderer.Config.Profiling {
 		//defer profile.Start().Stop()
 	}
-
+	gl.ClearColor(float32(0)/255, float32(0)/255, float32(0)/255, 0.9)
 	for !renderer.Window.ShouldClose() {
 
 		// Clear screen buffers
-		gl.ClearColor(float32(0)/255, float32(0)/255, float32(0)/255, 0.9)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 		gl.Clear(gl.DEPTH_BUFFER_BIT)
 
@@ -304,6 +303,8 @@ func initOpenGL(config *configuration.EngineConfig) uint32 {
 	if config.Dimensions == 3 {
 		gl.Enable(gl.DEPTH_TEST)
 		gl.Disable(gl.CULL_FACE)
+	} else {
+		gl.Disable(gl.DEPTH_TEST)
 	}
 
 	return 0

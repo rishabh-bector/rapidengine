@@ -105,12 +105,12 @@ func (c *CollisionControl) Update(camX, camY float32, inputs *input.Input) {
 	}
 	mx, my := c.ScaleMouseCoords(inputs.MouseX, inputs.MouseY, camX, camY)
 	for _, child := range c.MouseChildren {
-		child.MouseCollisionFunc(child.CheckCollisionRaw(mx, my, &c.MouseCollider) != 0)
+		child.MouseCollisionFunc(child.CheckCollisionRaw(mx, -my, &c.MouseCollider) != 0)
 	}
 }
 
 func (c *CollisionControl) ScaleMouseCoords(x, y float64, camX, camY float32) (float32, float32) {
-	return float32(x) + camX - float32(c.config.ScreenWidth/2), -1 * (float32(y) + camY - float32(c.config.ScreenHeight/2))
+	return float32(x) + camX - float32(c.config.ScreenWidth/2), (float32(y) - camY - float32(c.config.ScreenHeight/2))
 }
 
 // Collider contains data about a collision rect.

@@ -19,6 +19,7 @@ type Engine struct {
 	ShaderControl    ShaderControl
 	LightControl     LightControl
 	UIControl        UIControl
+	TextControl      TextControl
 
 	Config configuration.EngineConfig
 }
@@ -32,6 +33,7 @@ func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer, *in
 		ShaderControl:    NewShaderControl(),
 		LightControl:     NewLightControl(),
 		UIControl:        NewUIControl(),
+		TextControl:      NewTextControl(&config),
 		Config:           config,
 		RenderFunc:       renderFunc,
 	}
@@ -97,6 +99,7 @@ func (engine *Engine) Update(renderer *Renderer) {
 	engine.LightControl.Update(x, y, z)
 	engine.CollisionControl.Update(x, y, inputs)
 	engine.UIControl.Update(inputs)
+	engine.TextControl.Update()
 }
 
 func (engine *Engine) NewChild2D() Child2D {
