@@ -67,7 +67,7 @@ func (rr RuneRanges) GetGlyphIndex(char rune) rune {
 //
 // The low and high values determine the lower and upper rune limits
 // we should load for this font. For standard ASCII this would be: 32, 127.
-func NewTruetypeFontConfig(r io.Reader, scale fixed.Int26_6, runeRanges RuneRanges, runesPerRow fixed.Int26_6) (*FontConfig, error) {
+func NewTruetypeFontConfig(r io.Reader, scale fixed.Int26_6, runeRanges RuneRanges, runesPerRow, adjustHeight fixed.Int26_6) (*FontConfig, error) {
 	if !runeRanges.Validate() {
 		return nil, errors.New("Invalid rune ranges supplied.")
 	}
@@ -100,11 +100,15 @@ func NewTruetypeFontConfig(r io.Reader, scale fixed.Int26_6, runeRanges RuneRang
 
 	gb := ttf.Bounds(scale)
 	gw := (gb.Max.X - gb.Min.X)
-	gh := (gb.Max.Y - gb.Min.Y)
+	gh := (gb.Max.Y - gb.Min.Y) + adjustHeight
 
 	iw := Pow2(uint32(gw * runesPerRow))
 	ih := Pow2(uint32(gh * runesPerCol))
-
+	if iw > ih {
+		ih = iw
+	} else {
+		iw = ih
+	}
 	fg, bg := image.White, image.Transparent
 	rect := image.Rect(0, 0, int(iw), int(ih))
 	fc.Image = image.NewNRGBA(rect)
