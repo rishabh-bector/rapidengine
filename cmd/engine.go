@@ -114,7 +114,7 @@ func (engine *Engine) Update(renderer *Renderer) {
 
 	// Update FPS
 	if engine.Config.ShowFPS && engine.FrameCount > 10 {
-		engine.FPSBox.SetText(fmt.Sprintf("FPS: %v", int(1/renderer.DeltaFrameTime)))
+		engine.FPSBox.Text = fmt.Sprintf("FPS: %v", int(1/renderer.DeltaFrameTime))
 		engine.FrameCount = 0
 	}
 
@@ -128,13 +128,13 @@ func (engine *Engine) Update(renderer *Renderer) {
 }
 
 func (engine *Engine) NewChild2D() child.Child2D {
-	c := NewChild2D(&engine.Config, &engine.CollisionControl)
+	c := child.NewChild2D(&engine.Config)
 	c.AttachShader(engine.Renderer.ShaderProgram)
 	return c
 }
 
 func (engine *Engine) NewChild3D() child.Child3D {
-	c := NewChild3D(&engine.Config, &engine.CollisionControl)
+	c := child.NewChild3D(&engine.Config)
 	c.AttachShader(engine.Renderer.ShaderProgram)
 	return c
 }

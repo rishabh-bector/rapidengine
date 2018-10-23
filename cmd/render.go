@@ -138,52 +138,52 @@ func (renderer *Renderer) RenderChildren() {
 }
 
 // RenderChild renders a single child to the screen
-func (renderer *Renderer) RenderChild(child Child) {
-	BindChild(child)
+func (renderer *Renderer) RenderChild(c child.Child) {
+	BindChild(c)
 
-	child.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.LastFrameTime)
-	renderer.DrawChild(child)
+	c.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.LastFrameTime)
+	renderer.DrawChild(c)
 
 	gl.BindVertexArray(0)
 }
 
 // DrawChild draws the child's vertices to the screen
-func (renderer *Renderer) DrawChild(child Child) {
-	gl.DrawElements(gl.TRIANGLES, child.GetNumVertices(), gl.UNSIGNED_INT, gl.PtrOffset(0))
+func (renderer *Renderer) DrawChild(c child.Child) {
+	gl.DrawElements(gl.TRIANGLES, c.GetNumVertices(), gl.UNSIGNED_INT, gl.PtrOffset(0))
 }
 
 // RenderChildCopies renders all copies of a child
-func (renderer *Renderer) RenderChildCopies(child Child) {
-	BindChild(child)
-	copies := *(child.GetCopies())
-	for x := 0; x < child.GetNumCopies(); x++ {
-		renderer.RenderCopy(child, copies[x])
+func (renderer *Renderer) RenderChildCopies(c child.Child) {
+	BindChild(c)
+	copies := *(c.GetCopies())
+	for x := 0; x < c.GetNumCopies(); x++ {
+		renderer.RenderCopy(c, copies[x])
 	}
 }
 
 // RenderCopy renders a single copy of a child
-func (renderer *Renderer) RenderCopy(child Child, c ChildCopy) {
+func (renderer *Renderer) RenderCopy(c child.Child, cpy child.ChildCopy) {
 	if renderer.Config.Dimensions == 2 {
-		if (child.GetSpecificRenderDistance() != 0 && InBounds2D(c.X, c.Y, float32(renderer.camX), float32(renderer.camY), child.GetSpecificRenderDistance())) ||
-			InBounds2D(c.X, c.Y, float32(renderer.camX), float32(renderer.camY), renderer.RenderDistance) {
-			child.RenderCopy(c, renderer.MainCamera)
-			renderer.DrawChild(child)
-			child.AddCurrentCopy(c)
+		if (c.GetSpecificRenderDistance() != 0 && InBounds2D(cpy.X, cpy.Y, float32(renderer.camX), float32(renderer.camY), c.GetSpecificRenderDistance())) ||
+			InBounds2D(cpy.X, cpy.Y, float32(renderer.camX), float32(renderer.camY), renderer.RenderDistance) {
+			c.RenderCopy(cpy, renderer.MainCamera)
+			renderer.DrawChild(c)
+			c.AddCurrentCopy(cpy)
 		}
 	}
 	if renderer.Config.Dimensions == 3 {
-		if InBounds3D(c.X, c.Y, c.Z, float32(renderer.camX), float32(renderer.camY), float32(renderer.camZ), renderer.RenderDistance) {
-			child.RenderCopy(c, renderer.MainCamera)
-			renderer.DrawChild(child)
-			child.AddCurrentCopy(c)
+		if InBounds3D(cpy.X, cpy.Y, cpy.Z, float32(renderer.camX), float32(renderer.camY), float32(renderer.camZ), renderer.RenderDistance) {
+			c.RenderCopy(cpy, renderer.MainCamera)
+			renderer.DrawChild(c)
+			c.AddCurrentCopy(cpy)
 		}
 	}
 }
 
 // BindChild binds the VAO of a child
-func BindChild(child Child) {
-	gl.BindVertexArray(child.GetVertexArray().id)
-	gl.UseProgram(child.GetShaderProgram())
+func BindChild(c child.Child) {
+	gl.BindVertexArray(c.GetVertexArray().GetID())
+	gl.UseProgram(c.GetShaderProgram())
 	gl.EnableVertexAttribArray(0)
 	gl.EnableVertexAttribArray(1)
 	gl.EnableVertexAttribArray(2)
@@ -220,7 +220,7 @@ func NewRenderer(camera camera.Camera, config *configuration.EngineConfig) Rende
 	r := Renderer{
 		Window:             initGLFW(config),
 		ShaderProgram:      initOpenGL(config),
-		Children:           []Child{},
+		Children:           []child.Child{},
 		AutomaticRendering: true,
 		RenderFunc:         func(r *Renderer) {},
 		RenderDistance:     1000,
@@ -236,7 +236,7 @@ func NewRenderer(camera camera.Camera, config *configuration.EngineConfig) Rende
 
 func (renderer *Renderer) Initialize(engine *Engine) {
 	engine.TextureControl.NewTexture("../rapidengine/border.png", "default")
-	dm := NewMaterial(engine.ShaderControl.GetShader("colorLighting"), &engine.Config)
+	dm := material.NewMaterial(engine.ShaderControl.GetShader("colorLighting"), &engine.Config)
 	//dm.BecomeTexture(engine.TextureControl.GetTexture("default"))
 	dm.BecomeColor([]float32{0.2, 0.7, 0.4})
 	renderer.DefaultMaterial = dm
@@ -244,8 +244,8 @@ func (renderer *Renderer) Initialize(engine *Engine) {
 
 // Instance takes a child and adds it to the renderer's list,
 // so that it will be rendered every frame
-func (renderer *Renderer) Instance(child Child) {
-	renderer.Children = append(renderer.Children, child)
+func (renderer *Renderer) Instance(c child.Child) {
+	renderer.Children = append(renderer.Children, c)
 }
 
 // AttachCallback attaches a callback function to the renderer,

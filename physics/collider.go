@@ -56,6 +56,5 @@ func (collider *Collider) CheckCollision(x, y, vx, vy, otherX, otherY float32, o
 		}
 		return 3
 	}
-
 	return 0
 }

@@ -22,7 +22,7 @@ var SkyBoxProgram = ShaderProgram{
 
 const ShaderTextureVertex = `
 
-		#version 410
+		#version 410 
 
 		uniform mat4 modelMtx;
 		uniform mat4 viewMtx;
