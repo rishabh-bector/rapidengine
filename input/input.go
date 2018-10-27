@@ -21,24 +21,6 @@ type Input struct {
 	RightMouseButton bool
 }
 
-type InputControl struct {
-	keyMap map[string]glfw.Key
-}
-
-func NewInputControl() InputControl {
-	return InputControl{keyMap}
-}
-
-func (inputControl *InputControl) Update(window *glfw.Window) *Input {
-	defer swapMousePositions()
-	glfw.PollEvents()
-	current := map[string]bool{}
-	for name, key := range inputControl.keyMap {
-		current[name] = (window.GetKey(key) == glfw.Press)
-	}
-	return &Input{current, MouseX, MouseY, LastMouseX, LastMouseY, LeftMouseButton, RightMouseButton}
-}
-
 func MouseCallback(w *glfw.Window, xpos float64, ypos float64) {
 	MouseX = xpos
 	MouseY = ypos
@@ -49,12 +31,12 @@ func MouseButtonCallback(w *glfw.Window, button glfw.MouseButton, action glfw.Ac
 	RightMouseButton = (button == 1 && action == glfw.Press)
 }
 
-func swapMousePositions() {
+func SwapMousePositions() {
 	LastMouseX = MouseX
 	LastMouseY = MouseY
 }
 
-var keyMap map[string]glfw.Key = map[string]glfw.Key{
+var KeyMap map[string]glfw.Key = map[string]glfw.Key{
 	"w":     glfw.KeyW,
 	"a":     glfw.KeyA,
 	"s":     glfw.KeyS,

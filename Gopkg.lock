@@ -3,14 +3,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c6a3d6ca331ac0025bc7e2c3a09debf6c6e311fa48bb38b7a9b5ca29cc9843d1"
+  digest = "1:2ad2f845c05e9fcb89f4f381ea2bd03e344e4cb15ebe993dc0993a9c12a1f744"
   name = "github.com/4ydx/gltext"
   packages = [
     ".",
     "v4.1",
   ]
   pruneopts = "UT"
-  revision = "30a7d21762e34d1e761a6816c485815c86d97928"
+  revision = "84bc6aa204bffadd70a6fa2f0f267e6c4d82835e"
 
 [[projects]]
   branch = "master"

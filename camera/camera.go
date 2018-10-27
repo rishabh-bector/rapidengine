@@ -6,7 +6,6 @@ type Camera interface {
 	Look()
 
 	DefaultControls(*input.Input)
-
 	MoveUp()
 	MoveDown()
 	MoveLeft()
