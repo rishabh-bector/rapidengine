@@ -31,7 +31,8 @@ func NewUIButton(x, y, width, height float32, material *material.Material, confi
 	child.AttachMaterial(material)
 	child.AttachCollider(0, 0, width, height)
 	//child.AttachShader(engine.ShaderControl.GetShader("color"))
-	child.SetPosition(x, y)
+	child.X = x
+	child.Y = y
 	child.SetMouseFunc(button.MouseFunc)
 
 	button.ElementChild = &child

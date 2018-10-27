@@ -96,7 +96,6 @@ func (child2D *Child2D) BindChild() {
 
 func (child2D *Child2D) Update(mainCamera camera.Camera, delta float64, lastFrame float64) {
 	//cx, cy, _ := mainCamera.GetPosition()
-
 	child2D.VY -= child2D.Gravity
 
 	/*cols := child2D.collisioncontrol.CheckCollisionWithGroup(child2D, "ground", cx, cy)
@@ -214,29 +213,9 @@ func (child2D *Child2D) SetVelocity(vx, vy float32) {
 	child2D.VY = vy
 }
 
-func (child2D *Child2D) SetVelocityX(vx float32) {
-	child2D.VX = vx
-}
-
-func (child2D *Child2D) SetVelocityY(vy float32) {
-	child2D.VY = vy
-}
-
 func (child2D *Child2D) SetPosition(x, y float32) {
 	child2D.X = x
 	child2D.Y = y
-}
-
-func (child2D *Child2D) SetX(x float32) {
-	child2D.X = x
-}
-
-func (child2D *Child2D) SetY(y float32) {
-	child2D.Y = y
-}
-
-func (child2D *Child2D) SetGravity(g float32) {
-	child2D.Gravity = g
 }
 
 func (child2D *Child2D) SetSpecificRenderDistance(d float32) {

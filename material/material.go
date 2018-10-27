@@ -44,6 +44,7 @@ func NewMaterial(program uint32, config *configuration.EngineConfig) Material {
 		transparencyEnabled: false,
 		animationEnabled:    false,
 		animationCurrent:    0,
+		off:                 false,
 	}
 	if config.SingleMaterial {
 		m.off = true

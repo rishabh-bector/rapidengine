@@ -28,6 +28,9 @@ type Renderer struct {
 	// Current shader program
 	ShaderProgram uint32
 
+	// Currently bound child
+	CurrentBoundChild child.Child
+
 	// Children to be rendered
 	Children []child.Child
 
@@ -71,7 +74,7 @@ func (renderer *Renderer) StartRenderer() {
 	if renderer.Config.Profiling {
 		//defer profile.Start().Stop()
 	}
-	gl.ClearColor(float32(0)/255, float32(0)/255, float32(0)/255, 0.9)
+	gl.ClearColor(float32(50)/255, float32(50)/255, float32(50)/255, 1)
 	for !renderer.Window.ShouldClose() {
 
 		// Clear screen buffers
@@ -139,7 +142,10 @@ func (renderer *Renderer) RenderChildren() {
 
 // RenderChild renders a single child to the screen
 func (renderer *Renderer) RenderChild(c child.Child) {
-	BindChild(c)
+	if renderer.CurrentBoundChild != c {
+		BindChild(c)
+		renderer.CurrentBoundChild = c
+	}
 
 	c.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.LastFrameTime)
 	renderer.DrawChild(c)
@@ -154,7 +160,10 @@ func (renderer *Renderer) DrawChild(c child.Child) {
 
 // RenderChildCopies renders all copies of a child
 func (renderer *Renderer) RenderChildCopies(c child.Child) {
-	BindChild(c)
+	if renderer.CurrentBoundChild != c {
+		BindChild(c)
+		renderer.CurrentBoundChild = c
+	}
 	copies := *(c.GetCopies())
 	for x := 0; x < c.GetNumCopies(); x++ {
 		renderer.RenderCopy(c, copies[x])
@@ -163,12 +172,21 @@ func (renderer *Renderer) RenderChildCopies(c child.Child) {
 
 // RenderCopy renders a single copy of a child
 func (renderer *Renderer) RenderCopy(c child.Child, cpy child.ChildCopy) {
+	if renderer.CurrentBoundChild != c {
+		BindChild(c)
+		renderer.CurrentBoundChild = c
+	}
 	if renderer.Config.Dimensions == 2 {
-		if (c.GetSpecificRenderDistance() != 0 && InBounds2D(cpy.X, cpy.Y, float32(renderer.camX), float32(renderer.camY), c.GetSpecificRenderDistance())) ||
-			InBounds2D(cpy.X, cpy.Y, float32(renderer.camX), float32(renderer.camY), renderer.RenderDistance) {
+		if renderer.AutomaticRendering {
+			if (c.GetSpecificRenderDistance() != 0 && InBounds2D(cpy.X, cpy.Y, float32(renderer.camX), float32(renderer.camY), c.GetSpecificRenderDistance())) ||
+				InBounds2D(cpy.X, cpy.Y, float32(renderer.camX), float32(renderer.camY), renderer.RenderDistance) {
+				c.RenderCopy(cpy, renderer.MainCamera)
+				renderer.DrawChild(c)
+				c.AddCurrentCopy(cpy)
+			}
+		} else {
 			c.RenderCopy(cpy, renderer.MainCamera)
 			renderer.DrawChild(c)
-			c.AddCurrentCopy(cpy)
 		}
 	}
 	if renderer.Config.Dimensions == 3 {
@@ -187,7 +205,6 @@ func BindChild(c child.Child) {
 	gl.EnableVertexAttribArray(0)
 	gl.EnableVertexAttribArray(1)
 	gl.EnableVertexAttribArray(2)
-
 }
 
 // InBounds2D checks if a particular x/y is within the given render distance
