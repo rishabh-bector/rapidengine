@@ -14,6 +14,8 @@ type EngineConfig struct {
 
 	ShowFPS bool
 
+	MaxFPS int
+
 	Dimensions int
 
 	Profiling      bool
@@ -35,6 +37,7 @@ func NewEngineConfig(
 		PolygonLines:   false,
 		CollisionLines: false,
 		ShowFPS:        false,
+		MaxFPS:         60,
 		Dimensions:     Dimensions,
 		Profiling:      false,
 		SingleMaterial: false,

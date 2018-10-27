@@ -7,6 +7,8 @@ package cmd
 //   --------------------------------------------------
 
 import (
+	"time"
+
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	log "github.com/sirupsen/logrus"
@@ -64,6 +66,7 @@ type Renderer struct {
 	// FrameTime
 	DeltaFrameTime float64
 	LastFrameTime  float64
+	MinFrameTime   float64
 
 	// Termination Channel
 	Done chan bool
@@ -105,7 +108,11 @@ func (renderer *Renderer) StartRenderer() {
 		currentFrame := glfw.GetTime()
 		renderer.DeltaFrameTime = currentFrame - renderer.LastFrameTime
 		renderer.LastFrameTime = currentFrame
-		//println(int(renderer.DeltaFrameTime * 1000))
+
+		if renderer.DeltaFrameTime < renderer.MinFrameTime {
+			time.Sleep(time.Duration(1000000 * (renderer.MinFrameTime - renderer.DeltaFrameTime)))
+			renderer.DeltaFrameTime = renderer.MinFrameTime
+		}
 	}
 
 	renderer.Config.Logger.Info("Terminating...")
@@ -241,6 +248,7 @@ func NewRenderer(camera camera.Camera, config *configuration.EngineConfig) Rende
 		AutomaticRendering: true,
 		RenderFunc:         func(r *Renderer) {},
 		RenderDistance:     1000,
+		MinFrameTime:       1 / float64(config.MaxFPS),
 		Done:               make(chan bool),
 		MainCamera:         camera,
 		Config:             config,
