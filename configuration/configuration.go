@@ -7,6 +7,7 @@ type EngineConfig struct {
 	ScreenHeight int
 
 	FullScreen bool
+	VSync      bool
 
 	WindowTitle    string
 	PolygonLines   bool
@@ -33,6 +34,7 @@ func NewEngineConfig(
 		ScreenWidth:    ScreenWidth,
 		ScreenHeight:   ScreenHeight,
 		FullScreen:     true,
+		VSync:          true,
 		WindowTitle:    "game",
 		PolygonLines:   false,
 		CollisionLines: false,

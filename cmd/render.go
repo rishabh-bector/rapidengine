@@ -110,7 +110,7 @@ func (renderer *Renderer) StartRenderer() {
 		renderer.LastFrameTime = currentFrame
 
 		if renderer.DeltaFrameTime < renderer.MinFrameTime {
-			time.Sleep(time.Duration(1000000 * (renderer.MinFrameTime - renderer.DeltaFrameTime)))
+			time.Sleep(time.Duration(1000000000 * (renderer.MinFrameTime - renderer.DeltaFrameTime)))
 			renderer.DeltaFrameTime = renderer.MinFrameTime
 		}
 	}
@@ -310,7 +310,9 @@ func initGLFW(config *configuration.EngineConfig) *glfw.Window {
 
 	window.MakeContextCurrent()
 
-	glfw.SwapInterval(0)
+	if !config.VSync {
+		glfw.SwapInterval(0)
+	}
 
 	return window
 }
