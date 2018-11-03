@@ -6,10 +6,8 @@ import (
 	"rapidengine/camera"
 	"rapidengine/child"
 	"rapidengine/configuration"
-	"rapidengine/control"
 	"rapidengine/input"
 	"rapidengine/lighting"
-	"rapidengine/terrain"
 	"rapidengine/ui"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -19,14 +17,21 @@ type Engine struct {
 	Renderer   Renderer
 	RenderFunc func(renderer *Renderer, inputs *input.Input)
 
-	CollisionControl control.CollisionControl
-	TextureControl   control.TextureControl
-	InputControl     control.InputControl
-	ShaderControl    control.ShaderControl
-	LightControl     control.LightControl
-	UIControl        control.UIControl
+	CollisionControl CollisionControl
 
-	TextControl control.TextControl
+	TextureControl TextureControl
+
+	InputControl InputControl
+
+	ShaderControl ShaderControl
+
+	LightControl LightControl
+
+	UIControl UIControl
+
+	TerrainControl TerrainControl
+
+	TextControl TextControl
 	FPSBox      *ui.TextBox
 
 	FrameCount int
@@ -34,19 +39,27 @@ type Engine struct {
 	Config configuration.EngineConfig
 }
 
-func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer, *input.Input)) Engine {
+func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer, *input.Input)) *Engine {
 	e := Engine{
-		Renderer:         NewRenderer(getEngineCamera(config.Dimensions, &config), &config),
-		CollisionControl: control.NewCollisionControl(&config),
-		TextureControl:   control.NewTextureControl(),
-		InputControl:     control.NewInputControl(),
-		ShaderControl:    control.NewShaderControl(),
-		LightControl:     control.NewLightControl(),
-		UIControl:        control.NewUIControl(),
-		TextControl:      control.NewTextControl(&config),
-		Config:           config,
-		FrameCount:       0,
-		RenderFunc:       renderFunc,
+		// Main renderer
+		Renderer: NewRenderer(getEngineCamera(config.Dimensions, &config), &config),
+
+		// Package Controls
+		CollisionControl: NewCollisionControl(&config),
+		TextureControl:   NewTextureControl(),
+		InputControl:     NewInputControl(),
+		ShaderControl:    NewShaderControl(),
+		LightControl:     NewLightControl(),
+		TerrainControl:   NewTerrainControl(),
+		UIControl:        NewUIControl(),
+		TextControl:      NewTextControl(&config),
+
+		// Configuration
+		Config:     config,
+		FrameCount: 0,
+
+		// User render function
+		RenderFunc: renderFunc,
 	}
 
 	if e.Config.Profiling {
@@ -63,6 +76,8 @@ func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer, *in
 	e.ShaderControl.Initialize()
 	e.Renderer.Initialize(&e)
 	e.Renderer.AttachCallback(e.Update)
+
+	e.UIControl.Initialize(&e)
 
 	if e.Config.Dimensions == 2 {
 		l := lighting.NewDirectionLight(
@@ -84,10 +99,10 @@ func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer, *in
 		)
 		e.LightControl.SetDirectionalLight(&l)
 
-		terrain.NewSkyBox("TropicalSunnyDay", &e.ShaderControl, &e.TextureControl, &e.Config)
+		e.TerrainControl.NewSkyBox("TropicalSunnyDay", &e.ShaderControl, &e.TextureControl, &e.Config)
 	}
 
-	return e
+	return &e
 }
 
 func NewEngineConfig(
@@ -128,15 +143,11 @@ func (engine *Engine) Update(renderer *Renderer) {
 }
 
 func (engine *Engine) NewChild2D() child.Child2D {
-	c := child.NewChild2D(&engine.Config)
-	c.AttachShader(engine.Renderer.ShaderProgram)
-	return c
+	return child.NewChild2D(&engine.Config)
 }
 
 func (engine *Engine) NewChild3D() child.Child3D {
-	c := child.NewChild3D(&engine.Config)
-	c.AttachShader(engine.Renderer.ShaderProgram)
-	return c
+	return child.NewChild3D(&engine.Config)
 }
 
 func (engine *Engine) StartRenderer() {

@@ -1,10 +1,7 @@
 package terrain
 
 import (
-	"fmt"
 	"rapidengine/camera"
-	"rapidengine/configuration"
-	"rapidengine/control"
 	"rapidengine/geometry"
 	"rapidengine/material"
 
@@ -22,40 +19,19 @@ type SkyBox struct {
 	modelMatrix      mgl32.Mat4
 }
 
-func NewSkyBox(path string, shaderControl *control.ShaderControl, textureControl *control.TextureControl, config *configuration.EngineConfig) *SkyBox {
-	gl.UseProgram(shaderControl.GetShader("skybox"))
-	gl.BindAttribLocation(shaderControl.GetShader("skybox"), 0, gl.Str("position\x00"))
-
-	textureControl.NewCubeMap(
-		fmt.Sprintf("../rapidengine/assets/skybox/%s/%s_LF.png", path, path),
-		fmt.Sprintf("../rapidengine/assets/skybox/%s/%s_RT.png", path, path),
-		fmt.Sprintf("../rapidengine/assets/skybox/%s/%s_UP.png", path, path),
-		fmt.Sprintf("../rapidengine/assets/skybox/%s/%s_DN.png", path, path),
-		fmt.Sprintf("../rapidengine/assets/skybox/%s/%s_FR.png", path, path),
-		fmt.Sprintf("../rapidengine/assets/skybox/%s/%s_BK.png", path, path),
-		"skybox")
-
-	material := material.NewMaterial(shaderControl.GetShader("skybox"), config)
-	material.BecomeCubemap(textureControl.GetTexture("skybox"))
-
-	indices := []uint32{}
-	for i := 0; i < len(skyBoxVertices); i++ {
-		indices = append(indices, uint32(i))
-	}
-
-	vao := geometry.NewVertexArray(skyBoxVertices, indices)
-	vao.AddVertexAttribute(geometry.CubeTextures, 1, 2)
-
+func NewSkyBox(
+	shader uint32,
+	mat material.Material,
+	vao *geometry.VertexArray,
+	projectionMatrix,
+	modelMatrix mgl32.Mat4,
+) *SkyBox {
 	return &SkyBox{
-		shader:   shaderControl.GetShader("skybox"),
-		material: material,
-		vao:      vao,
-		projectionMatrix: mgl32.Perspective(
-			mgl32.DegToRad(45),
-			float32(config.ScreenWidth)/float32(config.ScreenHeight),
-			0.1, 100,
-		),
-		modelMatrix: mgl32.Ident4(),
+		shader:           shader,
+		material:         mat,
+		vao:              vao,
+		projectionMatrix: projectionMatrix,
+		modelMatrix:      modelMatrix,
 	}
 }
 
@@ -91,7 +67,7 @@ func (skyBox *SkyBox) Render(mainCamera camera.Camera) {
 	gl.DepthMask(true)
 }
 
-var skyBoxVertices = []float32{
+var SkyBoxVertices = []float32{
 
 	-1.0, 1.0, -1.0,
 	-1.0, -1.0, -1.0,

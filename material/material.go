@@ -83,7 +83,7 @@ func (material *Material) Render(delta float64, darkness float32) {
 
 	case SHADER_COLOR:
 		gl.Uniform3fv(gl.GetUniformLocation(material.shaderProgram, gl.Str("materialType\x00")), 1, &SHADER_COLOR_UNI[0])
-		gl.Uniform4fv(gl.GetUniformLocation(material.shaderProgram, gl.Str("color\x00")), 1, &material.color[0])
+		gl.Uniform3fv(gl.GetUniformLocation(material.shaderProgram, gl.Str("color\x00")), 1, &material.color[0])
 		gl.Uniform1f(gl.GetUniformLocation(material.shaderProgram, gl.Str("shine\x00")), material.shine)
 		gl.Uniform1f(gl.GetUniformLocation(material.shaderProgram, gl.Str("darkness\x00")), darkness)
 

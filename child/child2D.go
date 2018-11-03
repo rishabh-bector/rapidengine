@@ -57,6 +57,8 @@ func NewChild2D(config *configuration.EngineConfig) Child2D {
 		modelMatrix:            mgl32.Ident4(),
 		projectionMatrix:       mgl32.Ortho2D(-1, 1, -1, 1),
 		config:                 config,
+		X:                      0,
+		Y:                      0,
 		VX:                     0,
 		VY:                     0,
 		Gravity:                0,

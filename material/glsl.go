@@ -76,12 +76,12 @@ const ShaderColorFragment = `
 
 	#version 410
 
-	uniform vec4 color;
+	uniform vec3 color;
 
 	out vec4 outColor;
 
 	void main() {
-		outColor = color;
+		outColor = vec4(color, 1.0);
 	}
 
 ` + "\x00"

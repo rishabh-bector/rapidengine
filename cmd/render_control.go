@@ -149,12 +149,10 @@ func (renderer *Renderer) RenderChildren() {
 
 // RenderChild renders a single child to the screen
 func (renderer *Renderer) RenderChild(c child.Child) {
-	if renderer.CurrentBoundChild != c {
-		BindChild(c)
-		renderer.CurrentBoundChild = c
-	}
+	BindChild(c)
 
 	c.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.LastFrameTime)
+
 	renderer.DrawChild(c)
 
 	gl.BindVertexArray(0)
@@ -167,10 +165,9 @@ func (renderer *Renderer) DrawChild(c child.Child) {
 
 // RenderChildCopies renders all copies of a child
 func (renderer *Renderer) RenderChildCopies(c child.Child) {
-	if renderer.CurrentBoundChild != c {
-		BindChild(c)
-		renderer.CurrentBoundChild = c
-	}
+	BindChild(c)
+	renderer.CurrentBoundChild = c
+
 	copies := *(c.GetCopies())
 	for x := 0; x < c.GetNumCopies(); x++ {
 		renderer.RenderCopy(c, copies[x])

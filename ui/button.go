@@ -20,24 +20,23 @@ type Button struct {
 	colliding map[int]bool
 }
 
-func NewUIButton(x, y, width, height float32, material *material.Material, config *configuration.EngineConfig) (Button, *child.Child2D) {
+func NewUIButton(x, y, width, height float32, material *material.Material, config *configuration.EngineConfig) Button {
 	button := Button{
 		justClicked: false,
 		colliding:   make(map[int]bool),
 	}
 
-	child := child.NewChild2D(config)
-	child.AttachPrimitive(geometry.NewRectangle(width, height, config))
-	child.AttachMaterial(material)
-	child.AttachCollider(0, 0, width, height)
-	//child.AttachShader(engine.ShaderControl.GetShader("color"))
-	child.X = x
-	child.Y = y
-	child.SetMouseFunc(button.MouseFunc)
+	c := child.NewChild2D(config)
+	c.AttachPrimitive(geometry.NewRectangle(width, height, config))
+	c.AttachMaterial(material)
+	c.AttachCollider(0, 0, width, height)
+	c.X = x
+	c.Y = y
+	c.SetMouseFunc(button.MouseFunc)
 
-	button.ElementChild = &child
+	button.ElementChild = &c
 
-	return button, &child
+	return button
 }
 
 func (button *Button) Update(inputs *input.Input) {
