@@ -51,6 +51,9 @@ const ShaderTextureFragment = `
 		out vec4 outColor;
 
 		void main() {
+			if(texture(texture0, texCoord.xy).a < 0.5) {
+				discard;
+			}
 			outColor = texture(texture0, texCoord.xy);
 		}
 		

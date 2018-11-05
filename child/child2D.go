@@ -149,13 +149,13 @@ func (child2D *Child2D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
 	config.Material.Render(0, config.Darkness)
 }
 
-/*func (child2D *Child2D) CheckCollision(other Child) int {
+func (child2D *Child2D) CheckCollision(other Child) int {
 	return child2D.collider.CheckCollision(child2D.X, child2D.Y, child2D.VX, child2D.VY, other.GetX(), other.GetY(), other.GetCollider())
 }
 
-func (child2D *Child2D) CheckCollisionRaw(otherX, otherY float32, otherCollider *Collider) int {
+func (child2D *Child2D) CheckCollisionRaw(otherX, otherY float32, otherCollider *physics.Collider) int {
 	return child2D.collider.CheckCollision(child2D.X, child2D.Y, child2D.VX, child2D.VY, otherX, otherY, otherCollider)
-}*/
+}
 
 //  --------------------------------------------------
 //  Component Attachment

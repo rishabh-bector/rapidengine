@@ -26,7 +26,8 @@ type Material struct {
 	color []float32
 	shine float32
 
-	animationTextures []*uint32
+	animationPlaying  string
+	animationTextures map[string][]*uint32
 	animationCurrent  int
 	animationFrame    float64
 	animationFPS      float64
@@ -44,6 +45,7 @@ func NewMaterial(program uint32, config *configuration.EngineConfig) Material {
 		transparencyEnabled: false,
 		animationEnabled:    false,
 		animationCurrent:    0,
+		animationTextures:   make(map[string][]*uint32),
 		off:                 false,
 	}
 	if config.SingleMaterial {
@@ -65,10 +67,10 @@ func (material *Material) Render(delta float64, darkness float32) {
 		return
 	}
 
-	if material.animationEnabled {
+	if material.animationEnabled && material.animationPlaying != "" {
 		if material.animationFrame > 1/material.animationFPS {
-			material.texture = material.animationTextures[material.animationCurrent]
-			if material.animationCurrent < len(material.animationTextures)-1 {
+			material.texture = material.animationTextures[material.animationPlaying][material.animationCurrent]
+			if material.animationCurrent < len(material.animationTextures[material.animationPlaying])-1 {
 				material.animationCurrent++
 			} else {
 				material.animationCurrent = 0
@@ -155,12 +157,17 @@ func (material *Material) GetTexture() *uint32 {
 
 func (material *Material) EnableAnimation() {
 	material.animationEnabled = true
+	material.animationPlaying = ""
 }
 
-func (material *Material) AddFrame(f *uint32) {
-	material.animationTextures = append(material.animationTextures, f)
+func (material *Material) AddFrame(frame *uint32, anim string) {
+	material.animationTextures[anim] = append(material.animationTextures[anim], frame)
 }
 
 func (material *Material) SetAnimationFPS(s float64) {
 	material.animationFPS = s
+}
+
+func (material *Material) PlayAnimation(anim string) {
+	material.animationPlaying = anim
 }

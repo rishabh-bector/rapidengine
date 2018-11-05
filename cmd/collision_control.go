@@ -71,7 +71,7 @@ func (collisionControl *CollisionControl) CreateMouseCollision(c child.Child) {
 // on the screen.
 func (collisionControl *CollisionControl) CheckCollisionWithGroup(c child.Child, group string, camX, camY float32) []bool {
 	out := []bool{false, false, false, false}
-	/*for _, other := range collisionControl.GroupMap[group] {
+	for _, other := range collisionControl.GroupMap[group] {
 		if !other.CheckCopyingEnabled() {
 			if col := c.CheckCollision(other); col != 0 && c != other {
 				out[col-1] = true
@@ -83,7 +83,7 @@ func (collisionControl *CollisionControl) CheckCollisionWithGroup(c child.Child,
 				}
 			}
 		}
-	}*/
+	}
 	return out
 }
 
@@ -97,10 +97,10 @@ func (collisionControl *CollisionControl) Update(camX, camY float32, inputs *inp
 			link.Callback(col)
 		}
 	}
-	/*mx, my := collisionControl.ScaleMouseCoords(inputs.MouseX, inputs.MouseY, camX, camY)
+	mx, my := collisionControl.ScaleMouseCoords(inputs.MouseX, inputs.MouseY, camX, camY)
 	for _, c := range collisionControl.MouseChildren {
 		c.MouseCollisionFunc(c.CheckCollisionRaw(mx, -my, &collisionControl.MouseCollider) != 0)
-	}*/
+	}
 }
 
 func (collisionControl *CollisionControl) ScaleMouseCoords(x, y float64, camX, camY float32) (float32, float32) {

@@ -38,7 +38,9 @@ func (uiControl *UIControl) NewUIButton(
 	material *material.Material,
 ) ui.Button {
 	button := ui.NewUIButton(x, y, width, height, material, &uiControl.engine.Config)
+
 	button.ElementChild.AttachShader(uiControl.engine.ShaderControl.GetShader("color"))
 	uiControl.engine.Instance(button.ElementChild)
+	uiControl.engine.CollisionControl.CreateMouseCollision(button.ElementChild)
 	return button
 }

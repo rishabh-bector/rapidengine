@@ -38,8 +38,8 @@ type Child interface {
 	SetSpecificRenderDistance(float32)
 	GetSpecificRenderDistance() float32
 
-	//CheckCollision(Child) int
-	//CheckCollisionRaw(otherX float32, otherY float32, otherCollider *physics.Collider) int
+	CheckCollision(Child) int
+	CheckCollisionRaw(otherX float32, otherY float32, otherCollider *physics.Collider) int
 
 	MouseCollisionFunc(bool)
 
