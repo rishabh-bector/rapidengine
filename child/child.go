@@ -11,7 +11,7 @@ type ChildCopy struct {
 	Z        float32
 	Material *material.Material
 	Darkness float32
-	ID       int
+	ID       string
 }
 type Child interface {
 	PreRender(camera.Camera)
