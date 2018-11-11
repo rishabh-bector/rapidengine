@@ -2157,14 +2157,14 @@ typedef void (APIENTRYP PFNGLEVALCOORD2FVPROC)(const GLfloat* u);
 GLAPI PFNGLEVALCOORD2FVPROC glad_glEvalCoord2fv;
 #define glEvalCoord2fv glad_glEvalCoord2fv
 typedef void (APIENTRYP PFNGLEVALMESH1PROC)(GLenum mode, GLint i1, GLint i2);
-GLAPI PFNGLEVALMESH1PROC glad_glEvalMesh1;
-#define glEvalMesh1 glad_glEvalMesh1
+GLAPI PFNGLEVALMESH1PROC glad_glEvalPrimitive1;
+#define glEvalPrimitive1 glad_glEvalPrimitive1
 typedef void (APIENTRYP PFNGLEVALPOINT1PROC)(GLint i);
 GLAPI PFNGLEVALPOINT1PROC glad_glEvalPoint1;
 #define glEvalPoint1 glad_glEvalPoint1
 typedef void (APIENTRYP PFNGLEVALMESH2PROC)(GLenum mode, GLint i1, GLint i2, GLint j1, GLint j2);
-GLAPI PFNGLEVALMESH2PROC glad_glEvalMesh2;
-#define glEvalMesh2 glad_glEvalMesh2
+GLAPI PFNGLEVALMESH2PROC glad_glEvalPrimitive2;
+#define glEvalPrimitive2 glad_glEvalPrimitive2
 typedef void (APIENTRYP PFNGLEVALPOINT2PROC)(GLint i, GLint j);
 GLAPI PFNGLEVALPOINT2PROC glad_glEvalPoint2;
 #define glEvalPoint2 glad_glEvalPoint2

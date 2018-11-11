@@ -202,13 +202,10 @@ func (renderer *Renderer) RenderCopy(c child.Child, cpy child.ChildCopy) {
 	}
 }
 
-// BindChild binds the VAO of a child
+// BindChild binds the VAO & Shader of a child
 func BindChild(c child.Child) {
 	gl.BindVertexArray(c.GetVertexArray().GetID())
 	gl.UseProgram(c.GetShaderProgram())
-	gl.EnableVertexAttribArray(0)
-	gl.EnableVertexAttribArray(1)
-	gl.EnableVertexAttribArray(2)
 }
 
 // InBounds2D checks if a particular x/y is within the given render distance
@@ -257,8 +254,8 @@ func NewRenderer(camera camera.Camera, config *configuration.EngineConfig) Rende
 }
 
 func (renderer *Renderer) Initialize(engine *Engine) {
-	engine.TextureControl.NewTexture("../rapidengine/border.png", "default")
-	dm := material.NewMaterial(engine.ShaderControl.GetShader("colorLighting"), &engine.Config)
+	engine.TextureControl.NewTexture("../rapidengine/border.png", "default", "linear")
+	dm := material.NewMaterial(engine.ShaderControl.GetShader("colorLighting"), engine.Config)
 	//dm.BecomeTexture(engine.TextureControl.GetTexture("default"))
 	dm.BecomeColor([]float32{0.2, 0.7, 0.4})
 	renderer.DefaultMaterial = dm
@@ -337,6 +334,14 @@ func initOpenGL(config *configuration.EngineConfig) uint32 {
 	}
 
 	return 0
+}
+
+func (renderer *Renderer) EnablePolygonLines() {
+	gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
+}
+
+func (renderer *Renderer) DisablePolygonLines() {
+	gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
 }
 
 // SetRenderDistance sets the render distance

@@ -11,7 +11,8 @@ type ChildCopy struct {
 	Z        float32
 	Material *material.Material
 	Darkness float32
-	ID       string
+
+	ID string
 }
 type Child interface {
 	PreRender(camera.Camera)
@@ -26,7 +27,6 @@ type Child interface {
 	GetCollider() *physics.Collider
 	GetCopies() *[]ChildCopy
 	GetNumCopies() int
-	IterCopies(func(Child, ChildCopy))
 
 	GetX() float32
 	GetY() float32

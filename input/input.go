@@ -43,4 +43,5 @@ var KeyMap map[string]glfw.Key = map[string]glfw.Key{
 	"d":     glfw.KeyD,
 	"space": glfw.KeySpace,
 	"shift": glfw.KeyLeftShift,
+	"l":     glfw.KeyL,
 }

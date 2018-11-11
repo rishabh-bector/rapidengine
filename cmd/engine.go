@@ -36,23 +36,23 @@ type Engine struct {
 
 	FrameCount int
 
-	Config configuration.EngineConfig
+	Config *configuration.EngineConfig
 }
 
-func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer, *input.Input)) *Engine {
+func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *input.Input)) *Engine {
 	e := Engine{
 		// Main renderer
-		Renderer: NewRenderer(getEngineCamera(config.Dimensions, &config), &config),
+		Renderer: NewRenderer(getEngineCamera(config.Dimensions, config), config),
 
 		// Package Controls
-		CollisionControl: NewCollisionControl(&config),
+		CollisionControl: NewCollisionControl(config),
 		TextureControl:   NewTextureControl(),
 		InputControl:     NewInputControl(),
 		ShaderControl:    NewShaderControl(),
 		LightControl:     NewLightControl(),
 		TerrainControl:   NewTerrainControl(),
 		UIControl:        NewUIControl(),
-		TextControl:      NewTextControl(&config),
+		TextControl:      NewTextControl(config),
 
 		// Configuration
 		Config:     config,
@@ -99,7 +99,8 @@ func NewEngine(config configuration.EngineConfig, renderFunc func(*Renderer, *in
 		)
 		e.LightControl.SetDirectionalLight(&l)
 
-		e.TerrainControl.NewSkyBox("TropicalSunnyDay", &e.ShaderControl, &e.TextureControl, &e.Config)
+		e.Renderer.SkyBoxEnabled = true
+		e.Renderer.SkyBox = e.TerrainControl.NewSkyBox("TropicalSunnyDay", &e.ShaderControl, &e.TextureControl, e.Config)
 	}
 
 	return &e
@@ -143,11 +144,11 @@ func (engine *Engine) Update(renderer *Renderer) {
 }
 
 func (engine *Engine) NewChild2D() child.Child2D {
-	return child.NewChild2D(&engine.Config)
+	return child.NewChild2D(engine.Config)
 }
 
 func (engine *Engine) NewChild3D() child.Child3D {
-	return child.NewChild3D(&engine.Config)
+	return child.NewChild3D(engine.Config)
 }
 
 func (engine *Engine) StartRenderer() {

@@ -15,7 +15,7 @@ type Child3D struct {
 	vertexArray *geometry.VertexArray
 	numVertices int32
 
-	primitive string
+	mesh string
 
 	shaderProgram uint32
 	material      *material.Material
@@ -154,7 +154,7 @@ func (child3D *Child3D) AttachTextureCoords(coords []float32) {
 		panic("Cannot attach texture without VertexArray")
 	}
 	if child3D.shaderProgram == 0 {
-		panic("Cannot attach texture without shader program")
+		//panic("Cannot attach texture without shader program")
 	}
 
 	gl.BindVertexArray(child3D.vertexArray.GetID())
@@ -178,9 +178,10 @@ func (child3D *Child3D) AttachVertexArray(vao *geometry.VertexArray, numVertices
 	child3D.numVertices = numVertices
 }
 
-func (child3D *Child3D) AttachPrimitive(p geometry.Primitive) {
+func (child3D *Child3D) AttachMesh(p geometry.Mesh) {
 	child3D.AttachVertexArray(p.GetVAO(), p.GetNumVertices())
-	child3D.vertexArray.AddVertexAttribute(geometry.CubeNormals, 2, 3)
+	child3D.vertexArray.AddVertexAttribute(*p.GetNormals(), 2, 3)
+	child3D.AttachTextureCoords(*p.GetTexCoords())
 }
 
 func (child3D *Child3D) AttachShader(s uint32) {
@@ -235,8 +236,12 @@ func (child3D *Child3D) AddCopy(config ChildCopy) {
 	child3D.copies = append(child3D.copies, config)
 }
 
-func (child3D *Child3D) GetCopies() []ChildCopy {
-	return child3D.copies
+func (child3D *Child3D) GetCopies() *[]ChildCopy {
+	return &child3D.copies
+}
+
+func (child3D *Child3D) GetNumCopies() int {
+	return 0
 }
 
 func (child3D *Child3D) GetCurrentCopies() []ChildCopy {
@@ -269,4 +274,8 @@ func (child3D *Child3D) SetSpecificRenderDistance(d float32) {
 
 func (child3D *Child3D) GetSpecificRenderDistance() float32 {
 	return child3D.specificRenderDistance
+}
+
+func (child3D *Child3D) MouseCollisionFunc(collision bool) {
+
 }

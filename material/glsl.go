@@ -101,6 +101,7 @@ const ShaderColorLightingVertex = `
 	layout (location = 1) in vec3 tex;
 	layout (location = 2) in vec3 normal;
 
+	uniform float textureScale;
 	
 	// Child copying
 	uniform vec3 copyingEnabled;
@@ -125,7 +126,7 @@ const ShaderColorLightingVertex = `
 		FragPos = vec3(modelMtx * vec4(position, 1.0));
 
 		// Texture coordinates
-		TexCoords = tex;
+		TexCoords = tex / textureScale;
 	}
 
 ` + "\x00"

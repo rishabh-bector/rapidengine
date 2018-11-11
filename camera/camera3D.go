@@ -75,6 +75,7 @@ func (camera3D *Camera3D) DefaultControls(inputs *input.Input) {
 	if inputs.Keys["shift"] {
 		camera3D.MoveDown()
 	}
+
 	camera3D.ProcessMouse(inputs.MouseX, inputs.MouseY, inputs.LastMouseX, inputs.LastMouseY)
 }
 

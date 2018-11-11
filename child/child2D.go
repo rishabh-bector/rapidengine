@@ -21,7 +21,7 @@ type Child2D struct {
 	vertexArray *geometry.VertexArray
 	numVertices int32
 
-	primitive string
+	mesh string
 
 	shaderProgram uint32
 	material      *material.Material
@@ -175,10 +175,6 @@ func (child2D *Child2D) AttachTextureCoords(coords []float32) {
 	gl.BindVertexArray(0)
 }
 
-func (child2D *Child2D) AttachTextureCoordsPrimitive() {
-	child2D.AttachTextureCoords(geometry.GetPrimitiveCoords(child2D.primitive))
-}
-
 func (child2D *Child2D) AttachCollider(x, y, w, h float32) {
 	child2D.collider = physics.NewCollider(x, y, w, h)
 }
@@ -188,10 +184,14 @@ func (child2D *Child2D) AttachVertexArray(vao *geometry.VertexArray, numVertices
 	child2D.numVertices = numVertices
 }
 
-func (child2D *Child2D) AttachPrimitive(p geometry.Primitive) {
-	child2D.primitive = p.GetID()
+func (child2D *Child2D) AttachMesh(p geometry.Mesh) {
+	child2D.mesh = p.GetID()
+
 	child2D.AttachVertexArray(p.GetVAO(), p.GetNumVertices())
-	child2D.vertexArray.AddVertexAttribute(geometry.RectNormals, 2, 3)
+
+	child2D.vertexArray.AddVertexAttribute(*p.GetNormals(), 2, 3)
+
+	child2D.AttachTextureCoords(*p.GetTexCoords())
 }
 
 func (child2D *Child2D) AttachMaterial(m *material.Material) {
@@ -279,12 +279,6 @@ func (child2D *Child2D) AddCopy(config ChildCopy) {
 
 func (child2D *Child2D) GetCopies() *[]ChildCopy {
 	return &child2D.copies
-}
-
-func (child2D *Child2D) IterCopies(f func(Child, ChildCopy)) {
-	for _, copy := range child2D.copies {
-		f(child2D, copy)
-	}
 }
 
 func (child2D *Child2D) GetNumCopies() int {

@@ -37,7 +37,7 @@ func (uiControl *UIControl) NewUIButton(
 	width, height float32,
 	material *material.Material,
 ) ui.Button {
-	button := ui.NewUIButton(x, y, width, height, material, &uiControl.engine.Config)
+	button := ui.NewUIButton(x, y, width, height, material, uiControl.engine.Config)
 
 	button.ElementChild.AttachShader(uiControl.engine.ShaderControl.GetShader("color"))
 	uiControl.engine.Instance(button.ElementChild)
