@@ -30,8 +30,9 @@ type Renderer struct {
 	// Current shader program
 	ShaderProgram uint32
 
-	// Currently bound child
-	CurrentBoundChild child.Child
+	// Currently bound VAO
+	CurrentBoundVAO    uint32
+	CurrentBoundShader uint32
 
 	// Children to be rendered
 	Children []child.Child
@@ -149,7 +150,7 @@ func (renderer *Renderer) RenderChildren() {
 
 // RenderChild renders a single child to the screen
 func (renderer *Renderer) RenderChild(c child.Child) {
-	BindChild(c)
+	renderer.BindChild(c)
 
 	c.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.LastFrameTime)
 
@@ -165,8 +166,7 @@ func (renderer *Renderer) DrawChild(c child.Child) {
 
 // RenderChildCopies renders all copies of a child
 func (renderer *Renderer) RenderChildCopies(c child.Child) {
-	BindChild(c)
-	renderer.CurrentBoundChild = c
+	renderer.BindChild(c)
 
 	copies := *(c.GetCopies())
 	for x := 0; x < c.GetNumCopies(); x++ {
@@ -176,10 +176,7 @@ func (renderer *Renderer) RenderChildCopies(c child.Child) {
 
 // RenderCopy renders a single copy of a child
 func (renderer *Renderer) RenderCopy(c child.Child, cpy child.ChildCopy) {
-	if renderer.CurrentBoundChild != c {
-		BindChild(c)
-		renderer.CurrentBoundChild = c
-	}
+	renderer.BindChild(c)
 	if renderer.Config.Dimensions == 2 {
 		if renderer.AutomaticRendering {
 			if (c.GetSpecificRenderDistance() != 0 && InBounds2D(cpy.X, cpy.Y, float32(renderer.camX), float32(renderer.camY), c.GetSpecificRenderDistance())) ||
@@ -202,10 +199,16 @@ func (renderer *Renderer) RenderCopy(c child.Child, cpy child.ChildCopy) {
 	}
 }
 
-// BindChild binds the VAO & Shader of a child
-func BindChild(c child.Child) {
-	gl.BindVertexArray(c.GetVertexArray().GetID())
-	gl.UseProgram(c.GetShaderProgram())
+// BindChild intelligently binds the VAO & Shader of a child
+func (renderer *Renderer) BindChild(c child.Child) {
+	if id := c.GetVertexArray().GetID(); id != renderer.CurrentBoundVAO {
+		gl.BindVertexArray(id)
+		renderer.CurrentBoundVAO = id
+	}
+	if id := c.GetShaderProgram(); id != renderer.CurrentBoundShader {
+		gl.UseProgram(c.GetShaderProgram())
+		renderer.CurrentBoundShader = id
+	}
 }
 
 // InBounds2D checks if a particular x/y is within the given render distance
