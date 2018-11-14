@@ -9,6 +9,8 @@ type EngineConfig struct {
 	FullScreen bool
 	VSync      bool
 
+	GammaCorrection bool
+
 	WindowTitle    string
 	PolygonLines   bool
 	CollisionLines bool
@@ -31,16 +33,23 @@ func NewEngineConfig(
 	Dimensions int,
 ) EngineConfig {
 	return EngineConfig{
-		ScreenWidth:    ScreenWidth,
-		ScreenHeight:   ScreenHeight,
-		FullScreen:     true,
-		VSync:          true,
-		WindowTitle:    "game",
-		PolygonLines:   false,
+		WindowTitle: "game",
+
+		// Screen dimensions
+		ScreenWidth:  ScreenWidth,
+		ScreenHeight: ScreenHeight,
+		FullScreen:   true,
+		Dimensions:   Dimensions,
+
+		// Rendering
+		VSync:           true,
+		PolygonLines:    false,
+		GammaCorrection: true,
+
+		// Misc
 		CollisionLines: false,
 		ShowFPS:        false,
 		MaxFPS:         60,
-		Dimensions:     Dimensions,
 		Profiling:      false,
 		SingleMaterial: false,
 		Logger:         logrus.New(),

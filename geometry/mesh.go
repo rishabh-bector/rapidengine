@@ -7,6 +7,7 @@ package geometry
 //  --------------------------------------------------
 
 import (
+	"math"
 	"rapidengine/configuration"
 	"rapidengine/material"
 
@@ -53,7 +54,15 @@ func (p *Mesh) GetNormals() *[]float32 {
 
 // NormalizeSizes takes in a size in pixels and normalizes to [0, 1]
 func NormalizeSizes(x, y, sw, sh float32) (float32, float32) {
-	return x / float32(sw), y / float32(sh)
+	return x / sw, y / sh
+}
+
+func normalizeX(x, sw float32) float32 {
+	return x / sw
+}
+
+func normalizeY(y, sh float32) float32 {
+	return y / sh
 }
 
 // GetMeshCoords returns the appropriate texture coordinates
@@ -80,6 +89,57 @@ func NewTriangle(points []float32) Mesh {
 		numVertices: int32(len(indices)),
 	}
 	return t
+}
+
+// NewPolygon creates a mesh based on a radius and number of sides
+func NewPolygon(radius float32, numSides int, config *configuration.EngineConfig) Mesh {
+	vertices := make([]float32, (numSides+1)*3)
+	indices := make([]uint32, numSides*3)
+
+	normals := make([]float32, (numSides+1)*3)
+	texCoords := make([]float32, (numSides+1)*3)
+
+	sw := float32(config.ScreenWidth)
+	sh := float32(config.ScreenHeight)
+
+	vertexPointer := 3
+	for i := 0; i < numSides; i++ {
+		circleVertex := float64((float32(i) / float32(numSides)) * (2 * math.Pi))
+		vertices[vertexPointer] = normalizeX(float32(math.Cos(circleVertex))*radius, sw)
+		vertices[vertexPointer+1] = normalizeY(float32(math.Sin(circleVertex))*radius, sh)
+		vertices[vertexPointer+2] = 0
+
+		normals[vertexPointer] = 0
+		normals[vertexPointer+1] = 0
+		normals[vertexPointer+2] = 0
+
+		texCoords[vertexPointer] = 0
+		texCoords[vertexPointer+1] = 0
+		texCoords[vertexPointer+2] = 0
+
+		vertexPointer += 3
+	}
+
+	indexPointer := uint32(0)
+	for i := 0; i < numSides-1; i++ {
+		indices[indexPointer] = 0
+		indices[indexPointer+1] = uint32(i + 1)
+		indices[indexPointer+2] = uint32(i + 2)
+		indexPointer += 3
+	}
+
+	indices[indexPointer] = 0
+	indices[indexPointer+1] = uint32(numSides)
+	indices[indexPointer+2] = 1
+
+	return Mesh{
+		id:          "circle",
+		vao:         NewVertexArray(vertices, indices),
+		texCoords:   &texCoords,
+		normals:     &normals,
+		numVertices: int32(len(indices)),
+	}
+
 }
 
 // NewRectangle creates a rectangle Mesh centered around the origin,
@@ -146,7 +206,7 @@ func NewPlane(width, height, density int, heightData [][]float32) Mesh {
 				normals[vertexPointer*3+1] = 1
 				normals[vertexPointer*3+2] = 0
 			} else {
-				vertices[vertexPointer*3+1] = heightData[i][j]
+				vertices[vertexPointer*3+1] = heightData[int((float32(i)/float32(xCount))*float32(len(heightData)))][int((float32(j)/float32(yCount))*float32(len(heightData[0])))]
 				normal := calculateNormal(i, j, heightData)
 				normals[vertexPointer*3] = normal.X()
 				normals[vertexPointer*3+1] = normal.Y()
@@ -188,26 +248,26 @@ func NewPlane(width, height, density int, heightData [][]float32) Mesh {
 	}
 }
 
-func GetHeightMapData(path string, min, max float32) [][]float32 {
-	img, err := material.LoadImage(path)
+func GetHeightMapData(path string, max float32) [][]float32 {
+	img, err := material.LoadImageFullDepth(path)
 	if err != nil {
 		panic(err)
 	}
 
-	heightRange := max - min
+	img.At(0, 0).RGBA()
 
 	data := make([][]float32, img.Bounds().Size().X)
 	for i := range data {
 		data[i] = make([]float32, img.Bounds().Size().Y)
 	}
 
-	for x := 0; x < img.Bounds().Size().X; x++ {
-		for y := 0; y < img.Bounds().Size().Y; y++ {
+	for x := 0; x < img.Bounds().Max.X; x++ {
+		for y := 0; y < img.Bounds().Max.Y; y++ {
 			r, _, _, _ := img.At(x, y).RGBA()
-			data[x][y] = min + ((float32(r) / 65535) * heightRange)
+			//println((float32(r) / 65535.0) * max)
+			data[x][y] = ((float32(r) / 65535.0) * max)
 		}
 	}
-
 	return data
 }
 

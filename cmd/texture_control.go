@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"rapidengine/configuration"
 	"rapidengine/material"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
@@ -8,11 +9,14 @@ import (
 
 type TextureControl struct {
 	TexMap map[string]*uint32
+
+	config *configuration.EngineConfig
 }
 
-func NewTextureControl() TextureControl {
+func NewTextureControl(config *configuration.EngineConfig) TextureControl {
 	return TextureControl{
-		make(map[string]*uint32),
+		TexMap: make(map[string]*uint32),
+		config: config,
 	}
 }
 
@@ -52,10 +56,15 @@ func (textureControl *TextureControl) NewTexture(path string, name string, filte
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
 	}
 
+	texFormat := gl.RGBA
+	if textureControl.config.GammaCorrection {
+		texFormat = gl.SRGB_ALPHA
+	}
+
 	gl.TexImage2D(
 		gl.TEXTURE_2D,
 		0,
-		gl.RGBA,
+		int32(texFormat),
 		int32(rgba.Rect.Size().X),
 		int32(rgba.Rect.Size().Y),
 		0,

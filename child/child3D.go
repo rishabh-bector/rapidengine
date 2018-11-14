@@ -51,7 +51,7 @@ func NewChild3D(config *configuration.EngineConfig) Child3D {
 		projectionMatrix: mgl32.Perspective(
 			mgl32.DegToRad(45),
 			float32(config.ScreenWidth)/float32(config.ScreenHeight),
-			0.1, 100,
+			0.1, 100000,
 		),
 		config:                 config,
 		Gravity:                0,

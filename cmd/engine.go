@@ -46,7 +46,7 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 
 		// Package Controls
 		CollisionControl: NewCollisionControl(config),
-		TextureControl:   NewTextureControl(),
+		TextureControl:   NewTextureControl(config),
 		InputControl:     NewInputControl(),
 		ShaderControl:    NewShaderControl(),
 		LightControl:     NewLightControl(),
@@ -92,10 +92,10 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 	if e.Config.Dimensions == 3 {
 		l := lighting.NewDirectionLight(
 			e.ShaderControl.GetShader("colorLighting"),
+			[]float32{0.6, 0.6, 0.6},
+			[]float32{0.9, 0.9, 0.9},
 			[]float32{0.3, 0.3, 0.3},
-			[]float32{0.8, 0.8, 0.8},
-			[]float32{0, 0, 0},
-			[]float32{1, -1, 1},
+			[]float32{1, -0.5, 1},
 		)
 		e.LightControl.SetDirectionalLight(&l)
 

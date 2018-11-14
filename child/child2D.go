@@ -189,9 +189,13 @@ func (child2D *Child2D) AttachMesh(p geometry.Mesh) {
 
 	child2D.AttachVertexArray(p.GetVAO(), p.GetNumVertices())
 
-	child2D.vertexArray.AddVertexAttribute(*p.GetNormals(), 2, 3)
+	if p.GetNormals() != nil {
+		child2D.vertexArray.AddVertexAttribute(*p.GetNormals(), 2, 3)
+	}
 
-	child2D.AttachTextureCoords(*p.GetTexCoords())
+	if p.GetTexCoords() != nil {
+		child2D.AttachTextureCoords(*p.GetTexCoords())
+	}
 }
 
 func (child2D *Child2D) AttachMaterial(m *material.Material) {

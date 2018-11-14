@@ -201,14 +201,16 @@ func (renderer *Renderer) RenderCopy(c child.Child, cpy child.ChildCopy) {
 
 // BindChild intelligently binds the VAO & Shader of a child
 func (renderer *Renderer) BindChild(c child.Child) {
-	if id := c.GetVertexArray().GetID(); id != renderer.CurrentBoundVAO {
+	gl.BindVertexArray(c.GetVertexArray().GetID())
+	gl.UseProgram(c.GetShaderProgram())
+	/*if id := c.GetVertexArray().GetID(); id != renderer.CurrentBoundVAO {
 		gl.BindVertexArray(id)
 		renderer.CurrentBoundVAO = id
 	}
 	if id := c.GetShaderProgram(); id != renderer.CurrentBoundShader {
 		gl.UseProgram(c.GetShaderProgram())
 		renderer.CurrentBoundShader = id
-	}
+	}*/
 }
 
 // InBounds2D checks if a particular x/y is within the given render distance
@@ -334,6 +336,10 @@ func initOpenGL(config *configuration.EngineConfig) uint32 {
 		gl.Disable(gl.CULL_FACE)
 	} else {
 		gl.Disable(gl.DEPTH_TEST)
+	}
+
+	if config.GammaCorrection {
+		gl.Enable(gl.FRAMEBUFFER_SRGB)
 	}
 
 	return 0
