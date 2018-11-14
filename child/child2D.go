@@ -166,7 +166,7 @@ func (child2D *Child2D) AttachTextureCoords(coords []float32) {
 		panic("Cannot attach texture without VertexArray")
 	}
 	if child2D.shaderProgram == 0 {
-		panic("Cannot attach texture without shader program")
+		//panic("Cannot attach texture without shader program")
 	}
 
 	gl.BindVertexArray(child2D.vertexArray.GetID())
