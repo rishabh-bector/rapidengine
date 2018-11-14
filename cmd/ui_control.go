@@ -29,6 +29,10 @@ func (uiControl *UIControl) Update(inputs *input.Input) {
 }
 
 func (uiControl *UIControl) AddButton(button *ui.Button, id string) {
+	uiControl.engine.Instance(button.ElementChild)
+	uiControl.engine.CollisionControl.CreateMouseCollision(button.ElementChild)
+	uiControl.engine.TextControl.AddTextBox(button.TextBx)
+
 	uiControl.Buttons[id] = button
 }
 
@@ -40,7 +44,6 @@ func (uiControl *UIControl) NewUIButton(
 	button := ui.NewUIButton(x, y, width, height, material, uiControl.engine.Config)
 
 	button.ElementChild.AttachShader(uiControl.engine.ShaderControl.GetShader("color"))
-	uiControl.engine.Instance(button.ElementChild)
-	uiControl.engine.CollisionControl.CreateMouseCollision(button.ElementChild)
+
 	return button
 }

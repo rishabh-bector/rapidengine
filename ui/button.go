@@ -11,6 +11,9 @@ import (
 type Button struct {
 	ElementChild *child.Child2D
 
+	TextBx *TextBox
+	text   string
+
 	width  float32
 	height float32
 
@@ -54,6 +57,10 @@ func (button *Button) Update(inputs *input.Input) {
 
 func (button *Button) SetClickCallback(f func()) {
 	button.clickCallback = f
+}
+
+func (button *Button) AttachText(tb *TextBox) {
+	button.TextBx = tb
 }
 
 func (button *Button) MouseFunc(c bool) {

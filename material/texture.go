@@ -9,8 +9,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-
-	"golang.org/x/image/tiff"
 )
 
 func LoadImage(path string) (*image.RGBA, error) {
@@ -95,8 +93,6 @@ func LoadImageFullDepth(path string) (image.Image, error) {
 		decode = jpeg.Decode
 	case "image/png":
 		decode = png.Decode
-	case "application/octet-stream":
-		decode = tiff.Decode
 	default:
 		return nil, fmt.Errorf("unrecognized image format: %s", ct)
 	}
