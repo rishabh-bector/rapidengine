@@ -45,9 +45,9 @@ func (tc *TextControl) NewTextBox(text string, font string, x, y, scale float32,
 	textbox := &ui.TextBox{
 		Text:  text,
 		Font:  font,
-		Color: color,
-		X:     x,
-		Y:     y,
+		Color: [3]float32{color[0] / 255, color[1] / 255, color[2] / 255},
+		X:     x - float32(tc.config.ScreenWidth/2),
+		Y:     y - float32(tc.config.ScreenHeight/2),
 		Scale: scale,
 	}
 	textbox.SetV41Text(t)

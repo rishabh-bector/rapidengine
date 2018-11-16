@@ -24,7 +24,7 @@ type Material struct {
 	transparencyEnabled bool
 	transparencyTexture *uint32
 
-	color []float32
+	color [3]float32
 	shine float32
 
 	animationPlaying  string
@@ -41,7 +41,7 @@ func NewMaterial(program uint32, config *configuration.EngineConfig) Material {
 	m := Material{
 		shaderProgram:       program,
 		shaderType:          SHADER_COLOR,
-		color:               []float32{1, 1, 1},
+		color:               [3]float32{1, 1, 1},
 		shine:               0.8,
 		textureScale:        1,
 		transparencyEnabled: false,
@@ -91,7 +91,7 @@ func (material *Material) Render(delta float64, darkness float32) {
 		gl.EnableVertexAttribArray(1)
 		gl.EnableVertexAttribArray(2)
 
-		gl.Uniform3fv(gl.GetUniformLocation(material.shaderProgram, gl.Str("materialType\x00")), 1, &SHADER_TEXTURE_UNI[0])
+		gl.Uniform3fv(gl.GetUniformLocation(material.shaderProgram, gl.Str("materialType\x00")), 1, &SHADER_COLOR_UNI[0])
 		gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("diffuseMap\x00")), 0)
 		gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("cubeDiffuseMap\x00")), 1)
 		gl.Uniform1f(gl.GetUniformLocation(material.shaderProgram, gl.Str("shine\x00")), material.shine)
@@ -146,9 +146,9 @@ func (material *Material) Render(delta float64, darkness float32) {
 	}
 }
 
-func (material *Material) BecomeColor(rgba []float32) {
+func (material *Material) BecomeColor(rgb [3]float32) {
 	material.shaderType = SHADER_COLOR
-	material.color = rgba
+	material.color = [3]float32{rgb[0] / 255, rgb[1] / 255, rgb[2] / 255}
 }
 
 func (material *Material) BecomeTexture(t *uint32) {
@@ -178,7 +178,7 @@ func (material *Material) RemoveTransparency() {
 	material.transparencyTexture = nil
 }
 
-func (materal *Material) GetColor() []float32 {
+func (materal *Material) GetColor() [3]float32 {
 	return materal.color
 }
 

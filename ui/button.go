@@ -14,8 +14,8 @@ type Button struct {
 	TextBx *TextBox
 	text   string
 
-	width  float32
-	height float32
+	Width  float32
+	Height float32
 
 	clickCallback func()
 	justClicked   bool
@@ -27,6 +27,9 @@ func NewUIButton(x, y, width, height float32, material *material.Material, confi
 	button := Button{
 		justClicked: false,
 		colliding:   make(map[int]bool),
+		TextBx:      nil,
+		Width:       width,
+		Height:      height,
 	}
 
 	c := child.NewChild2D(config)

@@ -12,8 +12,9 @@ type TextBox struct {
 
 	Scale float32
 
-	X     float32
-	Y     float32
+	X float32
+	Y float32
+
 	Color [3]float32
 }
 

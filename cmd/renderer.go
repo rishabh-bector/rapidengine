@@ -78,7 +78,7 @@ func (renderer *Renderer) StartRenderer() {
 	if renderer.Config.Profiling {
 		//defer profile.Start().Stop()
 	}
-	gl.ClearColor(float32(50)/255, float32(50)/255, float32(50)/255, 1)
+	gl.ClearColor(float32(0)/255, float32(0)/255, float32(0)/255, 1)
 	for !renderer.Window.ShouldClose() {
 
 		// Clear screen buffers
@@ -262,7 +262,7 @@ func (renderer *Renderer) Initialize(engine *Engine) {
 	engine.TextureControl.NewTexture("../rapidengine/border.png", "default", "linear")
 	dm := material.NewMaterial(engine.ShaderControl.GetShader("colorLighting"), engine.Config)
 	//dm.BecomeTexture(engine.TextureControl.GetTexture("default"))
-	dm.BecomeColor([]float32{0.2, 0.7, 0.4})
+	dm.BecomeColor([3]float32{0.2, 0.7, 0.4})
 	renderer.DefaultMaterial = dm
 }
 

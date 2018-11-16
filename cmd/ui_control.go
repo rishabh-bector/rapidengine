@@ -31,7 +31,12 @@ func (uiControl *UIControl) Update(inputs *input.Input) {
 func (uiControl *UIControl) AddButton(button *ui.Button, id string) {
 	uiControl.engine.Instance(button.ElementChild)
 	uiControl.engine.CollisionControl.CreateMouseCollision(button.ElementChild)
-	uiControl.engine.TextControl.AddTextBox(button.TextBx)
+
+	if button.TextBx != nil {
+		button.TextBx.X = button.ElementChild.X - float32(uiControl.engine.Config.ScreenWidth/2) + (button.Width / 2)
+		button.TextBx.Y = button.ElementChild.Y - float32(uiControl.engine.Config.ScreenHeight/2) + (button.Height / 2)
+		uiControl.engine.TextControl.AddTextBox(button.TextBx)
+	}
 
 	uiControl.Buttons[id] = button
 }
