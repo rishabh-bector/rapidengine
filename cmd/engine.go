@@ -10,6 +10,8 @@ import (
 	"rapidengine/lighting"
 	"rapidengine/ui"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/go-gl/mathgl/mgl32"
 )
 
@@ -37,6 +39,8 @@ type Engine struct {
 	FrameCount int
 
 	Config *configuration.EngineConfig
+
+	Logger *logrus.Logger
 }
 
 func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *input.Input)) *Engine {
@@ -60,11 +64,13 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 
 		// User render function
 		RenderFunc: renderFunc,
+
+		Logger: config.Logger,
 	}
 
 	if e.Config.Profiling {
-		http.HandleFunc("/", profileEndpoint)
-		go http.ListenAndServe(":8080", nil)
+		//http.HandleFunc("/", profileEndpoint)
+		//go http.ListenAndServe(":8080", nil)
 	}
 
 	if e.Config.ShowFPS {
@@ -82,7 +88,7 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 	if e.Config.Dimensions == 2 {
 		l := lighting.NewDirectionLight(
 			e.ShaderControl.GetShader("colorLighting"),
-			[]float32{0, 0, 0},
+			[]float32{1, 1, 1},
 			[]float32{0, 0, 0},
 			[]float32{0, 0, 0},
 			[]float32{0, 0, -1},

@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/pkg/profile"
 	log "github.com/sirupsen/logrus"
 
 	"rapidengine/camera"
@@ -76,7 +77,7 @@ type Renderer struct {
 // StartRenderer contains the main render loop
 func (renderer *Renderer) StartRenderer() {
 	if renderer.Config.Profiling {
-		//defer profile.Start().Stop()
+		defer profile.Start().Stop()
 	}
 	gl.ClearColor(float32(0)/255, float32(0)/255, float32(0)/255, 1)
 	for !renderer.Window.ShouldClose() {

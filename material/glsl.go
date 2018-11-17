@@ -213,7 +213,7 @@ const ShaderColorLightingFragment = `
 
 		// phase 2: point lights
 		for(int i = 0; i < NR_POINT_LIGHTS; i++) {
-			result += CalcPointLight(lmao, norm, FragPos, viewDir);    
+			//result += CalcPointLight(lmao, norm, FragPos, viewDir);    
 		}
 
 		result *= darkness;
@@ -250,8 +250,13 @@ const ShaderColorLightingFragment = `
 			if(texture(diffuseMap, TexCoords.xy).a != 1.0f) {
 				discard;
 			}
-			if(transparencyEnabled == 1 && texture(transparencyMap, TexCoords.xy).x == 0.0f) {
-				return vec3(0, 0, 0);
+
+			if(transparencyEnabled == 1) {
+				if(texture(transparencyMap, TexCoords.xy).x == 0.0f) {
+					discard;
+				} else if (texture(transparencyMap, TexCoords.xy).x != 1.0f) {
+					return vec3(0, 0, 0);
+				}
 			}
 
 			ambient = light.ambient * vec3(texture(diffuseMap, TexCoords.xy));
