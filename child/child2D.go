@@ -23,8 +23,9 @@ type Child2D struct {
 
 	mesh string
 
-	shaderProgram uint32
-	material      *material.Material
+	shader   *material.ShaderProgram
+	material *material.Material
+	Darkness float32
 
 	modelMatrix      mgl32.Mat4
 	projectionMatrix mgl32.Mat4
@@ -64,6 +65,7 @@ func NewChild2D(config *configuration.EngineConfig) Child2D {
 		Gravity:                0,
 		copyingEnabled:         false,
 		specificRenderDistance: 0,
+		Darkness:               1,
 	}
 }
 
@@ -71,29 +73,26 @@ func (child2D *Child2D) PreRender(mainCamera camera.Camera) {
 	child2D.BindChild()
 
 	gl.UniformMatrix4fv(
-		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("modelMtx\x00")),
+		child2D.shader.GetUniform("modelMtx"),
 		1, false, &child2D.modelMatrix[0],
 	)
 
 	gl.UniformMatrix4fv(
-		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("viewMtx\x00")),
+		child2D.shader.GetUniform("viewMtx"),
 		1, false, mainCamera.GetFirstViewIndex(),
 	)
 
 	gl.UniformMatrix4fv(
-		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("projectionMtx\x00")),
+		child2D.shader.GetUniform("projectionMtx"),
 		1, false, &child2D.projectionMatrix[0],
 	)
-
-	gl.BindAttribLocation(child2D.shaderProgram, 0, gl.Str("position\x00"))
-	gl.BindAttribLocation(child2D.shaderProgram, 1, gl.Str("tex\x00"))
 
 	gl.BindVertexArray(0)
 }
 
 func (child2D *Child2D) BindChild() {
 	gl.BindVertexArray(child2D.vertexArray.GetID())
-	gl.UseProgram(child2D.shaderProgram)
+	child2D.shader.Bind()
 }
 
 func (child2D *Child2D) Update(mainCamera camera.Camera, delta float64, lastFrame float64) {
@@ -119,16 +118,16 @@ func (child2D *Child2D) Render(mainCamera camera.Camera, delta float64) {
 	child2D.modelMatrix = mgl32.Translate3D(sX, sY, 0)
 
 	gl.UniformMatrix4fv(
-		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("viewMtx\x00")),
+		child2D.shader.GetUniform("viewMtx"),
 		1, false, mainCamera.GetFirstViewIndex(),
 	)
 
 	gl.UniformMatrix4fv(
-		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("modelMtx\x00")),
+		child2D.shader.GetUniform("modelMtx"),
 		1, false, &child2D.modelMatrix[0],
 	)
 
-	child2D.material.Render(delta, 1)
+	child2D.material.Render(delta, child2D.Darkness)
 }
 
 func (child2D *Child2D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
@@ -137,12 +136,12 @@ func (child2D *Child2D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
 	child2D.projectionMatrix = mgl32.Ortho2D(-1, 1, -1, 1)
 
 	gl.UniformMatrix4fv(
-		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("viewMtx\x00")),
+		child2D.shader.GetUniform("viewMtx"),
 		1, false, mainCamera.GetFirstViewIndex(),
 	)
 
 	gl.UniformMatrix4fv(
-		gl.GetUniformLocation(child2D.shaderProgram, gl.Str("modelMtx\x00")),
+		child2D.shader.GetUniform("modelMtx"),
 		1, false, &child2D.modelMatrix[0],
 	)
 
@@ -165,12 +164,9 @@ func (child2D *Child2D) AttachTextureCoords(coords []float32) {
 	if child2D.vertexArray == nil {
 		panic("Cannot attach texture without VertexArray")
 	}
-	if child2D.shaderProgram == 0 {
-		//panic("Cannot attach texture without shader program")
-	}
 
 	gl.BindVertexArray(child2D.vertexArray.GetID())
-	gl.UseProgram(child2D.shaderProgram)
+	child2D.shader.Bind()
 	child2D.vertexArray.AddVertexAttribute(coords, 1, 2)
 	gl.BindVertexArray(0)
 }
@@ -202,8 +198,8 @@ func (child2D *Child2D) AttachMaterial(m *material.Material) {
 	child2D.material = m
 }
 
-func (child2D *Child2D) AttachShader(s uint32) {
-	child2D.shaderProgram = s
+func (child2D *Child2D) AttachShader(s *material.ShaderProgram) {
+	child2D.shader = s
 }
 
 func (child2D *Child2D) AttachGroup(group string) {
@@ -232,8 +228,8 @@ func (child2D *Child2D) SetSpecificRenderDistance(d float32) {
 //  Getters
 //  --------------------------------------------------
 
-func (child2D *Child2D) GetShaderProgram() uint32 {
-	return child2D.shaderProgram
+func (child2D *Child2D) GetShaderProgram() *material.ShaderProgram {
+	return child2D.shader
 }
 
 func (child2D *Child2D) GetVertexArray() *geometry.VertexArray {

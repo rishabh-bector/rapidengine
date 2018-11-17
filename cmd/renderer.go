@@ -202,16 +202,7 @@ func (renderer *Renderer) RenderCopy(c child.Child, cpy child.ChildCopy) {
 
 // BindChild intelligently binds the VAO & Shader of a child
 func (renderer *Renderer) BindChild(c child.Child) {
-	gl.BindVertexArray(c.GetVertexArray().GetID())
-	gl.UseProgram(c.GetShaderProgram())
-	/*if id := c.GetVertexArray().GetID(); id != renderer.CurrentBoundVAO {
-		gl.BindVertexArray(id)
-		renderer.CurrentBoundVAO = id
-	}
-	if id := c.GetShaderProgram(); id != renderer.CurrentBoundShader {
-		gl.UseProgram(c.GetShaderProgram())
-		renderer.CurrentBoundShader = id
-	}*/
+	c.BindChild()
 }
 
 // InBounds2D checks if a particular x/y is within the given render distance
@@ -261,7 +252,7 @@ func NewRenderer(camera camera.Camera, config *configuration.EngineConfig) Rende
 
 func (renderer *Renderer) Initialize(engine *Engine) {
 	engine.TextureControl.NewTexture("../rapidengine/border.png", "default", "linear")
-	dm := material.NewMaterial(engine.ShaderControl.GetShader("colorLighting"), engine.Config)
+	dm := material.NewMaterial(engine.ShaderControl.GetShader("texture"), engine.Config)
 	//dm.BecomeTexture(engine.TextureControl.GetTexture("default"))
 	dm.BecomeColor([3]float32{0.2, 0.7, 0.4})
 	renderer.DefaultMaterial = dm

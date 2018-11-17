@@ -10,6 +10,10 @@ func NewShaderControl() ShaderControl {
 	return ShaderControl{make(map[string]*material.ShaderProgram)}
 }
 
+func (shaderControl *ShaderControl) BindShader(name string) {
+	shaderControl.programs[name].Bind()
+}
+
 func (shaderControl *ShaderControl) Initialize() {
 	shaderControl.programs = map[string]*material.ShaderProgram{
 		"texture":       &material.TextureProgram,
@@ -22,6 +26,6 @@ func (shaderControl *ShaderControl) Initialize() {
 	}
 }
 
-func (shaderControl *ShaderControl) GetShader(name string) uint32 {
-	return shaderControl.programs[name].GetID()
+func (shaderControl *ShaderControl) GetShader(name string) *material.ShaderProgram {
+	return shaderControl.programs[name]
 }

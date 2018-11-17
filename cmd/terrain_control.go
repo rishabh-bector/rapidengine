@@ -7,7 +7,6 @@ import (
 	"rapidengine/material"
 	"rapidengine/terrain"
 
-	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 )
 
@@ -27,8 +26,7 @@ func (terrainControl *TerrainControl) NewSkyBox(
 	config *configuration.EngineConfig,
 ) *terrain.SkyBox {
 
-	gl.UseProgram(shaderControl.GetShader("skybox"))
-	gl.BindAttribLocation(shaderControl.GetShader("skybox"), 0, gl.Str("position\x00"))
+	shaderControl.GetShader("skybox").Bind()
 
 	textureControl.NewCubeMap(
 		fmt.Sprintf("../rapidengine/assets/skybox/%s/%s_LF.png", path, path),

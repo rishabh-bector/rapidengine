@@ -3,21 +3,87 @@ package material
 var TextureProgram = ShaderProgram{
 	vertexShader:   ShaderTextureVertex,
 	fragmentShader: ShaderTextureFragment,
+	uniformLocations: map[string]int32{
+		"texture0":            0,
+		"modelMtx":            0,
+		"viewMtx":             0,
+		"projectionMtx":       0,
+		"darkness":            0,
+		"transparencyEnabled": 0,
+		"transparencyMap":     0,
+	},
+	attributeLocations: map[string]uint32{
+		"position": 0,
+		"tex":      1,
+	},
 }
 
 var ColorProgram = ShaderProgram{
 	vertexShader:   ShaderColorVertex,
 	fragmentShader: ShaderColorFragment,
+	uniformLocations: map[string]int32{
+		"color":         0,
+		"transparency":  0,
+		"modelMtx":      0,
+		"viewMtx":       0,
+		"projectionMtx": 0,
+		"darkness":      0,
+	},
+	attributeLocations: map[string]uint32{
+		"position": 0,
+	},
 }
 
 var ColorLightingProgram = ShaderProgram{
 	vertexShader:   ShaderColorLightingVertex,
 	fragmentShader: ShaderColorLightingFragment,
+	uniformLocations: map[string]int32{
+		"textureScale":        0,
+		"copyingEnabled":      0,
+		"transparency":        0,
+		"modelMtx":            0,
+		"viewMtx":             0,
+		"projectionMtx":       0,
+		"materialType":        0,
+		"diffuseMap":          0,
+		"cubeDiffuseMap":      0,
+		"darkness":            0,
+		"color":               0,
+		"shine":               0,
+		"transparencyEnabled": 0,
+		"transparencyMap":     0,
+		"viewPos":             0,
+
+		"dirLight.direction": 0,
+		"dirLight.ambient":   0,
+		"dirLight.diffuse":   0,
+		"dirLight.specular":  0,
+
+		"pointLights": 0,
+		"lmao":        0,
+		"spotLight":   0,
+	},
+	attributeLocations: map[string]uint32{
+		"position": 0,
+		"tex":      1,
+		"normal":   2,
+	},
 }
 
 var SkyBoxProgram = ShaderProgram{
 	vertexShader:   ShaderSkyBoxVertex,
 	fragmentShader: ShaderSkyBoxFragment,
+	uniformLocations: map[string]int32{
+		"color":         0,
+		"transparency":  0,
+		"modelMtx":      0,
+		"viewMtx":       0,
+		"projectionMtx": 0,
+		"darkness":      0,
+	},
+	attributeLocations: map[string]uint32{
+		"position": 0,
+	},
 }
 
 const ShaderTextureVertex = `
@@ -45,16 +111,36 @@ const ShaderTextureFragment = `
 		#version 410
 
 		uniform sampler2D texture0;
+		uniform float darkness;
+		uniform int transparencyEnabled;
+		uniform sampler2D transparencyMap;
 
 		in vec3 texCoord;
 
 		out vec4 outColor;
 
 		void main() {
+
 			if(texture(texture0, texCoord.xy).a < 0.5) {
 				discard;
 			}
-			outColor = texture(texture0, texCoord.xy);
+
+			vec3 col = vec3(0, 0, 0);
+			float d = darkness;
+
+			if(transparencyEnabled == 1) {
+				if(texture(transparencyMap, texCoord.xy).x == 0.0f) {
+					discard;
+				} else if(texture(transparencyMap, texCoord.xy).x != 1.0f) {
+					col = vec3(0, 0, 0);
+				} else {
+					col = texture(texture0, texCoord.xy).xyz;
+				}
+			} else {
+				col = texture(texture0, texCoord.xy).xyz;
+			}
+
+			outColor = vec4(d * col, 1);
 		}
 		
 	` + "\x00"
@@ -73,21 +159,25 @@ const ShaderColorVertex = `
 		gl_Position = projectionMtx * viewMtx * modelMtx * vec4(position, 1.0);
 	}
 
-` + "\x00"
+	` + "\x00"
 
 const ShaderColorFragment = `
 
 	#version 410
 
 	uniform vec3 color;
+	uniform float transparency;
 
 	out vec4 outColor;
 
 	void main() {
-		outColor = vec4(color, 1.0);
+		if(transparency == 0) {
+			discard;
+		}
+		outColor = vec4(color, transparency);
 	}
 
-` + "\x00"
+	` + "\x00"
 
 const ShaderColorLightingVertex = `
 
@@ -129,7 +219,7 @@ const ShaderColorLightingVertex = `
 		TexCoords = tex / textureScale;
 	}
 
-` + "\x00"
+	` + "\x00"
 
 const ShaderColorLightingFragment = `
 

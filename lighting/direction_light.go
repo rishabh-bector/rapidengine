@@ -1,9 +1,13 @@
 package lighting
 
-import "github.com/go-gl/gl/v4.1-core/gl"
+import (
+	"rapidengine/material"
+
+	"github.com/go-gl/gl/v4.1-core/gl"
+)
 
 type DirectionLight struct {
-	program uint32
+	shader *material.ShaderProgram
 
 	ambient  []float32
 	diffuse  []float32
@@ -12,9 +16,9 @@ type DirectionLight struct {
 	direction []float32
 }
 
-func NewDirectionLight(p uint32, a, d, s, dir []float32) DirectionLight {
+func NewDirectionLight(p *material.ShaderProgram, a, d, s, dir []float32) DirectionLight {
 	return DirectionLight{
-		program:   p,
+		shader:    p,
 		ambient:   a,
 		diffuse:   d,
 		specular:  s,
@@ -23,34 +27,34 @@ func NewDirectionLight(p uint32, a, d, s, dir []float32) DirectionLight {
 }
 
 func (light *DirectionLight) PreRender() {
-	gl.UseProgram(light.program)
+	light.shader.Bind()
 }
 
 func (light *DirectionLight) UpdateShader(cx, cy, cz float32) {
 	c := []float32{cx, cy, cz}
-	gl.UseProgram(light.program)
+	light.shader.Bind()
 	gl.Uniform3fv(
-		gl.GetUniformLocation(light.program, gl.Str("dirLight.direction"+"\x00")),
+		light.shader.GetUniform("dirlight.direction"),
 		1, &light.direction[0],
 	)
 
 	gl.Uniform3fv(
-		gl.GetUniformLocation(light.program, gl.Str("dirLight.ambient"+"\x00")),
+		light.shader.GetUniform("dirlight.ambient"),
 		1, &light.ambient[0],
 	)
 
 	gl.Uniform3fv(
-		gl.GetUniformLocation(light.program, gl.Str("dirLight.diffuse"+"\x00")),
+		light.shader.GetUniform("dirlight.diffuse"),
 		1, &light.diffuse[0],
 	)
 
 	gl.Uniform3fv(
-		gl.GetUniformLocation(light.program, gl.Str("dirLight.specular"+"\x00")),
+		light.shader.GetUniform("dirlight.specular"),
 		1, &light.specular[0],
 	)
 
 	gl.Uniform3fv(
-		gl.GetUniformLocation(light.program, gl.Str("viewPos"+"\x00")),
+		light.shader.GetUniform("viewPos"),
 		1, &c[0],
 	)
 }

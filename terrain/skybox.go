@@ -10,7 +10,7 @@ import (
 )
 
 type SkyBox struct {
-	shader   uint32
+	shader   *material.ShaderProgram
 	material material.Material
 
 	vao *geometry.VertexArray
@@ -20,7 +20,7 @@ type SkyBox struct {
 }
 
 func NewSkyBox(
-	shader uint32,
+	shader *material.ShaderProgram,
 	mat material.Material,
 	vao *geometry.VertexArray,
 	projectionMatrix,
@@ -37,7 +37,7 @@ func NewSkyBox(
 
 func (skyBox *SkyBox) Render(mainCamera camera.Camera) {
 	gl.DepthMask(false)
-	gl.UseProgram(skyBox.shader)
+	skyBox.shader.Bind()
 	gl.BindVertexArray(skyBox.vao.GetID())
 
 	skyBox.material.Render(0, 1)
@@ -46,17 +46,17 @@ func (skyBox *SkyBox) Render(mainCamera camera.Camera) {
 	skyBox.modelMatrix = mgl32.Translate3D(x, y, z)
 
 	gl.UniformMatrix4fv(
-		gl.GetUniformLocation(skyBox.shader, gl.Str("modelMtx\x00")),
+		skyBox.shader.GetUniform("modelMtx"),
 		1, false, &skyBox.modelMatrix[0],
 	)
 
 	gl.UniformMatrix4fv(
-		gl.GetUniformLocation(skyBox.shader, gl.Str("viewMtx\x00")),
+		skyBox.shader.GetUniform("viewMtx"),
 		1, false, mainCamera.GetFirstViewIndex(),
 	)
 
 	gl.UniformMatrix4fv(
-		gl.GetUniformLocation(skyBox.shader, gl.Str("projectionMtx\x00")),
+		skyBox.shader.GetUniform("projectionMtx"),
 		1, false, &skyBox.projectionMatrix[0],
 	)
 

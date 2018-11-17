@@ -15,14 +15,16 @@ var SHADER_TEXTURE_UNI = []float32{0, 1, 0}
 var SHADER_CUBEMAP_UNI = []float32{0, 0, 1}
 
 type Material struct {
-	shaderProgram uint32
-	shaderType    string
+	shader     *ShaderProgram
+	shaderType string
 
 	texture      *uint32
 	textureScale float32
 
 	transparencyEnabled bool
 	transparencyTexture *uint32
+
+	transparency float32
 
 	color [3]float32
 	shine float32
@@ -37,10 +39,9 @@ type Material struct {
 	off bool
 }
 
-func NewMaterial(program uint32, config *configuration.EngineConfig) Material {
+func NewMaterial(program *ShaderProgram, config *configuration.EngineConfig) Material {
 	m := Material{
-		shaderProgram:       program,
-		shaderType:          SHADER_COLOR,
+		shader:              program,
 		color:               [3]float32{1, 1, 1},
 		shine:               0.8,
 		textureScale:        1,
@@ -48,6 +49,7 @@ func NewMaterial(program uint32, config *configuration.EngineConfig) Material {
 		animationEnabled:    false,
 		animationCurrent:    0,
 		animationTextures:   make(map[string][]*uint32),
+		transparency:        1,
 		off:                 false,
 	}
 	if config.SingleMaterial {
@@ -60,7 +62,6 @@ func (material *Material) PreRender() {
 	switch material.shaderType {
 	case SHADER_COLOR:
 	case SHADER_TEXTURE:
-		gl.BindAttribLocation(material.shaderProgram, 1, gl.Str("tex\x00"))
 	}
 }
 
@@ -86,47 +87,49 @@ func (material *Material) Render(delta float64, darkness float32) {
 	switch material.shaderType {
 
 	case SHADER_COLOR:
-		gl.Uniform3fv(gl.GetUniformLocation(material.shaderProgram, gl.Str("color\x00")), 1, &material.color[0])
+		gl.Uniform3fv(material.shader.GetUniform("color"), 1, &material.color[0])
 		gl.EnableVertexAttribArray(0)
 		gl.EnableVertexAttribArray(1)
 		gl.EnableVertexAttribArray(2)
 
-		gl.Uniform3fv(gl.GetUniformLocation(material.shaderProgram, gl.Str("materialType\x00")), 1, &SHADER_COLOR_UNI[0])
-		gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("diffuseMap\x00")), 0)
-		gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("cubeDiffuseMap\x00")), 1)
-		gl.Uniform1f(gl.GetUniformLocation(material.shaderProgram, gl.Str("shine\x00")), material.shine)
-		gl.Uniform1f(gl.GetUniformLocation(material.shaderProgram, gl.Str("textureScale\x00")), material.textureScale)
+		gl.Uniform3fv(material.shader.GetUniform("materialType"), 1, &SHADER_COLOR_UNI[0])
+		gl.Uniform1i(material.shader.GetUniform("diffuseMap"), 0)
+		gl.Uniform1i(material.shader.GetUniform("cubeDiffuseMap"), 1)
+		gl.Uniform1f(material.shader.GetUniform("shine"), material.shine)
+		gl.Uniform1f(material.shader.GetUniform("textureScale"), material.textureScale)
 
 		if material.transparencyEnabled {
-			gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("transparencyEnabled\x00")), 1)
+			gl.Uniform1i(material.shader.GetUniform("transparencyEnabled"), 1)
 			gl.ActiveTexture(gl.TEXTURE2)
 			gl.BindTexture(gl.TEXTURE_2D, *material.transparencyTexture)
-			gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("transparencyMap\x00")), 2)
+			gl.Uniform1i(material.shader.GetUniform("transparenctMap"), 2)
 		} else {
-			gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("transparencyEnabled\x00")), 0)
+			gl.Uniform1i(material.shader.GetUniform("transparencyEnabled"), 0)
 		}
 
-		gl.Uniform1f(gl.GetUniformLocation(material.shaderProgram, gl.Str("darkness\x00")), darkness)
+		gl.Uniform1f(material.shader.GetUniform("darkness"), darkness)
+		gl.Uniform1f(material.shader.GetUniform("transparency"), material.transparency)
 
 	case SHADER_TEXTURE:
 		gl.ActiveTexture(gl.TEXTURE0)
 		gl.BindTexture(gl.TEXTURE_2D, *material.texture)
-		gl.Uniform3fv(gl.GetUniformLocation(material.shaderProgram, gl.Str("materialType\x00")), 1, &SHADER_TEXTURE_UNI[0])
-		gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("diffuseMap\x00")), 0)
-		gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("cubeDiffuseMap\x00")), 1)
-		gl.Uniform1f(gl.GetUniformLocation(material.shaderProgram, gl.Str("shine\x00")), material.shine)
-		gl.Uniform1f(gl.GetUniformLocation(material.shaderProgram, gl.Str("textureScale\x00")), material.textureScale)
+		gl.Uniform3fv(material.shader.GetUniform("materialType"), 1, &SHADER_TEXTURE_UNI[0])
+		gl.Uniform1i(material.shader.GetUniform("diffuseMap"), 0)
+		gl.Uniform1i(material.shader.GetUniform("cubeDiffuseMap"), 1)
+		gl.Uniform1f(material.shader.GetUniform("shine"), material.shine)
+		gl.Uniform1f(material.shader.GetUniform("textureScale"), material.textureScale)
 
 		if material.transparencyEnabled {
-			gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("transparencyEnabled\x00")), 1)
+			gl.Uniform1i(material.shader.GetUniform("transparencyEnabled"), 1)
 			gl.ActiveTexture(gl.TEXTURE2)
 			gl.BindTexture(gl.TEXTURE_2D, *material.transparencyTexture)
-			gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("transparencyMap\x00")), 2)
+			gl.Uniform1i(material.shader.GetUniform("transparencyMap"), 2)
 		} else {
-			gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("transparencyEnabled\x00")), 0)
+			gl.Uniform1i(material.shader.GetUniform("transparencyEnabled"), 0)
 		}
 
-		gl.Uniform1f(gl.GetUniformLocation(material.shaderProgram, gl.Str("darkness\x00")), darkness)
+		gl.Uniform1f(material.shader.GetUniform("darkness"), darkness)
+		gl.Uniform1f(material.shader.GetUniform("transparency"), material.transparency)
 
 		gl.EnableVertexAttribArray(0)
 		gl.EnableVertexAttribArray(1)
@@ -135,10 +138,11 @@ func (material *Material) Render(delta float64, darkness float32) {
 	case SHADER_CUBEMAP:
 		gl.ActiveTexture(gl.TEXTURE1)
 		gl.BindTexture(gl.TEXTURE_CUBE_MAP, *material.texture)
-		gl.Uniform3fv(gl.GetUniformLocation(material.shaderProgram, gl.Str("materialType\x00")), 1, &SHADER_CUBEMAP_UNI[0])
-		gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("cubeDiffuseMap\x00")), 1)
-		gl.Uniform1f(gl.GetUniformLocation(material.shaderProgram, gl.Str("shine\x00")), material.shine)
-		gl.Uniform1f(gl.GetUniformLocation(material.shaderProgram, gl.Str("darkness\x00")), darkness)
+		gl.Uniform3fv(material.shader.GetUniform("materialType"), 1, &SHADER_CUBEMAP_UNI[0])
+		gl.Uniform1i(material.shader.GetUniform("cubeDiffuseMap"), 1)
+		gl.Uniform1f(material.shader.GetUniform("shine"), material.shine)
+		gl.Uniform1f(material.shader.GetUniform("darkness"), darkness)
+		gl.Uniform1f(material.shader.GetUniform("transparency"), material.transparency)
 
 		gl.EnableVertexAttribArray(0)
 		gl.EnableVertexAttribArray(1)
@@ -156,7 +160,7 @@ func (material *Material) BecomeTexture(t *uint32) {
 	material.texture = t
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, *t)
-	gl.Uniform1i(gl.GetUniformLocation(material.shaderProgram, gl.Str("texture0\x00")), int32(0))
+	gl.Uniform1i(material.shader.GetUniform("texture0"), int32(0))
 }
 
 func (material *Material) BecomeCubemap(c *uint32) {
@@ -164,8 +168,8 @@ func (material *Material) BecomeCubemap(c *uint32) {
 	material.texture = c
 }
 
-func (material *Material) AttachShader(s uint32) {
-	material.shaderProgram = s
+func (material *Material) AttachShader(s *ShaderProgram) {
+	material.shader = s
 }
 
 func (material *Material) AttachTransparency(texture *uint32) {
@@ -205,4 +209,8 @@ func (material *Material) SetAnimationFPS(s float64) {
 
 func (material *Material) PlayAnimation(anim string) {
 	material.animationPlaying = anim
+}
+
+func (material *Material) SetTransparency(t float32) {
+	material.transparency = t
 }

@@ -17,10 +17,12 @@ type ChildCopy struct {
 type Child interface {
 	PreRender(camera.Camera)
 
+	BindChild()
+
 	RenderCopy(ChildCopy, camera.Camera)
 	CheckCopyingEnabled() bool
 
-	GetShaderProgram() uint32
+	GetShaderProgram() *material.ShaderProgram
 	GetVertexArray() *geometry.VertexArray
 	GetNumVertices() int32
 
