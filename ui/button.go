@@ -33,8 +33,8 @@ func NewUIButton(x, y, width, height float32, material *material.Material, confi
 	}
 
 	c := child.NewChild2D(config)
-	c.AttachMesh(geometry.NewRectangle(width, height, config))
 	c.AttachMaterial(material)
+	c.AttachMesh(geometry.NewRectangle(width, height, config))
 	c.AttachCollider(0, 0, width, height)
 	c.X = x
 	c.Y = y

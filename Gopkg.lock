@@ -3,109 +3,93 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2ad2f845c05e9fcb89f4f381ea2bd03e344e4cb15ebe993dc0993a9c12a1f744"
   name = "github.com/4ydx/gltext"
   packages = [
     ".",
-    "v4.1",
+    "v4.1"
   ]
-  pruneopts = "UT"
   revision = "84bc6aa204bffadd70a6fa2f0f267e6c4d82835e"
 
 [[projects]]
   branch = "master"
-  digest = "1:0bd2fe5ef5c29d0a08c48772722ff70dc2fd4793f0451f8ca9bc309f1f249f60"
   name = "github.com/go-gl/gl"
   packages = ["v4.1-core/gl"]
-  pruneopts = "UT"
   revision = "68e2537930806bfcee1b92a0e14b4e9b8bb3a3e3"
 
 [[projects]]
   branch = "master"
-  digest = "1:96519e5f428b661be4ac2ed07cff5aaab64f668e29c392fa7494dc7c04bcf71a"
   name = "github.com/go-gl/glfw"
   packages = ["v3.2/glfw"]
-  pruneopts = "UT"
   revision = "691ee1b84c51ae625ed1aafebc915d3db3d63d66"
 
 [[projects]]
   branch = "master"
-  digest = "1:208382238a5b6e9a1a01e7f82e2dd3b80c0305fd622247f1ba6360805d398225"
   name = "github.com/go-gl/mathgl"
   packages = ["mgl32"]
-  pruneopts = "UT"
   revision = "cdf14b6b8f8a4a1bfb003dd5119205c5f711d85a"
 
 [[projects]]
   branch = "master"
-  digest = "1:7a6377256f670508711c56c25556d639e673c0fa0f519c5a758fdcbfc8af9ac8"
   name = "github.com/golang/freetype"
   packages = [
     ".",
     "raster",
-    "truetype",
+    "truetype"
   ]
-  pruneopts = "UT"
   revision = "e2365dfdc4a05e4b8299a783240d4a7d5a65d4e4"
 
 [[projects]]
-  digest = "1:0a69a1c0db3591fcefb47f115b224592c8dfa4368b7ba9fae509d5e16cdc95c8"
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
-  pruneopts = "UT"
   revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
   version = "v1.0.1"
 
 [[projects]]
-  digest = "1:3f53e9e4dfbb664cd62940c9c4b65a2171c66acd0b7621a1a6b8e78513525a52"
+  name = "github.com/ojrac/opensimplex-go"
+  packages = ["."]
+  revision = "7bffa9e65fbe3215abbe7c2215b7eff0f56b8a3f"
+  version = "v1.0.1"
+
+[[projects]]
+  name = "github.com/pkg/profile"
+  packages = ["."]
+  revision = "5b67d428864e92711fcbd2f8629456121a56d91f"
+  version = "v1.2.1"
+
+[[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  pruneopts = "UT"
   revision = "ad15b42461921f1fb3529b058c6786c6a45d5162"
   version = "v1.1.1"
 
 [[projects]]
   branch = "master"
-  digest = "1:3f3a05ae0b95893d90b9b3b5afdb79a9b3d96e4e36e099d841ae602e4aca0da8"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  pruneopts = "UT"
   revision = "0c41d7ab0a0ee717d4590a44bcb987dfd9e183eb"
 
 [[projects]]
   branch = "master"
-  digest = "1:5530edb982922b2abbfc765907562e72da5ecba84466a6394bcb14721aae322c"
   name = "golang.org/x/image"
   packages = [
     "font",
     "math/f32",
-    "math/fixed",
+    "math/fixed"
   ]
-  pruneopts = "UT"
   revision = "991ec62608f3c0da01d400756917825d1e2fd528"
 
 [[projects]]
   branch = "master"
-  digest = "1:56e0fb6e56fa651d9183abd2db5f29d05da203a7c50bf9b331259e5087aca683"
   name = "golang.org/x/sys"
   packages = [
     "unix",
-    "windows",
+    "windows"
   ]
-  pruneopts = "UT"
   revision = "8e24a49d80f82323e1c4db1b5da3e0f31171a151"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = [
-    "github.com/4ydx/gltext",
-    "github.com/4ydx/gltext/v4.1",
-    "github.com/go-gl/gl/v4.1-core/gl",
-    "github.com/go-gl/glfw/v3.2/glfw",
-    "github.com/go-gl/mathgl/mgl32",
-    "github.com/sirupsen/logrus",
-    "golang.org/x/image/math/fixed",
-  ]
+  inputs-digest = "6781011a3b5b3874f2ed3412a1631f7168bb2a5c45dcd44c616c2608ed022480"
   solver-name = "gps-cdcl"
   solver-version = 1

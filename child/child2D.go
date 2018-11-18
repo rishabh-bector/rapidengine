@@ -196,6 +196,7 @@ func (child2D *Child2D) AttachMesh(p geometry.Mesh) {
 
 func (child2D *Child2D) AttachMaterial(m *material.Material) {
 	child2D.material = m
+	child2D.shader = m.GetShader()
 }
 
 func (child2D *Child2D) AttachShader(s *material.ShaderProgram) {

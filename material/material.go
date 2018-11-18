@@ -190,6 +190,10 @@ func (material *Material) GetTexture() *uint32 {
 	return material.texture
 }
 
+func (material *Material) GetShader() *ShaderProgram {
+	return material.shader
+}
+
 func (material *Material) SetTextureScale(scale float32) {
 	material.textureScale = scale
 }
