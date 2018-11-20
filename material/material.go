@@ -33,7 +33,7 @@ type Material struct {
 	animationTextures map[string][]*uint32
 	animationCurrent  int
 	animationFrame    float64
-	animationFPS      float64
+	animationFPS      map[string]float64
 	animationEnabled  bool
 
 	off bool
@@ -49,6 +49,7 @@ func NewMaterial(program *ShaderProgram, config *configuration.EngineConfig) Mat
 		animationEnabled:    false,
 		animationCurrent:    0,
 		animationTextures:   make(map[string][]*uint32),
+		animationFPS:        make(map[string]float64),
 		transparency:        1,
 		off:                 false,
 	}
@@ -71,14 +72,14 @@ func (material *Material) Render(delta float64, darkness float32) {
 	}
 
 	if material.animationEnabled && material.animationPlaying != "" {
-		if material.animationFrame > 1/material.animationFPS {
-			material.texture = material.animationTextures[material.animationPlaying][material.animationCurrent]
+		if material.animationFrame > 1/material.animationFPS[material.animationPlaying] {
 			if material.animationCurrent < len(material.animationTextures[material.animationPlaying])-1 {
 				material.animationCurrent++
 			} else {
 				material.animationCurrent = 0
 			}
 			material.animationFrame = 0
+			material.texture = material.animationTextures[material.animationPlaying][material.animationCurrent]
 		} else {
 			material.animationFrame += delta
 		}
@@ -207,8 +208,8 @@ func (material *Material) AddFrame(frame *uint32, anim string) {
 	material.animationTextures[anim] = append(material.animationTextures[anim], frame)
 }
 
-func (material *Material) SetAnimationFPS(s float64) {
-	material.animationFPS = s
+func (material *Material) SetAnimationFPS(anim string, s float64) {
+	material.animationFPS[anim] = s
 }
 
 func (material *Material) PlayAnimation(anim string) {
