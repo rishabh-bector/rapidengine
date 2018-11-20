@@ -144,13 +144,12 @@ func NewPolygon(radius float32, numSides int, config *configuration.EngineConfig
 
 // NewRectangle creates a rectangle Mesh centered around the origin,
 // based on a width and height value
-func NewRectangle(width, height float32, config *configuration.EngineConfig) Mesh {
-	w, h := NormalizeSizes(width, height, float32(config.ScreenWidth), float32(config.ScreenHeight))
+func NewRectangle() Mesh {
 	points := []float32{
 		0, 0, 0,
-		w * 2, 0, 0,
-		w * 2, h * 2, 0,
-		0, h * 2, 0,
+		1, 0, 0,
+		1, 1, 0,
+		0, 1, 0,
 	}
 	indices := []uint32{
 		0, 1, 2,

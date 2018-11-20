@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"rapidengine/configuration"
+
 	"github.com/4ydx/gltext/v4.1"
 	"github.com/go-gl/mathgl/mgl32"
 )
@@ -18,9 +20,12 @@ type TextBox struct {
 	Color [3]float32
 }
 
-func (t *TextBox) Update() {
+func (t *TextBox) Update(config *configuration.EngineConfig) {
 	t.textObj.SetString(t.Text)
-	t.textObj.SetPosition(mgl32.Vec2{t.X, t.Y})
+	t.textObj.SetPosition(mgl32.Vec2{
+		t.X - float32(config.ScreenWidth/2),
+		t.Y - float32(config.ScreenHeight/2),
+	})
 	t.textObj.SetScale(t.Scale)
 	t.textObj.SetColor(mgl32.Vec3(t.Color))
 	t.textObj.Draw()

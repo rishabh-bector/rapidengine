@@ -45,8 +45,8 @@ type Child3D struct {
 	config *configuration.EngineConfig
 }
 
-func NewChild3D(config *configuration.EngineConfig) Child3D {
-	return Child3D{
+func NewChild3D(config *configuration.EngineConfig) *Child3D {
+	return &Child3D{
 		modelMatrix: mgl32.Ident4(),
 		projectionMatrix: mgl32.Perspective(
 			mgl32.DegToRad(45),

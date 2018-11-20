@@ -35,12 +35,6 @@ type Renderer struct {
 	CurrentBoundVAO    uint32
 	CurrentBoundShader uint32
 
-	// Children to be rendered
-	Children []child.Child
-
-	// Render all children every frame (default)
-	AutomaticRendering bool
-
 	// Per-frame callback from the user
 	RenderFunc func(renderer *Renderer)
 
@@ -63,7 +57,9 @@ type Renderer struct {
 	Config *configuration.EngineConfig
 
 	// Default Material
-	DefaultMaterial material.Material
+	DefaultMaterial1 material.Material
+	DefaultMaterial2 material.Material
+	DefaultMaterial3 material.Material
 
 	// FrameTime
 	DeltaFrameTime float64
@@ -72,6 +68,9 @@ type Renderer struct {
 
 	// Termination Channel
 	Done chan bool
+
+	// Engine
+	engine *Engine
 }
 
 // StartRenderer contains the main render loop
@@ -79,42 +78,12 @@ func (renderer *Renderer) StartRenderer() {
 	if renderer.Config.Profiling {
 		defer profile.Start().Stop()
 	}
+
 	gl.ClearColor(float32(0)/255, float32(0)/255, float32(0)/255, 1)
+
+	// Render loop
 	for !renderer.Window.ShouldClose() {
-
-		// Clear screen buffers
-		gl.Clear(gl.COLOR_BUFFER_BIT)
-		gl.Clear(gl.DEPTH_BUFFER_BIT)
-
-		// Render skybox
-		if renderer.SkyBoxEnabled {
-			renderer.SkyBox.Render(renderer.MainCamera)
-		}
-
-		// Render children
-		if renderer.AutomaticRendering {
-			renderer.RenderChildren()
-		}
-
-		// Call user render loop
-		renderer.RenderFunc(renderer)
-
-		// Update camera
-		renderer.MainCamera.Look()
-		renderer.camX, renderer.camY, renderer.camZ = renderer.MainCamera.GetPosition()
-
-		// Update window buffers
-		renderer.Window.SwapBuffers()
-
-		// Frame logic
-		currentFrame := glfw.GetTime()
-		renderer.DeltaFrameTime = currentFrame - renderer.LastFrameTime
-		renderer.LastFrameTime = currentFrame
-
-		if renderer.DeltaFrameTime < renderer.MinFrameTime {
-			time.Sleep(time.Duration(1000000000 * (renderer.MinFrameTime - renderer.DeltaFrameTime)))
-			renderer.DeltaFrameTime = renderer.MinFrameTime
-		}
+		renderer.renderFrame()
 	}
 
 	renderer.Config.Logger.Info("Terminating...")
@@ -122,24 +91,58 @@ func (renderer *Renderer) StartRenderer() {
 	renderer.Done <- true
 }
 
-// PreRenderChildren calls the PreRender method of each child,
-// for initialization
-func (renderer *Renderer) PreRenderChildren() {
-	if renderer.Config.SingleMaterial {
-		renderer.DefaultMaterial.PreRender()
+// RenderFrame renders a single frame to the screen
+func (renderer *Renderer) renderFrame() {
+	// Clear screen buffers
+	gl.Clear(gl.COLOR_BUFFER_BIT)
+	gl.Clear(gl.DEPTH_BUFFER_BIT)
+
+	// Render skybox
+	if renderer.SkyBoxEnabled {
+		renderer.SkyBox.Render(renderer.MainCamera)
 	}
-	for _, child := range renderer.Children {
-		child.PreRender(renderer.MainCamera)
+
+	// Render children
+	if renderer.engine.ChildControl.IsAutomaticRendering() {
+		renderer.RenderChildren()
 	}
+
+	// Call user render loop
+	renderer.RenderFunc(renderer)
+
+	// Update camera
+	renderer.MainCamera.Look()
+	renderer.camX, renderer.camY, renderer.camZ = renderer.MainCamera.GetPosition()
+
+	// Update window buffers
+	renderer.Window.SwapBuffers()
+
+	// Frame logic
+	currentFrame := glfw.GetTime()
+	renderer.DeltaFrameTime = currentFrame - renderer.LastFrameTime
+	renderer.LastFrameTime = currentFrame
+
+	if renderer.DeltaFrameTime < renderer.MinFrameTime {
+		time.Sleep(time.Duration(1000000000 * (renderer.MinFrameTime - renderer.DeltaFrameTime)))
+		renderer.DeltaFrameTime = renderer.MinFrameTime
+	}
+}
+
+// ForceUpdate forces a frame render
+func (renderer *Renderer) ForceUpdate() {
+	gl.Clear(gl.COLOR_BUFFER_BIT)
+	gl.Clear(gl.DEPTH_BUFFER_BIT)
+
+	renderer.RenderChildren()
+	renderer.engine.TextControl.Update()
+
+	renderer.Window.SwapBuffers()
 }
 
 // RenderChildren binds the appropriate shaders and Vertex Array for each child,
 // or child copy, and draws them to the screen using an element buffer
 func (renderer *Renderer) RenderChildren() {
-	if renderer.Config.SingleMaterial {
-		renderer.DefaultMaterial.Render(0, 1)
-	}
-	for _, child := range renderer.Children {
+	for _, child := range renderer.engine.ChildControl.GetSceneChildren() {
 		go child.RemoveCurrentCopies()
 		if !child.CheckCopyingEnabled() {
 			renderer.RenderChild(child)
@@ -155,13 +158,12 @@ func (renderer *Renderer) RenderChild(c child.Child) {
 
 	c.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.LastFrameTime)
 
-	renderer.DrawChild(c)
+	renderer.drawChild(c)
 
 	gl.BindVertexArray(0)
 }
 
-// DrawChild draws the child's vertices to the screen
-func (renderer *Renderer) DrawChild(c child.Child) {
+func (renderer *Renderer) drawChild(c child.Child) {
 	gl.DrawElements(gl.TRIANGLES, c.GetNumVertices(), gl.UNSIGNED_INT, gl.PtrOffset(0))
 }
 
@@ -179,22 +181,22 @@ func (renderer *Renderer) RenderChildCopies(c child.Child) {
 func (renderer *Renderer) RenderCopy(c child.Child, cpy child.ChildCopy) {
 	renderer.BindChild(c)
 	if renderer.Config.Dimensions == 2 {
-		if renderer.AutomaticRendering {
+		if renderer.engine.ChildControl.IsAutomaticRendering() {
 			if (c.GetSpecificRenderDistance() != 0 && InBounds2D(cpy.X, cpy.Y, float32(renderer.camX), float32(renderer.camY), c.GetSpecificRenderDistance())) ||
 				InBounds2D(cpy.X, cpy.Y, float32(renderer.camX), float32(renderer.camY), renderer.RenderDistance) {
 				c.RenderCopy(cpy, renderer.MainCamera)
-				renderer.DrawChild(c)
+				renderer.drawChild(c)
 				c.AddCurrentCopy(cpy)
 			}
 		} else {
 			c.RenderCopy(cpy, renderer.MainCamera)
-			renderer.DrawChild(c)
+			renderer.drawChild(c)
 		}
 	}
 	if renderer.Config.Dimensions == 3 {
 		if InBounds3D(cpy.X, cpy.Y, cpy.Z, float32(renderer.camX), float32(renderer.camY), float32(renderer.camZ), renderer.RenderDistance) {
 			c.RenderCopy(cpy, renderer.MainCamera)
-			renderer.DrawChild(c)
+			renderer.drawChild(c)
 			c.AddCurrentCopy(cpy)
 		}
 	}
@@ -233,16 +235,14 @@ func InBounds3D(x, y, z, camX, camY, camZ, renderDistance float32) bool {
 // is called every frame, allowing the User to have frame-by-frame control
 func NewRenderer(camera camera.Camera, config *configuration.EngineConfig) Renderer {
 	r := Renderer{
-		Window:             initGLFW(config),
-		ShaderProgram:      initOpenGL(config),
-		Children:           []child.Child{},
-		AutomaticRendering: true,
-		RenderFunc:         func(r *Renderer) {},
-		RenderDistance:     1000,
-		MinFrameTime:       1 / float64(config.MaxFPS),
-		Done:               make(chan bool),
-		MainCamera:         camera,
-		Config:             config,
+		Window:         initGLFW(config),
+		ShaderProgram:  initOpenGL(config),
+		RenderFunc:     func(r *Renderer) {},
+		RenderDistance: 1000,
+		MinFrameTime:   1 / float64(config.MaxFPS),
+		Done:           make(chan bool),
+		MainCamera:     camera,
+		Config:         config,
 	}
 	r.Window.SetCursorPosCallback(input.MouseCallback)
 	r.Window.SetMouseButtonCallback(input.MouseButtonCallback)
@@ -251,17 +251,20 @@ func NewRenderer(camera camera.Camera, config *configuration.EngineConfig) Rende
 }
 
 func (renderer *Renderer) Initialize(engine *Engine) {
-	engine.TextureControl.NewTexture("../rapidengine/border.png", "default", "linear")
-	dm := material.NewMaterial(engine.ShaderControl.GetShader("texture"), engine.Config)
-	//dm.BecomeTexture(engine.TextureControl.GetTexture("default"))
-	dm.BecomeColor([3]float32{0.2, 0.7, 0.4})
-	renderer.DefaultMaterial = dm
-}
+	renderer.engine = engine
 
-// Instance takes a child and adds it to the renderer's list,
-// so that it will be rendered every frame
-func (renderer *Renderer) Instance(c child.Child) {
-	renderer.Children = append(renderer.Children, c)
+	dm1 := material.NewMaterial(engine.ShaderControl.GetShader("color"), engine.Config)
+	dm1.BecomeColor([3]float32{46, 49, 49})
+
+	dm2 := material.NewMaterial(engine.ShaderControl.GetShader("color"), engine.Config)
+	dm2.BecomeColor([3]float32{211, 84, 0})
+
+	dm3 := material.NewMaterial(engine.ShaderControl.GetShader("color"), engine.Config)
+	dm3.BecomeColor([3]float32{255, 255, 255})
+
+	renderer.DefaultMaterial1 = dm1
+	renderer.DefaultMaterial2 = dm2
+	renderer.DefaultMaterial3 = dm3
 }
 
 // AttachCallback attaches a callback function to the renderer,

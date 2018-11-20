@@ -23,7 +23,6 @@ type Child2D struct {
 
 	mesh string
 
-	shader   *material.ShaderProgram
 	material *material.Material
 	Darkness float32
 
@@ -45,6 +44,9 @@ type Child2D struct {
 
 	Gravity float32
 
+	ScaleX float32
+	ScaleY float32
+
 	Group          string
 	collider       physics.Collider
 	mouseCollision func(bool)
@@ -53,8 +55,8 @@ type Child2D struct {
 	//collisioncontrol *CollisionControl
 }
 
-func NewChild2D(config *configuration.EngineConfig) Child2D {
-	return Child2D{
+func NewChild2D(config *configuration.EngineConfig) *Child2D {
+	c := &Child2D{
 		modelMatrix:            mgl32.Ident4(),
 		projectionMatrix:       mgl32.Ortho2D(-1, 1, -1, 1),
 		config:                 config,
@@ -63,27 +65,30 @@ func NewChild2D(config *configuration.EngineConfig) Child2D {
 		VX:                     0,
 		VY:                     0,
 		Gravity:                0,
+		ScaleX:                 1,
+		ScaleY:                 1,
 		copyingEnabled:         false,
 		specificRenderDistance: 0,
 		Darkness:               1,
 	}
+	return c
 }
 
 func (child2D *Child2D) PreRender(mainCamera camera.Camera) {
 	child2D.BindChild()
 
 	gl.UniformMatrix4fv(
-		child2D.shader.GetUniform("modelMtx"),
+		child2D.material.GetShader().GetUniform("modelMtx"),
 		1, false, &child2D.modelMatrix[0],
 	)
 
 	gl.UniformMatrix4fv(
-		child2D.shader.GetUniform("viewMtx"),
+		child2D.material.GetShader().GetUniform("viewMtx"),
 		1, false, mainCamera.GetFirstViewIndex(),
 	)
 
 	gl.UniformMatrix4fv(
-		child2D.shader.GetUniform("projectionMtx"),
+		child2D.material.GetShader().GetUniform("projectionMtx"),
 		1, false, &child2D.projectionMatrix[0],
 	)
 
@@ -92,7 +97,7 @@ func (child2D *Child2D) PreRender(mainCamera camera.Camera) {
 
 func (child2D *Child2D) BindChild() {
 	gl.BindVertexArray(child2D.vertexArray.GetID())
-	child2D.shader.Bind()
+	child2D.material.GetShader().Bind()
 }
 
 func (child2D *Child2D) Update(mainCamera camera.Camera, delta float64, lastFrame float64) {
@@ -114,16 +119,19 @@ func (child2D *Child2D) Update(mainCamera camera.Camera, delta float64, lastFram
 }
 
 func (child2D *Child2D) Render(mainCamera camera.Camera, delta float64) {
-	sX, sY := ScaleCoordinates(child2D.X, child2D.Y, float32(child2D.config.ScreenWidth), float32(child2D.config.ScreenHeight))
+	sX, sY := ScaleTranslation(child2D.X, child2D.Y, float32(child2D.config.ScreenWidth), float32(child2D.config.ScreenHeight))
 	child2D.modelMatrix = mgl32.Translate3D(sX, sY, 0)
 
+	scaleX, scaleY := ScaleTransformation(child2D.ScaleX, child2D.ScaleY, float32(child2D.config.ScreenWidth), float32(child2D.config.ScreenHeight))
+	child2D.modelMatrix = child2D.modelMatrix.Mul4(mgl32.Scale3D(scaleX, scaleY, 0))
+
 	gl.UniformMatrix4fv(
-		child2D.shader.GetUniform("viewMtx"),
+		child2D.material.GetShader().GetUniform("viewMtx"),
 		1, false, mainCamera.GetFirstViewIndex(),
 	)
 
 	gl.UniformMatrix4fv(
-		child2D.shader.GetUniform("modelMtx"),
+		child2D.material.GetShader().GetUniform("modelMtx"),
 		1, false, &child2D.modelMatrix[0],
 	)
 
@@ -131,17 +139,21 @@ func (child2D *Child2D) Render(mainCamera camera.Camera, delta float64) {
 }
 
 func (child2D *Child2D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
-	sX, sY := ScaleCoordinates(config.X, config.Y, float32(child2D.config.ScreenWidth), float32(child2D.config.ScreenHeight))
+	sX, sY := ScaleTranslation(config.X, config.Y, float32(child2D.config.ScreenWidth), float32(child2D.config.ScreenHeight))
 	child2D.modelMatrix = mgl32.Translate3D(sX, sY, 0)
-	child2D.projectionMatrix = mgl32.Ortho2D(-1, 1, -1, 1)
+
+	scaleX, scaleY := ScaleTransformation(child2D.ScaleX, child2D.ScaleY, float32(child2D.config.ScreenWidth), float32(child2D.config.ScreenHeight))
+	child2D.modelMatrix = child2D.modelMatrix.Mul4(mgl32.Scale3D(scaleX, scaleY, 0))
+
+	config.Material.GetShader().Bind()
 
 	gl.UniformMatrix4fv(
-		child2D.shader.GetUniform("viewMtx"),
+		config.Material.GetShader().GetUniform("viewMtx"),
 		1, false, mainCamera.GetFirstViewIndex(),
 	)
 
 	gl.UniformMatrix4fv(
-		child2D.shader.GetUniform("modelMtx"),
+		config.Material.GetShader().GetUniform("modelMtx"),
 		1, false, &child2D.modelMatrix[0],
 	)
 
@@ -166,7 +178,7 @@ func (child2D *Child2D) AttachTextureCoords(coords []float32) {
 	}
 
 	gl.BindVertexArray(child2D.vertexArray.GetID())
-	child2D.shader.Bind()
+	child2D.material.GetShader().Bind()
 	child2D.vertexArray.AddVertexAttribute(coords, 1, 2)
 	gl.BindVertexArray(0)
 }
@@ -196,11 +208,6 @@ func (child2D *Child2D) AttachMesh(p geometry.Mesh) {
 
 func (child2D *Child2D) AttachMaterial(m *material.Material) {
 	child2D.material = m
-	child2D.shader = m.GetShader()
-}
-
-func (child2D *Child2D) AttachShader(s *material.ShaderProgram) {
-	child2D.shader = s
 }
 
 func (child2D *Child2D) AttachGroup(group string) {
@@ -230,7 +237,7 @@ func (child2D *Child2D) SetSpecificRenderDistance(d float32) {
 //  --------------------------------------------------
 
 func (child2D *Child2D) GetShaderProgram() *material.ShaderProgram {
-	return child2D.shader
+	return child2D.material.GetShader()
 }
 
 func (child2D *Child2D) GetVertexArray() *geometry.VertexArray {
@@ -314,6 +321,10 @@ func (child2D *Child2D) MouseCollisionFunc(c bool) {
 	child2D.mouseCollision(c)
 }
 
-func ScaleCoordinates(x, y, sw, sh float32) (float32, float32) {
+func ScaleTranslation(x, y, sw, sh float32) (float32, float32) {
 	return 2*(x/float32(sw)) - 1, 2*(y/float32(sh)) - 1
+}
+
+func ScaleTransformation(x, y, sw, sh float32) (float32, float32) {
+	return (x / sw) * 2, (y / sh) * 2
 }

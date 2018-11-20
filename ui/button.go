@@ -2,20 +2,16 @@ package ui
 
 import (
 	"rapidengine/child"
-	"rapidengine/configuration"
 	"rapidengine/geometry"
 	"rapidengine/input"
-	"rapidengine/material"
 )
 
 type Button struct {
-	ElementChild *child.Child2D
+	ButtonChild *child.Child2D
 
 	TextBx *TextBox
-	text   string
 
-	Width  float32
-	Height float32
+	transform geometry.Transform
 
 	clickCallback func()
 	justClicked   bool
@@ -23,26 +19,26 @@ type Button struct {
 	colliding map[int]bool
 }
 
-func NewUIButton(x, y, width, height float32, material *material.Material, config *configuration.EngineConfig) Button {
+func NewUIButton(x, y, width, height float32) Button {
 	button := Button{
 		justClicked: false,
 		colliding:   make(map[int]bool),
 		TextBx:      nil,
-		Width:       width,
-		Height:      height,
+		transform:   geometry.NewTransform(x, y, 0, width, height, 0),
 	}
 
-	c := child.NewChild2D(config)
-	c.AttachMaterial(material)
-	c.AttachMesh(geometry.NewRectangle(width, height, config))
-	c.AttachCollider(0, 0, width, height)
-	c.X = x
-	c.Y = y
-	c.SetMouseFunc(button.MouseFunc)
-
-	button.ElementChild = &c
-
 	return button
+}
+
+func (button *Button) Initialize() {
+	button.ButtonChild.AttachCollider(
+		0, 0,
+		button.transform.SX,
+		button.transform.SY,
+	)
+	button.ButtonChild.SetMouseFunc(button.MouseFunc)
+	button.SetPosition(button.transform.X, button.transform.Y)
+	button.SetDimensions(button.transform.SX, button.transform.SY)
 }
 
 func (button *Button) Update(inputs *input.Input) {
@@ -64,8 +60,32 @@ func (button *Button) SetClickCallback(f func()) {
 
 func (button *Button) AttachText(tb *TextBox) {
 	button.TextBx = tb
+	button.Initialize()
 }
 
 func (button *Button) MouseFunc(c bool) {
 	button.colliding[0] = c
+}
+
+//  --------------------------------------------------
+//  Interface
+//  --------------------------------------------------
+
+func (button *Button) SetPosition(x, y float32) {
+	button.ButtonChild.X = x
+	button.ButtonChild.Y = y
+
+	if button.TextBx != nil {
+		button.TextBx.X = button.ButtonChild.X + button.GetTransform().SX/2
+		button.TextBx.Y = button.ButtonChild.Y + button.GetTransform().SY/2
+	}
+}
+
+func (button *Button) SetDimensions(width, height float32) {
+	button.ButtonChild.ScaleX = width
+	button.ButtonChild.ScaleY = height
+}
+
+func (button *Button) GetTransform() geometry.Transform {
+	return button.transform
 }

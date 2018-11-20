@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"rapidengine/camera"
-	"rapidengine/child"
 	"rapidengine/configuration"
 	"rapidengine/input"
 	"rapidengine/lighting"
@@ -18,6 +17,8 @@ import (
 type Engine struct {
 	Renderer   Renderer
 	RenderFunc func(renderer *Renderer, inputs *input.Input)
+
+	ChildControl ChildControl
 
 	CollisionControl CollisionControl
 
@@ -49,6 +50,7 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 		Renderer: NewRenderer(getEngineCamera(config.Dimensions, config), config),
 
 		// Package Controls
+		ChildControl:     NewChildControl(),
 		CollisionControl: NewCollisionControl(config),
 		TextureControl:   NewTextureControl(config),
 		InputControl:     NewInputControl(),
@@ -68,22 +70,19 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 		Logger: config.Logger,
 	}
 
-	if e.Config.Profiling {
-		//http.HandleFunc("/", profileEndpoint)
-		//go http.ListenAndServe(":8080", nil)
-	}
-
-	if e.Config.ShowFPS {
-		e.TextControl.LoadFont("../rapidengine/assets/fonts/roboto.ttf", "roboto", 64, 10)
-		e.FPSBox = e.TextControl.NewTextBox("Rapid Engine", "roboto", float32(e.Config.ScreenWidth/2-100), float32(e.Config.ScreenHeight/2-50), 0.5, [3]float32{1, 1, 1})
-		e.TextControl.AddTextBox(e.FPSBox)
-	}
-
+	e.ChildControl.Initialize(&e)
 	e.ShaderControl.Initialize()
+	e.UIControl.Initialize(&e)
+	e.TextControl.Initialize(&e)
 	e.Renderer.Initialize(&e)
+
 	e.Renderer.AttachCallback(e.Update)
 
-	e.UIControl.Initialize(&e)
+	e.TextControl.LoadFont("../rapidengine/assets/fonts/avenir-next-regular.ttf", "avenir", 32, 0)
+	if e.Config.ShowFPS {
+		e.FPSBox = e.TextControl.NewTextBox("Rapid Engine", "roboto", float32(e.Config.ScreenWidth/2-100), float32(e.Config.ScreenHeight/2-50), 0.5, [3]float32{1, 1, 1})
+		e.TextControl.AddTextBox(e.FPSBox, "scene1")
+	}
 
 	if e.Config.Dimensions == 2 {
 		l := lighting.NewDirectionLight(
@@ -121,7 +120,7 @@ func NewEngineConfig(
 }
 
 func (engine *Engine) Initialize() {
-	engine.Renderer.PreRenderChildren()
+	engine.ChildControl.PreRenderChildren()
 }
 
 func (engine *Engine) Update(renderer *Renderer) {
@@ -149,22 +148,10 @@ func (engine *Engine) Update(renderer *Renderer) {
 	engine.FrameCount++
 }
 
-func (engine *Engine) NewChild2D() child.Child2D {
-	return child.NewChild2D(engine.Config)
-}
-
-func (engine *Engine) NewChild3D() child.Child3D {
-	return child.NewChild3D(engine.Config)
-}
-
 func (engine *Engine) StartRenderer() {
 	if engine.Config.CollisionLines {
 	}
 	engine.Renderer.StartRenderer()
-}
-
-func (engine *Engine) Instance(c child.Child) {
-	engine.Renderer.Instance(c)
 }
 
 func (engine *Engine) InstanceLight(l *lighting.PointLight) {

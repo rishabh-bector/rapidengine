@@ -13,26 +13,31 @@ import (
 )
 
 type TextControl struct {
-	Texts map[int]*ui.TextBox
+	Texts map[string][]*ui.TextBox
+
 	Fonts map[string]*v41.Font
 
-	numTexts int
-
-	config *configuration.EngineConfig
+	engine *Engine
 }
 
 func NewTextControl(config *configuration.EngineConfig) TextControl {
 	return TextControl{
-		Texts:    make(map[int]*ui.TextBox),
-		Fonts:    make(map[string]*v41.Font),
-		numTexts: 0,
-		config:   config,
+		Texts: make(map[string][]*ui.TextBox),
+		Fonts: make(map[string]*v41.Font),
 	}
 }
 
+func (tc *TextControl) Initialize(engine *Engine) {
+	tc.engine = engine
+}
+
 func (tc *TextControl) Update() {
-	for _, textbox := range tc.Texts {
-		textbox.Update()
+	for scn, texts := range tc.Texts {
+		if scn == tc.engine.ChildControl.GetScene() {
+			for _, t := range texts {
+				t.Update(tc.engine.Config)
+			}
+		}
 	}
 }
 
@@ -46,8 +51,8 @@ func (tc *TextControl) NewTextBox(text string, font string, x, y, scale float32,
 		Text:  text,
 		Font:  font,
 		Color: [3]float32{color[0] / 255, color[1] / 255, color[2] / 255},
-		X:     x - float32(tc.config.ScreenWidth/2),
-		Y:     y - float32(tc.config.ScreenHeight/2),
+		X:     x,
+		Y:     y,
 		Scale: scale,
 	}
 	textbox.SetV41Text(t)
@@ -55,9 +60,8 @@ func (tc *TextControl) NewTextBox(text string, font string, x, y, scale float32,
 	return textbox
 }
 
-func (tc *TextControl) AddTextBox(tb *ui.TextBox) {
-	tc.Texts[tc.numTexts] = tb
-	tc.numTexts++
+func (tc *TextControl) AddTextBox(tb *ui.TextBox, scene string) {
+	tc.Texts[scene] = append(tc.Texts[scene], tb)
 }
 
 func (tc *TextControl) LoadFont(path string, name string, scale float32, offset int) {
@@ -102,7 +106,7 @@ func (tc *TextControl) LoadFont(path string, name string, scale float32, offset 
 		}
 	}
 
-	font.ResizeWindow(float32(tc.config.ScreenWidth), float32(tc.config.ScreenHeight))
+	font.ResizeWindow(float32(tc.engine.Config.ScreenWidth), float32(tc.engine.Config.ScreenHeight))
 
 	tc.Fonts[name] = font
 
