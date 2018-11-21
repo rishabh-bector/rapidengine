@@ -42,7 +42,7 @@ func (uiControl *UIControl) NewUIButton(x, y, width, height float32) *ui.Button 
 	button := ui.NewUIButton(x, y, width, height)
 
 	button.ButtonChild = uiControl.engine.ChildControl.NewChild2D()
-	button.ButtonChild.AttachMaterial(&uiControl.engine.Renderer.DefaultMaterial2)
+	button.ButtonChild.AttachMaterial(uiControl.engine.Renderer.DefaultMaterial2)
 	button.ButtonChild.AttachMesh(geometry.NewRectangle())
 
 	button.Initialize()
@@ -71,8 +71,8 @@ func (uiControl *UIControl) NewProgressBar() *ui.ProgressBar {
 	pb.BackChild = uiControl.engine.ChildControl.NewChild2D()
 	pb.BarChild = uiControl.engine.ChildControl.NewChild2D()
 
-	pb.BackChild.AttachMaterial(&uiControl.engine.Renderer.DefaultMaterial1)
-	pb.BarChild.AttachMaterial(&uiControl.engine.Renderer.DefaultMaterial2)
+	pb.BackChild.AttachMaterial(uiControl.engine.Renderer.DefaultMaterial1)
+	pb.BarChild.AttachMaterial(uiControl.engine.Renderer.DefaultMaterial2)
 
 	pb.BarChild.AttachMesh(geometry.NewRectangle())
 	pb.BackChild.AttachMesh(geometry.NewRectangle())

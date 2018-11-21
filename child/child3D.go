@@ -17,8 +17,7 @@ type Child3D struct {
 
 	mesh string
 
-	shaderProgram uint32
-	material      *material.Material
+	material material.Material
 
 	modelMatrix      mgl32.Mat4
 	projectionMatrix mgl32.Mat4
@@ -64,23 +63,19 @@ func (child3D *Child3D) PreRender(mainCamera camera.Camera) {
 	child3D.BindChild()
 
 	gl.UniformMatrix4fv(
-		gl.GetUniformLocation(child3D.shaderProgram, gl.Str("modelMtx\x00")),
+		child3D.material.GetShader().GetUniform("modelMtx"),
 		1, false, &child3D.modelMatrix[0],
 	)
 
 	gl.UniformMatrix4fv(
-		gl.GetUniformLocation(child3D.shaderProgram, gl.Str("viewMtx\x00")),
+		child3D.material.GetShader().GetUniform("viewMtx"),
 		1, false, mainCamera.GetFirstViewIndex(),
 	)
 
 	gl.UniformMatrix4fv(
-		gl.GetUniformLocation(child3D.shaderProgram, gl.Str("projectionMtx\x00")),
+		child3D.material.GetShader().GetUniform("projectionMtx"),
 		1, false, &child3D.projectionMatrix[0],
 	)
-
-	gl.BindAttribLocation(child3D.shaderProgram, 0, gl.Str("position\x00"))
-
-	child3D.material.PreRender()
 
 	/*
 		if child3D.copyingEnabled {
@@ -98,7 +93,7 @@ func (child3D *Child3D) PreRender(mainCamera camera.Camera) {
 
 func (child3D *Child3D) BindChild() {
 	gl.BindVertexArray(child3D.vertexArray.GetID())
-	gl.UseProgram(child3D.shaderProgram)
+	child3D.material.GetShader().Bind()
 }
 
 func (child3D *Child3D) Update(mainCamera camera.Camera, delta float64, lastFrame float64) {
@@ -115,12 +110,12 @@ func (child3D *Child3D) Render(mainCamera camera.Camera) {
 	child3D.modelMatrix = mgl32.Translate3D(child3D.X, child3D.Y, child3D.Z)
 
 	gl.UniformMatrix4fv(
-		gl.GetUniformLocation(child3D.shaderProgram, gl.Str("viewMtx\x00")),
+		child3D.material.GetShader().GetUniform("viewMtx"),
 		1, false, mainCamera.GetFirstViewIndex(),
 	)
 
 	gl.UniformMatrix4fv(
-		gl.GetUniformLocation(child3D.shaderProgram, gl.Str("modelMtx\x00")),
+		child3D.material.GetShader().GetUniform("modelMtx"),
 		1, false, &child3D.modelMatrix[0],
 	)
 
@@ -131,18 +126,18 @@ func (child3D *Child3D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
 	child3D.modelMatrix = mgl32.Translate3D(config.X, config.Y, config.Z)
 
 	gl.UniformMatrix4fv(
-		gl.GetUniformLocation(child3D.shaderProgram, gl.Str("viewMtx\x00")),
+		child3D.material.GetShader().GetUniform("viewMtx"),
 		1, false, mainCamera.GetFirstViewIndex(),
 	)
 
 	gl.UniformMatrix4fv(
-		gl.GetUniformLocation(child3D.shaderProgram, gl.Str("modelMtx\x00")),
+		child3D.material.GetShader().GetUniform("modelMtx"),
 		1, false, &child3D.modelMatrix[0],
 	)
 
 	c := []float32{1, 0, 0}
 	gl.Uniform3fv(
-		gl.GetUniformLocation(child3D.shaderProgram, gl.Str("copyingEnabled\x00")),
+		child3D.material.GetShader().GetUniform("copyingEnabled"),
 		1, &c[0],
 	)
 
@@ -153,12 +148,8 @@ func (child3D *Child3D) AttachTextureCoords(coords []float32) {
 	if child3D.vertexArray == nil {
 		panic("Cannot attach texture without VertexArray")
 	}
-	if child3D.shaderProgram == 0 {
-		//panic("Cannot attach texture without shader program")
-	}
 
-	gl.BindVertexArray(child3D.vertexArray.GetID())
-	gl.UseProgram(child3D.shaderProgram)
+	child3D.BindChild()
 	child3D.vertexArray.AddVertexAttribute(coords, 1, 3)
 	gl.BindVertexArray(0)
 }
@@ -169,7 +160,7 @@ func (child3D *Child3D) SetPosition(x, y, z float32) {
 	child3D.Z = z
 }
 
-func (child3D *Child3D) AttachMaterial(m *material.Material) {
+func (child3D *Child3D) AttachMaterial(m material.Material) {
 	child3D.material = m
 }
 
@@ -184,10 +175,6 @@ func (child3D *Child3D) AttachMesh(p geometry.Mesh) {
 	child3D.AttachTextureCoords(*p.GetTexCoords())
 }
 
-func (child3D *Child3D) AttachShader(s uint32) {
-	child3D.shaderProgram = s
-}
-
 func (child3D *Child3D) GetX() float32 {
 	return child3D.X
 }
@@ -200,8 +187,8 @@ func (child3D *Child3D) GetZ() float32 {
 	return child3D.Z
 }
 
-func (child3D *Child3D) GetShaderProgram() uint32 {
-	return child3D.shaderProgram
+func (child3D *Child3D) GetShaderProgram() *material.ShaderProgram {
+	return child3D.material.GetShader()
 }
 
 func (child3D *Child3D) GetVertexArray() *geometry.VertexArray {
@@ -210,10 +197,6 @@ func (child3D *Child3D) GetVertexArray() *geometry.VertexArray {
 
 func (child3D *Child3D) GetNumVertices() int32 {
 	return child3D.numVertices
-}
-
-func (child3D *Child3D) GetTexture() *uint32 {
-	return child3D.material.GetTexture()
 }
 
 func (child3D *Child3D) GetCollider() *physics.Collider {

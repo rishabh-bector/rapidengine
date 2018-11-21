@@ -39,7 +39,7 @@ func (cc *ChildControl) InstanceChild(c child.Child, scene string) {
 
 func (cc *ChildControl) NewChild2D() *child.Child2D {
 	c := child.NewChild2D(cc.engine.Config)
-	c.AttachMaterial(&cc.engine.Renderer.DefaultMaterial1)
+	c.AttachMaterial(cc.engine.Renderer.DefaultMaterial1)
 	c.AttachMesh(geometry.NewRectangle())
 	return c
 }
