@@ -1,8 +1,8 @@
 package material
 
 var TextureProgram = ShaderProgram{
-	vertexShader:   ShaderTextureVertex,
-	fragmentShader: ShaderTextureFragment,
+	vertexShader:   "../rapidengine/material/glsl/basic.frag",
+	fragmentShader: "../rapidengine/material/glsl/basic.vert",
 	uniformLocations: map[string]int32{
 		"texture0":            0,
 		"modelMtx":            0,
@@ -15,22 +15,6 @@ var TextureProgram = ShaderProgram{
 	attributeLocations: map[string]uint32{
 		"position": 0,
 		"tex":      1,
-	},
-}
-
-var ColorProgram = ShaderProgram{
-	vertexShader:   ShaderColorVertex,
-	fragmentShader: ShaderColorFragment,
-	uniformLocations: map[string]int32{
-		"color":         0,
-		"transparency":  0,
-		"modelMtx":      0,
-		"viewMtx":       0,
-		"projectionMtx": 0,
-		"darkness":      0,
-	},
-	attributeLocations: map[string]uint32{
-		"position": 0,
 	},
 }
 
@@ -85,99 +69,6 @@ var SkyBoxProgram = ShaderProgram{
 		"position": 0,
 	},
 }
-
-const ShaderTextureVertex = `
-
-		#version 410 
-
-		uniform mat4 modelMtx;
-		uniform mat4 viewMtx;
-		uniform mat4 projectionMtx;
-
-		layout (location = 0) in vec3 position;
-		layout (location = 1) in vec3 tex;
-
-		out vec3 texCoord;
-		
-		void main() {
-			texCoord = tex;
-			gl_Position = projectionMtx * viewMtx * modelMtx * vec4(position, 1.0);
-		}
-	
-	` + "\x00"
-
-const ShaderTextureFragment = `
-
-		#version 410
-
-		uniform sampler2D texture0;
-		uniform float darkness;
-		uniform int transparencyEnabled;
-		uniform sampler2D transparencyMap;
-
-		in vec3 texCoord;
-
-		out vec4 outColor;
-
-		void main() {
-
-			if(texture(texture0, texCoord.xy).a < 0.5) {
-				discard;
-			}
-
-			vec3 col = vec3(0, 0, 0);
-			float d = darkness;
-
-			if(transparencyEnabled == 1) {
-				if(texture(transparencyMap, texCoord.xy).x == 0.0f) {
-					discard;
-				} else if(texture(transparencyMap, texCoord.xy).x != 1.0f) {
-					col = vec3(0, 0, 0);
-				} else {
-					col = texture(texture0, texCoord.xy).xyz;
-				}
-			} else {
-				col = texture(texture0, texCoord.xy).xyz;
-			}
-
-			outColor = vec4(d * col, 1);
-		}
-		
-	` + "\x00"
-
-const ShaderColorVertex = `
-
-	#version 410
-
-	uniform mat4 modelMtx;
-	uniform mat4 viewMtx;
-	uniform mat4 projectionMtx;
-
-	layout (location = 0) in vec3 position;
-
-	void main() {
-		gl_Position = projectionMtx * viewMtx * modelMtx * vec4(position, 1.0);
-	}
-
-	` + "\x00"
-
-const ShaderColorFragment = `
-
-	#version 410
-
-	uniform vec3 color;
-	uniform float transparency;
-
-	out vec4 outColor;
-
-	void main() {
-		if(transparency == 0) {
-			discard;
-		}
-		outColor = vec4(color, transparency);
-	}
-
-	` + "\x00"
 
 const ShaderColorLightingVertex = `
 

@@ -2,6 +2,7 @@ package material
 
 import (
 	"fmt"
+	"io/ioutil"
 	"strings"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
@@ -36,15 +37,24 @@ func (shaderProgram *ShaderProgram) GetID() uint32 {
 }
 
 func (shaderProgram *ShaderProgram) Compile() {
-	vertexShader, err := CompileShader(shaderProgram.vertexShader, gl.VERTEX_SHADER)
+	vert, err := ioutil.ReadFile(shaderProgram.vertexShader)
+	if err != nil {
+		panic(err)
+	}
+	vertexShader, err := CompileShader(string(vert), gl.VERTEX_SHADER)
 	if err != nil {
 		panic(err)
 	}
 
-	fragmentShader, err := CompileShader(shaderProgram.fragmentShader, gl.FRAGMENT_SHADER)
+	frag, err := ioutil.ReadFile(shaderProgram.fragmentShader)
 	if err != nil {
 		panic(err)
 	}
+	fragmentShader, err := CompileShader(string(frag), gl.FRAGMENT_SHADER)
+	if err != nil {
+		panic(err)
+	}
+
 	shaderProgram.id = gl.CreateProgram()
 	gl.AttachShader(shaderProgram.id, vertexShader)
 	gl.AttachShader(shaderProgram.id, fragmentShader)

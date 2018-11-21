@@ -1,5 +1,6 @@
 package material
 
+/*
 import (
 	"rapidengine/configuration"
 
@@ -219,3 +220,4 @@ func (material *Material) PlayAnimation(anim string) {
 func (material *Material) SetTransparency(t float32) {
 	material.transparency = t
 }
+*/

@@ -23,7 +23,7 @@ type Child2D struct {
 
 	mesh string
 
-	material *material.Material
+	material material.Material
 	Darkness float32
 
 	modelMatrix      mgl32.Mat4
@@ -206,7 +206,7 @@ func (child2D *Child2D) AttachMesh(p geometry.Mesh) {
 	}
 }
 
-func (child2D *Child2D) AttachMaterial(m *material.Material) {
+func (child2D *Child2D) AttachMaterial(m material.Material) {
 	child2D.material = m
 }
 
@@ -246,10 +246,6 @@ func (child2D *Child2D) GetVertexArray() *geometry.VertexArray {
 
 func (child2D *Child2D) GetNumVertices() int32 {
 	return child2D.numVertices
-}
-
-func (child2D *Child2D) GetTexture() *uint32 {
-	return child2D.material.GetTexture()
 }
 
 func (child2D *Child2D) GetCollider() *physics.Collider {

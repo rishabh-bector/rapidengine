@@ -9,7 +9,7 @@ type ChildCopy struct {
 	X        float32
 	Y        float32
 	Z        float32
-	Material *material.Material
+	Material material.Material
 	Darkness float32
 
 	ID string

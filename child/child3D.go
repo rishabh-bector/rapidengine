@@ -18,7 +18,7 @@ type Child3D struct {
 	mesh string
 
 	shaderProgram uint32
-	material      *material.Material
+	material      material.Material
 
 	modelMatrix      mgl32.Mat4
 	projectionMatrix mgl32.Mat4
@@ -79,8 +79,6 @@ func (child3D *Child3D) PreRender(mainCamera camera.Camera) {
 	)
 
 	gl.BindAttribLocation(child3D.shaderProgram, 0, gl.Str("position\x00"))
-
-	child3D.material.PreRender()
 
 	/*
 		if child3D.copyingEnabled {
@@ -169,7 +167,7 @@ func (child3D *Child3D) SetPosition(x, y, z float32) {
 	child3D.Z = z
 }
 
-func (child3D *Child3D) AttachMaterial(m *material.Material) {
+func (child3D *Child3D) AttachMaterial(m material.Material) {
 	child3D.material = m
 }
 
@@ -210,10 +208,6 @@ func (child3D *Child3D) GetVertexArray() *geometry.VertexArray {
 
 func (child3D *Child3D) GetNumVertices() int32 {
 	return child3D.numVertices
-}
-
-func (child3D *Child3D) GetTexture() *uint32 {
-	return child3D.material.GetTexture()
 }
 
 func (child3D *Child3D) GetCollider() *physics.Collider {
