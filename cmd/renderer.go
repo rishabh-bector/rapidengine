@@ -57,9 +57,8 @@ type Renderer struct {
 	Config *configuration.EngineConfig
 
 	// Default Material
-	DefaultMaterial1 material.Material
-	DefaultMaterial2 material.Material
-	DefaultMaterial3 material.Material
+	DefaultMaterial1 *material.BasicMaterial
+	DefaultMaterial2 *material.BasicMaterial
 
 	// FrameTime
 	DeltaFrameTime float64
@@ -99,7 +98,7 @@ func (renderer *Renderer) renderFrame() {
 
 	// Render skybox
 	if renderer.SkyBoxEnabled {
-		renderer.SkyBox.Render(renderer.MainCamera)
+		//renderer.SkyBox.Render(renderer.MainCamera)
 	}
 
 	// Render children
@@ -253,18 +252,16 @@ func NewRenderer(camera camera.Camera, config *configuration.EngineConfig) Rende
 func (renderer *Renderer) Initialize(engine *Engine) {
 	renderer.engine = engine
 
-	dm1 := material.NewMaterial(engine.ShaderControl.GetShader("color"), engine.Config)
-	dm1.BecomeColor([3]float32{46, 49, 49})
+	engine.TextureControl.NewTexture("../rapidengine/assets/abstract.jpg", "default", "linear")
 
-	dm2 := material.NewMaterial(engine.ShaderControl.GetShader("color"), engine.Config)
-	dm2.BecomeColor([3]float32{211, 84, 0})
+	dm1 := renderer.engine.MaterialControl.NewBasicMaterial()
+	dm1.Hue = [4]float32{46, 49, 49, 255}
 
-	dm3 := material.NewMaterial(engine.ShaderControl.GetShader("color"), engine.Config)
-	dm3.BecomeColor([3]float32{255, 255, 255})
+	dm2 := renderer.engine.MaterialControl.NewBasicMaterial()
+	dm2.Hue = [4]float32{211, 84, 0, 255}
 
 	renderer.DefaultMaterial1 = dm1
 	renderer.DefaultMaterial2 = dm2
-	renderer.DefaultMaterial3 = dm3
 }
 
 // AttachCallback attaches a callback function to the renderer,

@@ -24,6 +24,8 @@ type Engine struct {
 
 	TextureControl TextureControl
 
+	MaterialControl MaterialControl
+
 	InputControl InputControl
 
 	ShaderControl ShaderControl
@@ -55,6 +57,7 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 		TextureControl:   NewTextureControl(config),
 		InputControl:     NewInputControl(),
 		ShaderControl:    NewShaderControl(),
+		MaterialControl:  NewMaterialControl(),
 		LightControl:     NewLightControl(),
 		TerrainControl:   NewTerrainControl(),
 		UIControl:        NewUIControl(),
@@ -72,10 +75,12 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 
 	e.ChildControl.Initialize(&e)
 	e.ShaderControl.Initialize()
+	e.MaterialControl.Initialize(&e)
 	e.UIControl.Initialize(&e)
 	e.TextControl.Initialize(&e)
-	e.Renderer.Initialize(&e)
+	e.TerrainControl.Initialize(&e)
 
+	e.Renderer.Initialize(&e)
 	e.Renderer.AttachCallback(e.Update)
 
 	e.TextControl.LoadFont("../rapidengine/assets/fonts/avenir-next-regular.ttf", "avenir", 32, 0)
@@ -105,7 +110,7 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 		e.LightControl.SetDirectionalLight(&l)
 
 		e.Renderer.SkyBoxEnabled = true
-		e.Renderer.SkyBox = e.TerrainControl.NewSkyBox("TropicalSunnyDay", &e.ShaderControl, &e.TextureControl, e.Config)
+		//e.Renderer.SkyBox = e.TerrainControl.NewSkyBox("TropicalSunnyDay", &e.ShaderControl, &e.TextureControl, e.Config)
 	}
 
 	return &e

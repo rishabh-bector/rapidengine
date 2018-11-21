@@ -41,7 +41,7 @@ func (shaderProgram *ShaderProgram) Compile() {
 	if err != nil {
 		panic(err)
 	}
-	vertexShader, err := CompileShader(string(vert), gl.VERTEX_SHADER)
+	vertexShader, err := CompileShader(string(vert)+"\x00", gl.VERTEX_SHADER)
 	if err != nil {
 		panic(err)
 	}
@@ -50,7 +50,7 @@ func (shaderProgram *ShaderProgram) Compile() {
 	if err != nil {
 		panic(err)
 	}
-	fragmentShader, err := CompileShader(string(frag), gl.FRAGMENT_SHADER)
+	fragmentShader, err := CompileShader(string(frag)+"\x00", gl.FRAGMENT_SHADER)
 	if err != nil {
 		panic(err)
 	}
@@ -89,4 +89,81 @@ func CompileShader(source string, shaderType uint32) (uint32, error) {
 		return 0, fmt.Errorf("failed to compile %v: %v", source, log)
 	}
 	return shader, nil
+}
+
+//  --------------------------------------------------
+//  Shader Programs
+//  --------------------------------------------------
+
+var BasicProgram = ShaderProgram{
+	vertexShader:   "../rapidengine/material/glsl/basic/basic.vert",
+	fragmentShader: "../rapidengine/material/glsl/basic/basic.frag",
+	uniformLocations: map[string]int32{
+		"modelMtx":      0,
+		"viewMtx":       0,
+		"projectionMtx": 0,
+
+		"diffuseLevel":    0,
+		"hue":             0,
+		"darkness":        0,
+		"diffuseMap":      0,
+		"diffuseMapScale": 0,
+		"alphaMapLevel":   0,
+		"alphaMap":        0,
+	},
+	attributeLocations: map[string]uint32{
+		"position": 0,
+		"tex":      1,
+	},
+}
+
+var StandardProgram = ShaderProgram{
+	vertexShader:   "../rapidengine/material/glsl/standard/standard.vert",
+	fragmentShader: "../rapidengine/material/glsl/standard/standard.frag",
+	uniformLocations: map[string]int32{
+		"textureScale":        0,
+		"copyingEnabled":      0,
+		"transparency":        0,
+		"modelMtx":            0,
+		"viewMtx":             0,
+		"projectionMtx":       0,
+		"materialType":        0,
+		"diffuseMap":          0,
+		"cubeDiffuseMap":      0,
+		"darkness":            0,
+		"color":               0,
+		"shine":               0,
+		"transparencyEnabled": 0,
+		"transparencyMap":     0,
+		"viewPos":             0,
+
+		"dirLight.direction": 0,
+		"dirLight.ambient":   0,
+		"dirLight.diffuse":   0,
+		"dirLight.specular":  0,
+
+		"pointLights": 0,
+		"lmao":        0,
+	},
+	attributeLocations: map[string]uint32{
+		"position": 0,
+		"tex":      1,
+		"normal":   2,
+	},
+}
+
+var SkyBoxProgram = ShaderProgram{
+	vertexShader:   "../rapidengine/material/glsl/skybox/skybox.vert",
+	fragmentShader: "../rapidengine/material/glsl/skybox/skybox.frag",
+	uniformLocations: map[string]int32{
+		"color":         0,
+		"transparency":  0,
+		"modelMtx":      0,
+		"viewMtx":       0,
+		"projectionMtx": 0,
+		"darkness":      0,
+	},
+	attributeLocations: map[string]uint32{
+		"position": 0,
+	},
 }
