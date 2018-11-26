@@ -76,41 +76,6 @@ func (light *PointLight) UpdateShader(cx, cy, cz float32, ind int) {
 	)
 
 	gl.Uniform3fv(
-		gl.GetUniformLocation(light.shader.GetID(), gl.Str("lmao.ambient"+"\x00")),
-		1, &light.ambient[0],
-	)
-
-	gl.Uniform3fv(
-		gl.GetUniformLocation(light.shader.GetID(), gl.Str("lmao.diffuse"+"\x00")),
-		1, &light.diffuse[0],
-	)
-
-	gl.Uniform3fv(
-		gl.GetUniformLocation(light.shader.GetID(), gl.Str("lmao.specular"+"\x00")),
-		1, &light.specular[0],
-	)
-
-	gl.Uniform1f(
-		gl.GetUniformLocation(light.shader.GetID(), gl.Str("lmao.constant"+"\x00")),
-		light.constant,
-	)
-
-	gl.Uniform1f(
-		gl.GetUniformLocation(light.shader.GetID(), gl.Str("lmao.linear"+"\x00")),
-		light.linear,
-	)
-
-	gl.Uniform1f(
-		gl.GetUniformLocation(light.shader.GetID(), gl.Str("lmao.quadratic"+"\x00")),
-		light.quadratic,
-	)
-
-	gl.Uniform3fv(
-		gl.GetUniformLocation(light.shader.GetID(), gl.Str("lmao.position"+"\x00")),
-		1, &light.position[0],
-	)
-
-	gl.Uniform3fv(
 		gl.GetUniformLocation(light.shader.GetID(), gl.Str("viewPos"+"\x00")),
 		1, &c[0],
 	)

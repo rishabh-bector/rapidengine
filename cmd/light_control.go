@@ -6,8 +6,8 @@ type LightControl struct {
 	lightingEnabled    map[int]bool
 	directionalEnabled map[int]bool
 
-	directionLight map[int]*lighting.DirectionLight
-	pointLightMap  map[int]*lighting.PointLight
+	DirLight      map[int]*lighting.DirectionLight
+	pointLightMap map[int]*lighting.PointLight
 }
 
 func NewLightControl() LightControl {
@@ -15,7 +15,7 @@ func NewLightControl() LightControl {
 		lightingEnabled:    make(map[int]bool),
 		directionalEnabled: make(map[int]bool),
 		pointLightMap:      make(map[int]*lighting.PointLight),
-		directionLight:     make(map[int]*lighting.DirectionLight),
+		DirLight:           make(map[int]*lighting.DirectionLight),
 	}
 	l.EnableDirectionalLighting()
 	return l
@@ -23,8 +23,8 @@ func NewLightControl() LightControl {
 
 func (lightControl *LightControl) Update(cx, cy, cz float32) {
 	if lightControl.lightingEnabled[0] {
-		if lightControl.directionLight[0] != nil && lightControl.directionalEnabled[0] {
-			lightControl.directionLight[0].UpdateShader(cx, cy, cz)
+		if lightControl.DirLight[0] != nil && lightControl.directionalEnabled[0] {
+			lightControl.DirLight[0].UpdateShader(cx, cy, cz)
 		}
 		for ind, light := range lightControl.pointLightMap {
 			light.UpdateShader(cx, cy, cz, ind)
@@ -34,8 +34,8 @@ func (lightControl *LightControl) Update(cx, cy, cz float32) {
 
 func (lightControl *LightControl) PreRender() {
 	if lightControl.lightingEnabled[0] {
-		if lightControl.directionLight[0] != nil && lightControl.directionalEnabled[0] {
-			lightControl.directionLight[0].PreRender()
+		if lightControl.DirLight[0] != nil && lightControl.directionalEnabled[0] {
+			lightControl.DirLight[0].PreRender()
 		}
 		for _, light := range lightControl.pointLightMap {
 			light.PreRender()
@@ -48,7 +48,7 @@ func (lightControl *LightControl) InstanceLight(l *lighting.PointLight, ind int)
 }
 
 func (lightControl *LightControl) SetDirectionalLight(light *lighting.DirectionLight) {
-	lightControl.directionLight[0] = light
+	lightControl.DirLight[0] = light
 }
 
 func (lightControl *LightControl) EnableLighting() {

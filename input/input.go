@@ -37,11 +37,22 @@ func SwapMousePositions() {
 }
 
 var KeyMap map[string]glfw.Key = map[string]glfw.Key{
-	"w":     glfw.KeyW,
-	"a":     glfw.KeyA,
-	"s":     glfw.KeyS,
-	"d":     glfw.KeyD,
-	"space": glfw.KeySpace,
-	"shift": glfw.KeyLeftShift,
-	"l":     glfw.KeyL,
+	"w": glfw.KeyW,
+	"a": glfw.KeyA,
+	"s": glfw.KeyS,
+	"d": glfw.KeyD,
+
+	"space":  glfw.KeySpace,
+	"shift":  glfw.KeyLeftShift,
+	"escape": glfw.KeyEscape,
+
+	"up":    glfw.KeyUp,
+	"down":  glfw.KeyDown,
+	"left":  glfw.KeyLeft,
+	"right": glfw.KeyRight,
+
+	"l": glfw.KeyL,
+	"k": glfw.KeyK,
+	"o": glfw.KeyO,
+	"p": glfw.KeyP,
 }

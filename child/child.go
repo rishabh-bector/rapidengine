@@ -46,4 +46,8 @@ type Child interface {
 	MouseCollisionFunc(bool)
 
 	Update(camera.Camera, float64, float64)
+
+	Activate()
+	Deactivate()
+	IsActive() bool
 }

@@ -25,6 +25,7 @@ type CollisionControl struct {
 	MouseCollider    physics.Collider
 
 	config *configuration.EngineConfig
+	engine *Engine
 }
 
 // NewCollisionControl creates a new CollisionControl
@@ -42,6 +43,10 @@ func NewCollisionControl(config *configuration.EngineConfig) CollisionControl {
 		},
 		config: config,
 	}
+}
+
+func (collisionControl *CollisionControl) Initialize(engine *Engine) {
+	collisionControl.engine = engine
 }
 
 // CreateGroup creates an empty child collision group
@@ -89,17 +94,24 @@ func (collisionControl *CollisionControl) CheckCollisionWithGroup(c child.Child,
 
 // Update is called once per frame, and checks for
 // collisions of all children in the LinkMap. It also
-// checks for collisions with the mouse with all
+// checks for collisions with the mouse with all active
 // children in the MouseChildren map
 func (collisionControl *CollisionControl) Update(camX, camY float32, inputs *input.Input) {
 	for c, link := range collisionControl.LinkMap {
-		if col := collisionControl.CheckCollisionWithGroup(c, link.Group, camX, camY); col != nil {
-			link.Callback(col)
+		if c.IsActive() {
+			if col := collisionControl.CheckCollisionWithGroup(c, link.Group, camX, camY); col != nil {
+				link.Callback(col)
+			}
 		}
 	}
-	mx, my := collisionControl.ScaleMouseCoords(inputs.MouseX, inputs.MouseY, camX, camY)
+
+	mx, my := float32(inputs.MouseX), float32(inputs.MouseY)-float32(collisionControl.config.ScreenHeight) //collisionControl.ScaleMouseCoords(inputs.MouseX, inputs.MouseY, camX, camY)
 	for _, c := range collisionControl.MouseChildren {
-		c.MouseCollisionFunc(c.CheckCollisionRaw(mx, -my, &collisionControl.MouseCollider) != 0)
+		if c.IsActive() {
+			c.MouseCollisionFunc(c.CheckCollisionRaw(mx, -my, &collisionControl.MouseCollider) != 0)
+		} else {
+			c.MouseCollisionFunc(false)
+		}
 	}
 }
 

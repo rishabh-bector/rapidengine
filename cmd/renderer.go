@@ -98,13 +98,11 @@ func (renderer *Renderer) renderFrame() {
 
 	// Render skybox
 	if renderer.SkyBoxEnabled {
-		//renderer.SkyBox.Render(renderer.MainCamera)
+		renderer.SkyBox.Render(renderer.MainCamera)
 	}
 
 	// Render children
-	if renderer.engine.ChildControl.IsAutomaticRendering() {
-		renderer.RenderChildren()
-	}
+	renderer.RenderChildren()
 
 	// Call user render loop
 	renderer.RenderFunc(renderer)
@@ -141,12 +139,14 @@ func (renderer *Renderer) ForceUpdate() {
 // RenderChildren binds the appropriate shaders and Vertex Array for each child,
 // or child copy, and draws them to the screen using an element buffer
 func (renderer *Renderer) RenderChildren() {
-	for _, child := range renderer.engine.ChildControl.GetSceneChildren() {
-		go child.RemoveCurrentCopies()
-		if !child.CheckCopyingEnabled() {
-			renderer.RenderChild(child)
-		} else {
-			renderer.RenderChildCopies(child)
+	if renderer.engine.SceneControl.GetCurrentScene().IsAutomaticRendering() {
+		for _, child := range renderer.engine.SceneControl.GetCurrentChildren() {
+			go child.RemoveCurrentCopies()
+			if !child.CheckCopyingEnabled() {
+				renderer.RenderChild(child)
+			} else {
+				renderer.RenderChildCopies(child)
+			}
 		}
 	}
 }
@@ -180,17 +180,14 @@ func (renderer *Renderer) RenderChildCopies(c child.Child) {
 func (renderer *Renderer) RenderCopy(c child.Child, cpy child.ChildCopy) {
 	renderer.BindChild(c)
 	if renderer.Config.Dimensions == 2 {
-		if renderer.engine.ChildControl.IsAutomaticRendering() {
-			if (c.GetSpecificRenderDistance() != 0 && InBounds2D(cpy.X, cpy.Y, float32(renderer.camX), float32(renderer.camY), c.GetSpecificRenderDistance())) ||
-				InBounds2D(cpy.X, cpy.Y, float32(renderer.camX), float32(renderer.camY), renderer.RenderDistance) {
-				c.RenderCopy(cpy, renderer.MainCamera)
-				renderer.drawChild(c)
-				c.AddCurrentCopy(cpy)
-			}
-		} else {
+		if (c.GetSpecificRenderDistance() != 0 && InBounds2D(cpy.X, cpy.Y, float32(renderer.camX), float32(renderer.camY), c.GetSpecificRenderDistance())) ||
+			InBounds2D(cpy.X, cpy.Y, float32(renderer.camX), float32(renderer.camY), renderer.RenderDistance) {
 			c.RenderCopy(cpy, renderer.MainCamera)
 			renderer.drawChild(c)
+			c.AddCurrentCopy(cpy)
 		}
+		c.RenderCopy(cpy, renderer.MainCamera)
+		renderer.drawChild(c)
 	}
 	if renderer.Config.Dimensions == 3 {
 		if InBounds3D(cpy.X, cpy.Y, cpy.Z, float32(renderer.camX), float32(renderer.camY), float32(renderer.camZ), renderer.RenderDistance) {

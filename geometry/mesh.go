@@ -30,6 +30,10 @@ type Mesh struct {
 
 	// Number of vertices
 	numVertices int32
+
+	// Normal Mapping
+	tangent    []float32
+	bitTangent []float32
 }
 
 func (p *Mesh) GetID() string {
@@ -247,6 +251,142 @@ func NewPlane(width, height, density int, heightData [][]float32) Mesh {
 	}
 }
 
+func (m *Mesh) ComputeTangents() {
+	usedIndices := []uint32{}
+	for i := 0; i < int(len(m.vao.indices)); i += 3 {
+		v0 := mgl32.Vec3{
+			m.vao.vertices[m.vao.indices[i]*3],
+			m.vao.vertices[m.vao.indices[i]*3+1],
+			m.vao.vertices[m.vao.indices[i]*3+2],
+		}
+		v1 := mgl32.Vec3{
+			m.vao.vertices[m.vao.indices[i+1]*3],
+			m.vao.vertices[m.vao.indices[i+1]*3+1],
+			m.vao.vertices[m.vao.indices[i+1]*3+2],
+		}
+		v2 := mgl32.Vec3{
+			m.vao.vertices[m.vao.indices[i+2]*3],
+			m.vao.vertices[m.vao.indices[i+2]*3+1],
+			m.vao.vertices[m.vao.indices[i+2]*3+2],
+		}
+
+		texCoords := *m.texCoords
+		uv0 := mgl32.Vec2{
+			texCoords[m.vao.indices[i]*3],
+			texCoords[m.vao.indices[i]*3+1],
+		}
+		uv1 := mgl32.Vec2{
+			texCoords[m.vao.indices[i+1]*3],
+			texCoords[m.vao.indices[i+1]*3+1],
+		}
+		uv2 := mgl32.Vec2{
+			texCoords[m.vao.indices[i+2]*3],
+			texCoords[m.vao.indices[i+2]*3+1],
+		}
+
+		deltaPos1 := v1.Sub(v0)
+		deltaPos2 := v2.Sub(v0)
+
+		deltaUV1 := uv1.Sub(uv0)
+		deltaUV2 := uv2.Sub(uv0)
+
+		r := 1.0 / (deltaUV1.X()*deltaUV2.Y() - deltaUV1.Y()*deltaUV2.X())
+
+		tangent := mgl32.Vec3{
+			r * (deltaUV2.Y()*deltaPos1.X() - deltaUV1.Y()*deltaPos2.X()),
+			r * (deltaUV2.Y()*deltaPos1.Y() - deltaUV1.Y()*deltaPos2.Y()),
+			r * (deltaUV2.Y()*deltaPos1.Z() - deltaUV1.Y()*deltaPos2.Z()),
+		}.Normalize()
+
+		bitTangent := mgl32.Vec3{
+			r * (-deltaUV2.X()*deltaPos1.X() - deltaUV1.X()*deltaPos2.X()),
+			r * (-deltaUV2.X()*deltaPos1.Y() - deltaUV1.X()*deltaPos2.Y()),
+			r * (-deltaUV2.X()*deltaPos1.Z() - deltaUV1.X()*deltaPos2.Z()),
+		}.Normalize()
+
+		//m.fixInd(usedIndices, tangent, bitTangent, i)
+		//m.fixInd(usedIndices, tangent, bitTangent, i+1)
+		//m.fixInd(usedIndices, tangent, bitTangent, i+2)
+
+		tanArray := []float32{tangent.X(), tangent.Y(), tangent.Z()}
+		bitTanArray := []float32{bitTangent.X(), bitTangent.Y(), bitTangent.Z()}
+
+		m.tangent = append(m.tangent, tanArray...)
+		m.tangent = append(m.tangent, tanArray...)
+		m.tangent = append(m.tangent, tanArray...)
+
+		m.bitTangent = append(m.bitTangent, bitTanArray...)
+		m.bitTangent = append(m.bitTangent, bitTanArray...)
+		m.bitTangent = append(m.bitTangent, bitTanArray...)
+
+		usedIndices = append(usedIndices, m.vao.indices[i])
+	}
+
+	m.GetVAO().AddVertexAttribute(m.tangent, 3, 3)
+	m.GetVAO().AddVertexAttribute(m.bitTangent, 4, 3)
+
+}
+
+func (m *Mesh) fixInd(usedIndices []uint32, tangent mgl32.Vec3, bitTangent mgl32.Vec3, i int) {
+	if ind := isIndexUsed(usedIndices, m.vao.indices[i]); ind != -1 {
+		oldTan := mgl32.Vec3{
+			m.tangent[ind*3],
+			m.tangent[ind*3+1],
+			m.tangent[ind*3+2],
+		}
+		oldBit := mgl32.Vec3{
+			m.bitTangent[ind*3],
+			m.bitTangent[ind*3+1],
+			m.bitTangent[ind*3+2],
+		}
+
+		newTan := avgVec(oldTan, tangent)
+		newBit := avgVec(oldBit, bitTangent)
+
+		m.tangent[ind*3] = newTan.X()
+		m.tangent[ind*3+1] = newTan.Y()
+		m.tangent[ind*3+2] = newTan.Z()
+
+		m.bitTangent[ind*3] = newBit.X()
+		m.bitTangent[ind*3+1] = newBit.Y()
+		m.bitTangent[ind*3+2] = newBit.Z()
+
+		tanArray := []float32{newTan.X(), newTan.Y(), newTan.Z()}
+		bitTanArray := []float32{newBit.X(), newBit.Y(), newBit.Z()}
+
+		m.tangent = append(m.tangent, tanArray...)
+		m.bitTangent = append(m.bitTangent, bitTanArray...)
+
+		usedIndices = append(usedIndices, m.vao.indices[i])
+
+	} else {
+		tanArray := []float32{tangent.X(), tangent.Y(), tangent.Z()}
+		bitTanArray := []float32{bitTangent.X(), bitTangent.Y(), bitTangent.Z()}
+
+		m.tangent = append(m.tangent, tanArray...)
+		m.bitTangent = append(m.bitTangent, bitTanArray...)
+
+		usedIndices = append(usedIndices, m.vao.indices[i])
+	}
+}
+
+func isIndexUsed(usedIndices []uint32, v uint32) int {
+	for i, uv := range usedIndices {
+		if uv == v {
+			return i
+		}
+	}
+	return -1
+}
+
+func avgVec(vec1 mgl32.Vec3, vec2 mgl32.Vec3) mgl32.Vec3 {
+	return mgl32.Vec3{
+		(vec1.X() + vec2.X()) / 2,
+		(vec1.Y() + vec2.Y()) / 2,
+		(vec1.Z() + vec2.Z()) / 2,
+	}
+}
+
 func GetHeightMapData(path string, max float32) [][]float32 {
 	img, err := material.LoadImageFullDepth(path)
 	if err != nil {
@@ -262,11 +402,19 @@ func GetHeightMapData(path string, max float32) [][]float32 {
 
 	for x := 0; x < img.Bounds().Max.X; x++ {
 		for y := 0; y < img.Bounds().Max.Y; y++ {
-			r, _, _, _ := img.At(x, y).RGBA()
-			//println((float32(r) / 65535.0) * max)
+			r, _, _, _ := img.At(y, x).RGBA()
 			data[x][y] = ((float32(r) / 65535.0) * max)
 		}
 	}
+
+	for x := 0; x < len(data); x++ {
+		for y := 0; y < len(data[0]); y++ {
+			temp := data[x][y]
+			data[x][y] = data[y][x]
+			data[y][x] = temp
+		}
+	}
+
 	return data
 }
 
@@ -280,200 +428,6 @@ func calculateNormal(x, z int, heights [][]float32) mgl32.Vec3 {
 	D := heights[x][z-1]
 	U := heights[x][z+1]
 
-	normal := mgl32.Vec3{L - R, 2, D - U}
-	normal = normal.Normalize()
-
-	return normal
-}
-
-var RectTextures = []float32{
-	0, 1, //0,
-	1, 1, //0,
-	1, 0, //0,
-	0, 0, //0,
-}
-
-var RectNormals = []float32{
-	0, 0, 1,
-	0, 0, 1,
-	0, 0, 1,
-	0, 0, 1,
-	0, 0, 1,
-	0, 0, 1,
-}
-
-var CubePoints = []float32{
-	-0.5, -0.5, -0.5,
-	0.5, -0.5, -0.5,
-	0.5, 0.5, -0.5,
-	0.5, 0.5, -0.5,
-	-0.5, 0.5, -0.5,
-	-0.5, -0.5, -0.5,
-
-	-0.5, -0.5, 0.5,
-	0.5, -0.5, 0.5,
-	0.5, 0.5, 0.5,
-	0.5, 0.5, 0.5,
-	-0.5, 0.5, 0.5,
-	-0.5, -0.5, 0.5,
-
-	-0.5, 0.5, 0.5,
-	-0.5, 0.5, -0.5,
-	-0.5, -0.5, -0.5,
-	-0.5, -0.5, -0.5,
-	-0.5, -0.5, 0.5,
-	-0.5, 0.5, 0.5,
-
-	0.5, 0.5, 0.5,
-	0.5, 0.5, -0.5,
-	0.5, -0.5, -0.5,
-	0.5, -0.5, -0.5,
-	0.5, -0.5, 0.5,
-	0.5, 0.5, 0.5,
-
-	-0.5, -0.5, -0.5,
-	0.5, -0.5, -0.5,
-	0.5, -0.5, 0.5,
-	0.5, -0.5, 0.5,
-	-0.5, -0.5, 0.5,
-	-0.5, -0.5, -0.5,
-
-	-0.5, 0.5, -0.5,
-	0.5, 0.5, -0.5,
-	0.5, 0.5, 0.5,
-	0.5, 0.5, 0.5,
-	-0.5, 0.5, 0.5,
-	-0.5, 0.5, -0.5,
-}
-
-var CubeNormals = []float32{
-	0, 0, -1,
-	0, 0, -1,
-	0, 0, -1,
-	0, 0, -1,
-	0, 0, -1,
-	0, 0, -1,
-
-	0, 0, 1,
-	0, 0, 1,
-	0, 0, 1,
-	0, 0, 1,
-	0, 0, 1,
-	0, 0, 1,
-
-	-1, 0, 0,
-	-1, 0, 0,
-	-1, 0, 0,
-	-1, 0, 0,
-	-1, 0, 0,
-	-1, 0, 0,
-
-	1, 0, 0,
-	1, 0, 0,
-	1, 0, 0,
-	1, 0, 0,
-	1, 0, 0,
-	1, 0, 0,
-
-	0, -1, 0,
-	0, -1, 0,
-	0, -1, 0,
-	0, -1, 0,
-	0, -1, 0,
-	0, -1, 0,
-
-	0, 1, 0,
-	0, 1, 0,
-	0, 1, 0,
-	0, 1, 0,
-	0, 1, 0,
-	0, 1, 0,
-}
-
-var CubeTextures = []float32{
-	0, 0, 0,
-	1, 0, 0,
-	1, 1, 0,
-	1, 1, 0,
-	0, 1, 0,
-	0, 0, 0,
-
-	0, 0, 0,
-	1, 0, 0,
-	1, 1, 0,
-	1, 1, 0,
-	0, 1, 0,
-	0, 0, 0,
-
-	1, 0, 0,
-	1, 1, 0,
-	0, 1, 0,
-	0, 1, 0,
-	0, 0, 0,
-	1, 0, 0,
-
-	1, 0, 0,
-	1, 1, 0,
-	0, 1, 0,
-	0, 1, 0,
-	0, 0, 0,
-	1, 0, 0,
-
-	0, 1, 0,
-	1, 1, 0,
-	1, 0, 0,
-	1, 0, 0,
-	0, 0, 0,
-	0, 1, 0,
-
-	0, 1, 0,
-	1, 1, 0,
-	1, 0, 0,
-	1, 0, 0,
-	0, 0, 0,
-	0, 1, 0,
-}
-
-var CubeMapTextures = []float32{
-	-1.0, -1.0, 1.0,
-	-1.0, -1.0, -1.0,
-	-1.0, 1.0, -1.0,
-	-1.0, 1.0, -1.0,
-	-1.0, 1.0, 1.0,
-	-1.0, -1.0, 1.0,
-
-	-1.0, -1.0, 1.0,
-	-1.0, -1.0, -1.0,
-	-1.0, 1.0, -1.0,
-	-1.0, 1.0, -1.0,
-	-1.0, 1.0, 1.0,
-	-1.0, -1.0, 1.0,
-
-	-1.0, 1.0, 1.0,
-	-1.0, 1.0, -1.0,
-	-1.0, -1.0, -1.0,
-	-1.0, -1.0, -1.0,
-	-1.0, -1.0, 1.0,
-	-1.0, 1.0, 1.0,
-
-	-1.0, 1.0, 1.0,
-	-1.0, 1.0, -1.0,
-	-1.0, -1.0, -1.0,
-	-1.0, -1.0, -1.0,
-	-1.0, -1.0, 1.0,
-	-1.0, 1.0, 1.0,
-
-	-1.0, 1.0, -1.0,
-	1.0, 1.0, -1.0,
-	1.0, 1.0, 1.0,
-	1.0, 1.0, 1.0,
-	-1.0, 1.0, 1.0,
-	-1.0, 1.0, -1.0,
-
-	-1.0, 1.0, -1.0,
-	1.0, 1.0, -1.0,
-	1.0, 1.0, 1.0,
-	1.0, 1.0, 1.0,
-	-1.0, 1.0, 1.0,
-	-1.0, 1.0, -1.0,
+	normal := mgl32.Vec3{L - R, 1, D - U}
+	return normal.Normalize()
 }

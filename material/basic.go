@@ -15,12 +15,15 @@ type BasicMaterial struct {
 	AlphaMapLevel float32
 	AlphaMap      *uint32
 
-	animationPlaying  string
-	animationTextures map[string][]*uint32
-	animationCurrent  int
-	animationFrame    float64
-	animationFPS      map[string]float64
-	animationEnabled  bool
+	Flipped int
+
+	animationPlaying     string
+	animationTextures    map[string][]*uint32
+	animationCurrent     int
+	animationFrame       float64
+	animationFPS         map[string]float64
+	animationPlayingOnce bool
+	animationEnabled     bool
 }
 
 func NewBasicMaterial(shader *ShaderProgram) *BasicMaterial {
@@ -62,6 +65,8 @@ func (bm *BasicMaterial) Render(delta float64, darkness float32) {
 	gl.Uniform1i(bm.shader.GetUniform("alphaMap"), 1)
 
 	gl.Uniform1f(bm.shader.GetUniform("darkness"), darkness)
+
+	gl.Uniform1i(bm.shader.GetUniform("flipped"), int32(bm.Flipped))
 }
 
 func (bm *BasicMaterial) UpdateAttribArrays() {
@@ -80,6 +85,11 @@ func (bm *BasicMaterial) UpdateAnimation(delta float64) {
 			if bm.animationCurrent < len(bm.animationTextures[bm.animationPlaying])-1 {
 				bm.animationCurrent++
 			} else {
+				if bm.animationPlayingOnce {
+					bm.animationPlaying = ""
+					bm.animationPlayingOnce = false
+					return
+				}
 				bm.animationCurrent = 0
 			}
 			bm.animationFrame = 0
@@ -104,4 +114,13 @@ func (bm *BasicMaterial) SetAnimationFPS(anim string, s float64) {
 
 func (bm *BasicMaterial) PlayAnimation(anim string) {
 	bm.animationPlaying = anim
+	bm.animationCurrent = 0
+	bm.animationFrame = 0
+	bm.animationPlayingOnce = false
+	bm.DiffuseMap = bm.animationTextures[bm.animationPlaying][bm.animationCurrent]
+}
+
+func (bm *BasicMaterial) PlayAnimationOnce(anim string) {
+	bm.PlayAnimation(anim)
+	bm.animationPlayingOnce = true
 }

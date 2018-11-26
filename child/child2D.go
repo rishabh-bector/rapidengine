@@ -18,6 +18,8 @@ import (
 )
 
 type Child2D struct {
+	active bool
+
 	vertexArray *geometry.VertexArray
 	numVertices int32
 
@@ -28,6 +30,7 @@ type Child2D struct {
 
 	modelMatrix      mgl32.Mat4
 	projectionMatrix mgl32.Mat4
+	Static           bool
 
 	numCopies      int
 	copies         []ChildCopy
@@ -52,7 +55,6 @@ type Child2D struct {
 	mouseCollision func(bool)
 
 	config *configuration.EngineConfig
-	//collisioncontrol *CollisionControl
 }
 
 func NewChild2D(config *configuration.EngineConfig) *Child2D {
@@ -125,10 +127,18 @@ func (child2D *Child2D) Render(mainCamera camera.Camera, delta float64) {
 	scaleX, scaleY := ScaleTransformation(child2D.ScaleX, child2D.ScaleY, float32(child2D.config.ScreenWidth), float32(child2D.config.ScreenHeight))
 	child2D.modelMatrix = child2D.modelMatrix.Mul4(mgl32.Scale3D(scaleX, scaleY, 0))
 
-	gl.UniformMatrix4fv(
-		child2D.material.GetShader().GetUniform("viewMtx"),
-		1, false, mainCamera.GetFirstViewIndex(),
-	)
+	if !child2D.Static {
+		gl.UniformMatrix4fv(
+			child2D.material.GetShader().GetUniform("viewMtx"),
+			1, false, mainCamera.GetFirstViewIndex(),
+		)
+	} else {
+		ident := mainCamera.GetStaticView()
+		gl.UniformMatrix4fv(
+			child2D.material.GetShader().GetUniform("viewMtx"),
+			1, false, &ident[0],
+		)
+	}
 
 	gl.UniformMatrix4fv(
 		child2D.material.GetShader().GetUniform("modelMtx"),
@@ -212,6 +222,18 @@ func (child2D *Child2D) AttachMaterial(m material.Material) {
 
 func (child2D *Child2D) AttachGroup(group string) {
 	child2D.Group = group
+}
+
+func (child2D *Child2D) Activate() {
+	child2D.active = true
+}
+
+func (child2D *Child2D) Deactivate() {
+	child2D.active = false
+}
+
+func (child2D *Child2D) IsActive() bool {
+	return child2D.active
 }
 
 //  --------------------------------------------------

@@ -99,17 +99,24 @@ var BasicProgram = ShaderProgram{
 	vertexShader:   "../rapidengine/material/glsl/basic/basic.vert",
 	fragmentShader: "../rapidengine/material/glsl/basic/basic.frag",
 	uniformLocations: map[string]int32{
+		// Vertices
 		"modelMtx":      0,
 		"viewMtx":       0,
 		"projectionMtx": 0,
 
-		"diffuseLevel":    0,
-		"hue":             0,
-		"darkness":        0,
+		"flipped": 0,
+
+		// Basic Material
+		"diffuseLevel": 0,
+
+		"hue":      0,
+		"darkness": 0,
+
 		"diffuseMap":      0,
 		"diffuseMapScale": 0,
-		"alphaMapLevel":   0,
-		"alphaMap":        0,
+
+		"alphaMapLevel": 0,
+		"alphaMap":      0,
 	},
 	attributeLocations: map[string]uint32{
 		"position": 0,
@@ -121,34 +128,36 @@ var StandardProgram = ShaderProgram{
 	vertexShader:   "../rapidengine/material/glsl/standard/standard.vert",
 	fragmentShader: "../rapidengine/material/glsl/standard/standard.frag",
 	uniformLocations: map[string]int32{
-		"textureScale":        0,
-		"copyingEnabled":      0,
-		"transparency":        0,
-		"modelMtx":            0,
-		"viewMtx":             0,
-		"projectionMtx":       0,
-		"materialType":        0,
-		"diffuseMap":          0,
-		"cubeDiffuseMap":      0,
-		"darkness":            0,
-		"color":               0,
-		"shine":               0,
-		"transparencyEnabled": 0,
-		"transparencyMap":     0,
-		"viewPos":             0,
+		// Vertices
+		"modelMtx":      0,
+		"viewMtx":       0,
+		"projectionMtx": 0,
 
+		// Standard Material
+		"diffuseMap": 0,
+		"normalMap":  0,
+
+		"heightMap":    0,
+		"displacement": 0,
+
+		"scale": 0,
+
+		// Lighting
 		"dirLight.direction": 0,
 		"dirLight.ambient":   0,
 		"dirLight.diffuse":   0,
 		"dirLight.specular":  0,
 
-		"pointLights": 0,
-		"lmao":        0,
+		"viewPos": 0,
+
+		"numPointLights": 0,
 	},
 	attributeLocations: map[string]uint32{
-		"position": 0,
-		"tex":      1,
-		"normal":   2,
+		"position":   0,
+		"tex":        1,
+		"normal":     2,
+		"tangent":    3,
+		"bitTangent": 4,
 	},
 }
 
@@ -156,12 +165,11 @@ var SkyBoxProgram = ShaderProgram{
 	vertexShader:   "../rapidengine/material/glsl/skybox/skybox.vert",
 	fragmentShader: "../rapidengine/material/glsl/skybox/skybox.frag",
 	uniformLocations: map[string]int32{
-		"color":         0,
-		"transparency":  0,
-		"modelMtx":      0,
-		"viewMtx":       0,
-		"projectionMtx": 0,
-		"darkness":      0,
+		// Vertices
+		"modelMtx":       0,
+		"viewMtx":        0,
+		"projectionMtx":  0,
+		"cubeDiffuseMap": 0,
 	},
 	attributeLocations: map[string]uint32{
 		"position": 0,

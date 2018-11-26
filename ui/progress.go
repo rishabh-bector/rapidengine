@@ -33,13 +33,12 @@ func NewProgressBar(config *configuration.EngineConfig) ProgressBar {
 	return pb
 }
 
-func (pb *ProgressBar) Update(inputs *input.Input) {
-	pb.BarChild.ScaleX = (pb.currentPercentage / 100) * (pb.transform.SX * pb.barScaleX)
-}
-
 func (pb *ProgressBar) Initialize() {
 	pb.SetPosition(pb.transform.X, pb.transform.Y)
 	pb.SetDimensions(pb.transform.SX, pb.transform.SY)
+
+	pb.BackChild.Static = true
+	pb.BarChild.Static = true
 }
 
 func (pb *ProgressBar) SetBarScale(sx, sy float32) {
@@ -72,6 +71,10 @@ func (pb *ProgressBar) GetPercentage() float32 {
 //  Interface
 //  --------------------------------------------------
 
+func (pb *ProgressBar) Update(inputs *input.Input) {
+	pb.BarChild.ScaleX = (pb.currentPercentage / 100) * (pb.transform.SX * pb.barScaleX)
+}
+
 func (pb *ProgressBar) SetPosition(x, y float32) {
 	pb.transform.X = x
 	pb.transform.Y = y
@@ -96,4 +99,12 @@ func (pb *ProgressBar) SetDimensions(width, height float32) {
 
 func (pb *ProgressBar) GetTransform() geometry.Transform {
 	return pb.transform
+}
+
+func (pb *ProgressBar) GetChildren() []*child.Child2D {
+	return []*child.Child2D{pb.BackChild, pb.BarChild}
+}
+
+func (pb *ProgressBar) GetTextBoxes() []*TextBox {
+	return []*TextBox{pb.TextBxLeft, pb.TextBxRight}
 }

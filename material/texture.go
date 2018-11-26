@@ -82,22 +82,7 @@ func LoadImageFullDepth(path string) (image.Image, error) {
 	}
 	defer imgFile.Close()
 
-	ct, err := detectContentType(imgFile)
-	if err != nil {
-		return nil, err
-	}
-
-	var decode func(io.Reader) (image.Image, error)
-	switch ct {
-	case "image/jpeg":
-		decode = jpeg.Decode
-	case "image/png":
-		decode = png.Decode
-	default:
-		return nil, fmt.Errorf("unrecognized image format: %s", ct)
-	}
-
-	src, err := decode(imgFile)
+	src, _, err := image.Decode(imgFile)
 
 	if err != nil {
 		return nil, err

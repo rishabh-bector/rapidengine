@@ -26,6 +26,18 @@ func (uiControl *UIControl) Update(inputs *input.Input) {
 	}
 }
 
+func (uiControl *UIControl) InstanceElement(e ui.Element, scene *Scene) {
+	for _, c := range e.GetChildren() {
+		scene.InstanceChild(c)
+	}
+	for _, t := range e.GetTextBoxes() {
+		if t != nil {
+			scene.InstanceText(t)
+		}
+	}
+	uiControl.addElement(e)
+}
+
 func (uiControl *UIControl) addElement(e ui.Element) {
 	uiControl.Elements = append(uiControl.Elements, e)
 }
@@ -35,7 +47,7 @@ func (uiControl *UIControl) AlignCenter(e ui.Element) {
 }
 
 //  --------------------------------------------------
-//  Buttons
+//  Element Constructors
 //  --------------------------------------------------
 
 func (uiControl *UIControl) NewUIButton(x, y, width, height float32) *ui.Button {
@@ -45,25 +57,12 @@ func (uiControl *UIControl) NewUIButton(x, y, width, height float32) *ui.Button 
 	button.ButtonChild.AttachMaterial(uiControl.engine.Renderer.DefaultMaterial2)
 	button.ButtonChild.AttachMesh(geometry.NewRectangle())
 
+	uiControl.engine.CollisionControl.CreateMouseCollision(button.ButtonChild)
+
 	button.Initialize()
 
 	return &button
 }
-
-func (uiControl *UIControl) InstanceButton(button *ui.Button, scene string) {
-	uiControl.engine.ChildControl.InstanceChild(button.ButtonChild, scene)
-	uiControl.engine.CollisionControl.CreateMouseCollision(button.ButtonChild)
-
-	if button.TextBx != nil {
-		uiControl.engine.TextControl.AddTextBox(button.TextBx, scene)
-	}
-
-	uiControl.addElement(button)
-}
-
-//  --------------------------------------------------
-//  Progress Bars
-//  --------------------------------------------------
 
 func (uiControl *UIControl) NewProgressBar() *ui.ProgressBar {
 	pb := ui.NewProgressBar(uiControl.engine.Config)
@@ -82,14 +81,14 @@ func (uiControl *UIControl) NewProgressBar() *ui.ProgressBar {
 	return &pb
 }
 
-func (uiControl *UIControl) InstanceProgressBar(progressBar *ui.ProgressBar, scene string) {
-	uiControl.engine.ChildControl.InstanceChild(progressBar.BackChild, scene)
-	uiControl.engine.ChildControl.InstanceChild(progressBar.BarChild, scene)
+func (uiControl *UIControl) NewMenu() *ui.Menu {
+	menu := ui.NewMenu(uiControl.engine.Config)
 
-	if progressBar.TextBxLeft != nil {
-		uiControl.engine.TextControl.AddTextBox(progressBar.TextBxLeft, scene)
-		uiControl.engine.TextControl.AddTextBox(progressBar.TextBxRight, scene)
-	}
+	menu.BackChild = uiControl.engine.ChildControl.NewChild2D()
+	menu.BackChild.AttachMaterial(uiControl.engine.Renderer.DefaultMaterial1)
+	menu.BackChild.AttachMesh(geometry.NewRectangle())
 
-	uiControl.addElement(progressBar)
+	menu.Initialize()
+
+	return &menu
 }

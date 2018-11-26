@@ -12,10 +12,11 @@ import (
 )
 
 type Child3D struct {
-	vertexArray *geometry.VertexArray
+	active bool
+
 	numVertices int32
 
-	mesh string
+	mesh geometry.Mesh
 
 	material material.Material
 
@@ -33,6 +34,10 @@ type Child3D struct {
 	VX float32
 	VY float32
 	VZ float32
+
+	RX float32
+	RY float32
+	RZ float32
 
 	Gravity float32
 
@@ -92,7 +97,7 @@ func (child3D *Child3D) PreRender(mainCamera camera.Camera) {
 }
 
 func (child3D *Child3D) BindChild() {
-	gl.BindVertexArray(child3D.vertexArray.GetID())
+	gl.BindVertexArray(child3D.mesh.GetVAO().GetID())
 	child3D.material.GetShader().Bind()
 }
 
@@ -108,6 +113,10 @@ func (child3D *Child3D) Update(mainCamera camera.Camera, delta float64, lastFram
 
 func (child3D *Child3D) Render(mainCamera camera.Camera) {
 	child3D.modelMatrix = mgl32.Translate3D(child3D.X, child3D.Y, child3D.Z)
+
+	child3D.modelMatrix = child3D.modelMatrix.Mul4(mgl32.HomogRotate3DX(child3D.RX))
+	child3D.modelMatrix = child3D.modelMatrix.Mul4(mgl32.HomogRotate3DY(child3D.RY))
+	child3D.modelMatrix = child3D.modelMatrix.Mul4(mgl32.HomogRotate3DZ(child3D.RZ))
 
 	gl.UniformMatrix4fv(
 		child3D.material.GetShader().GetUniform("viewMtx"),
@@ -145,12 +154,12 @@ func (child3D *Child3D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
 }
 
 func (child3D *Child3D) AttachTextureCoords(coords []float32) {
-	if child3D.vertexArray == nil {
+	if child3D.mesh.GetVAO() == nil {
 		panic("Cannot attach texture without VertexArray")
 	}
 
 	child3D.BindChild()
-	child3D.vertexArray.AddVertexAttribute(coords, 1, 3)
+	child3D.mesh.GetVAO().AddVertexAttribute(coords, 1, 3)
 	gl.BindVertexArray(0)
 }
 
@@ -164,15 +173,24 @@ func (child3D *Child3D) AttachMaterial(m material.Material) {
 	child3D.material = m
 }
 
-func (child3D *Child3D) AttachVertexArray(vao *geometry.VertexArray, numVertices int32) {
-	child3D.vertexArray = vao
-	child3D.numVertices = numVertices
+func (child3D *Child3D) AttachMesh(p geometry.Mesh) {
+	child3D.mesh = p
+	child3D.numVertices = p.GetNumVertices()
+	child3D.mesh.GetVAO().AddVertexAttribute(*p.GetNormals(), 2, 3)
+	child3D.AttachTextureCoords(*p.GetTexCoords())
+	child3D.mesh.ComputeTangents()
 }
 
-func (child3D *Child3D) AttachMesh(p geometry.Mesh) {
-	child3D.AttachVertexArray(p.GetVAO(), p.GetNumVertices())
-	child3D.vertexArray.AddVertexAttribute(*p.GetNormals(), 2, 3)
-	child3D.AttachTextureCoords(*p.GetTexCoords())
+func (child3D *Child3D) Activate() {
+	child3D.active = true
+}
+
+func (child3D *Child3D) Deactivate() {
+	child3D.active = false
+}
+
+func (child3D *Child3D) IsActive() bool {
+	return child3D.active
 }
 
 func (child3D *Child3D) GetX() float32 {
@@ -192,7 +210,7 @@ func (child3D *Child3D) GetShaderProgram() *material.ShaderProgram {
 }
 
 func (child3D *Child3D) GetVertexArray() *geometry.VertexArray {
-	return child3D.vertexArray
+	return child3D.mesh.GetVAO()
 }
 
 func (child3D *Child3D) GetNumVertices() int32 {

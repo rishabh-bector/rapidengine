@@ -9,20 +9,20 @@ import (
 type DirectionLight struct {
 	shader *material.ShaderProgram
 
-	ambient  []float32
-	diffuse  []float32
-	specular []float32
+	Ambient  []float32
+	Diffuse  []float32
+	Specular []float32
 
-	direction []float32
+	Direction []float32
 }
 
 func NewDirectionLight(p *material.ShaderProgram, a, d, s, dir []float32) DirectionLight {
 	return DirectionLight{
 		shader:    p,
-		ambient:   a,
-		diffuse:   d,
-		specular:  s,
-		direction: dir,
+		Ambient:   a,
+		Diffuse:   d,
+		Specular:  s,
+		Direction: dir,
 	}
 }
 
@@ -34,23 +34,23 @@ func (light *DirectionLight) UpdateShader(cx, cy, cz float32) {
 	c := []float32{cx, cy, cz}
 	light.shader.Bind()
 	gl.Uniform3fv(
-		light.shader.GetUniform("dirlight.direction"),
-		1, &light.direction[0],
+		light.shader.GetUniform("dirLight.direction"),
+		1, &light.Direction[0],
 	)
 
 	gl.Uniform3fv(
-		light.shader.GetUniform("dirlight.ambient"),
-		1, &light.ambient[0],
+		light.shader.GetUniform("dirLight.ambient"),
+		1, &light.Ambient[0],
 	)
 
 	gl.Uniform3fv(
-		light.shader.GetUniform("dirlight.diffuse"),
-		1, &light.diffuse[0],
+		light.shader.GetUniform("dirLight.diffuse"),
+		1, &light.Diffuse[0],
 	)
 
 	gl.Uniform3fv(
-		light.shader.GetUniform("dirlight.specular"),
-		1, &light.specular[0],
+		light.shader.GetUniform("dirLight.specular"),
+		1, &light.Specular[0],
 	)
 
 	gl.Uniform3fv(

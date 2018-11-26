@@ -13,8 +13,6 @@ import (
 )
 
 type TextControl struct {
-	Texts map[string][]*ui.TextBox
-
 	Fonts map[string]*v41.Font
 
 	engine *Engine
@@ -22,7 +20,6 @@ type TextControl struct {
 
 func NewTextControl(config *configuration.EngineConfig) TextControl {
 	return TextControl{
-		Texts: make(map[string][]*ui.TextBox),
 		Fonts: make(map[string]*v41.Font),
 	}
 }
@@ -32,12 +29,8 @@ func (tc *TextControl) Initialize(engine *Engine) {
 }
 
 func (tc *TextControl) Update() {
-	for scn, texts := range tc.Texts {
-		if scn == tc.engine.ChildControl.GetScene() {
-			for _, t := range texts {
-				t.Update(tc.engine.Config)
-			}
-		}
+	for _, t := range tc.engine.SceneControl.GetCurrentTexts() {
+		t.Update(tc.engine.Config)
 	}
 }
 
@@ -58,10 +51,6 @@ func (tc *TextControl) NewTextBox(text string, font string, x, y, scale float32,
 	textbox.SetV41Text(t)
 
 	return textbox
-}
-
-func (tc *TextControl) AddTextBox(tb *ui.TextBox, scene string) {
-	tc.Texts[scene] = append(tc.Texts[scene], tb)
 }
 
 func (tc *TextControl) LoadFont(path string, name string, scale float32, offset int) {

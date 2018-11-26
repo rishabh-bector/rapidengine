@@ -10,8 +10,7 @@ import (
 )
 
 type SkyBox struct {
-	shader   *material.ShaderProgram
-	material material.Material
+	material *material.CubemapMaterial
 
 	vao *geometry.VertexArray
 
@@ -19,25 +18,18 @@ type SkyBox struct {
 	modelMatrix      mgl32.Mat4
 }
 
-func NewSkyBox(
-	shader *material.ShaderProgram,
-	mat material.Material,
-	vao *geometry.VertexArray,
-	projectionMatrix,
-	modelMatrix mgl32.Mat4,
-) *SkyBox {
+func NewSkyBox(mat *material.CubemapMaterial, vao *geometry.VertexArray, projMtx, modelMtx mgl32.Mat4) *SkyBox {
 	return &SkyBox{
-		shader:           shader,
 		material:         mat,
 		vao:              vao,
-		projectionMatrix: projectionMatrix,
-		modelMatrix:      modelMatrix,
+		projectionMatrix: projMtx,
+		modelMatrix:      modelMtx,
 	}
 }
 
 func (skyBox *SkyBox) Render(mainCamera camera.Camera) {
 	gl.DepthMask(false)
-	skyBox.shader.Bind()
+	skyBox.material.GetShader().Bind()
 	gl.BindVertexArray(skyBox.vao.GetID())
 
 	skyBox.material.Render(0, 1)
@@ -46,17 +38,17 @@ func (skyBox *SkyBox) Render(mainCamera camera.Camera) {
 	skyBox.modelMatrix = mgl32.Translate3D(x, y, z)
 
 	gl.UniformMatrix4fv(
-		skyBox.shader.GetUniform("modelMtx"),
+		skyBox.material.GetShader().GetUniform("modelMtx"),
 		1, false, &skyBox.modelMatrix[0],
 	)
 
 	gl.UniformMatrix4fv(
-		skyBox.shader.GetUniform("viewMtx"),
+		skyBox.material.GetShader().GetUniform("viewMtx"),
 		1, false, mainCamera.GetFirstViewIndex(),
 	)
 
 	gl.UniformMatrix4fv(
-		skyBox.shader.GetUniform("projectionMtx"),
+		skyBox.material.GetShader().GetUniform("projectionMtx"),
 		1, false, &skyBox.projectionMatrix[0],
 	)
 

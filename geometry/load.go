@@ -8,11 +8,18 @@ type VertexArray struct {
 	id            uint32
 	vertexBuffer  uint32
 	elementBuffer uint32
+
+	vertices []float32
+	indices  []uint32
 }
 
 func NewVertexArray(vertices []float32, elements []uint32) *VertexArray {
 	var id uint32
-	vertexArray := VertexArray{id: id}
+	vertexArray := VertexArray{
+		id:       id,
+		vertices: vertices,
+		indices:  elements,
+	}
 	gl.GenVertexArrays(1, &vertexArray.id)
 	gl.BindVertexArray(vertexArray.id)
 	vertexArray.vertexBuffer = vertexArray.AddVertexAttribute(vertices, 0, 3)

@@ -1,5 +1,14 @@
 package cmd
 
+import (
+	"fmt"
+	"rapidengine/configuration"
+	"rapidengine/geometry"
+	"rapidengine/terrain"
+
+	"github.com/go-gl/mathgl/mgl32"
+)
+
 type TerrainControl struct {
 	engine *Engine
 }
@@ -12,7 +21,7 @@ func (tc *TerrainControl) Initialize(engine *Engine) {
 	tc.engine = engine
 }
 
-/*func (terrainControl *TerrainControl) NewSkyBox(
+func (terrainControl *TerrainControl) NewSkyBox(
 	path string,
 
 	shaderControl *ShaderControl,
@@ -33,8 +42,8 @@ func (tc *TerrainControl) Initialize(engine *Engine) {
 		"skybox",
 	)
 
-	material := terrainControl.engine.MaterialControl.NewBasicMaterial()
-	material.BecomeCubemap(textureControl.GetTexture("skybox"))
+	material := terrainControl.engine.MaterialControl.NewCubemapMaterial()
+	material.CubeDiffuseMap = textureControl.GetTexture("skybox")
 
 	indices := []uint32{}
 	for i := 0; i < len(terrain.SkyBoxVertices); i++ {
@@ -45,7 +54,6 @@ func (tc *TerrainControl) Initialize(engine *Engine) {
 	vao.AddVertexAttribute(geometry.CubeTextures, 1, 2)
 
 	return terrain.NewSkyBox(
-		shaderControl.GetShader("skybox"),
 		material,
 		vao,
 		mgl32.Perspective(
@@ -56,4 +64,3 @@ func (tc *TerrainControl) Initialize(engine *Engine) {
 		mgl32.Ident4(),
 	)
 }
-*/

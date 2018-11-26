@@ -155,6 +155,14 @@ func (camera3D *Camera3D) GetFirstViewIndex() *float32 {
 	return &camera3D.View[0]
 }
 
+func (camera3D *Camera3D) GetStaticView() mgl32.Mat4 {
+	return mgl32.LookAtV(
+		mgl32.Vec3{0, 0, 0},
+		camera3D.Position.Add(camera3D.FrontAxis),
+		camera3D.UpAxis,
+	)
+}
+
 func (camera3D *Camera3D) GetPosition() (float32, float32, float32) {
 	return camera3D.Position.X(), camera3D.Position.Y(), camera3D.Position.Z()
 }

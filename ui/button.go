@@ -37,21 +37,9 @@ func (button *Button) Initialize() {
 		button.transform.SY,
 	)
 	button.ButtonChild.SetMouseFunc(button.MouseFunc)
+	button.ButtonChild.Static = true
 	button.SetPosition(button.transform.X, button.transform.Y)
 	button.SetDimensions(button.transform.SX, button.transform.SY)
-}
-
-func (button *Button) Update(inputs *input.Input) {
-	if button.colliding[0] {
-		if inputs.LeftMouseButton {
-			if !button.justClicked {
-				button.clickCallback()
-				button.justClicked = true
-			}
-		} else {
-			button.justClicked = false
-		}
-	}
 }
 
 func (button *Button) SetClickCallback(f func()) {
@@ -67,9 +55,26 @@ func (button *Button) MouseFunc(c bool) {
 	button.colliding[0] = c
 }
 
+func (button *Button) Block() {
+	button.justClicked = true
+}
+
 //  --------------------------------------------------
 //  Interface
 //  --------------------------------------------------
+
+func (button *Button) Update(inputs *input.Input) {
+	if button.colliding[0] {
+		if inputs.LeftMouseButton {
+			if !button.justClicked {
+				button.clickCallback()
+				button.justClicked = true
+			}
+		} else {
+			button.justClicked = false
+		}
+	}
+}
 
 func (button *Button) SetPosition(x, y float32) {
 	button.ButtonChild.X = x
@@ -88,4 +93,12 @@ func (button *Button) SetDimensions(width, height float32) {
 
 func (button *Button) GetTransform() geometry.Transform {
 	return button.transform
+}
+
+func (button *Button) GetChildren() []*child.Child2D {
+	return []*child.Child2D{button.ButtonChild}
+}
+
+func (button *Button) GetTextBoxes() []*TextBox {
+	return []*TextBox{button.TextBx}
 }

@@ -1,6 +1,10 @@
 package camera
 
-import "rapidengine/input"
+import (
+	"rapidengine/input"
+
+	"github.com/go-gl/mathgl/mgl32"
+)
 
 type Camera interface {
 	Look()
@@ -17,6 +21,7 @@ type Camera interface {
 	ChangePitch(float32)
 
 	GetFirstViewIndex() *float32
+	GetStaticView() mgl32.Mat4
 
 	SetPosition(float32, float32, float32)
 	GetPosition() (float32, float32, float32)

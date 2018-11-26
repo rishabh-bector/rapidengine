@@ -18,27 +18,19 @@ type Engine struct {
 	Renderer   Renderer
 	RenderFunc func(renderer *Renderer, inputs *input.Input)
 
-	ChildControl ChildControl
-
+	ChildControl     ChildControl
+	SceneControl     SceneControl
 	CollisionControl CollisionControl
+	TextureControl   TextureControl
+	MaterialControl  MaterialControl
+	InputControl     InputControl
+	ShaderControl    ShaderControl
+	LightControl     LightControl
+	UIControl        UIControl
+	TerrainControl   TerrainControl
+	TextControl      TextControl
 
-	TextureControl TextureControl
-
-	MaterialControl MaterialControl
-
-	InputControl InputControl
-
-	ShaderControl ShaderControl
-
-	LightControl LightControl
-
-	UIControl UIControl
-
-	TerrainControl TerrainControl
-
-	TextControl TextControl
-	FPSBox      *ui.TextBox
-
+	FPSBox     *ui.TextBox
 	FrameCount int
 
 	Config *configuration.EngineConfig
@@ -53,6 +45,7 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 
 		// Package Controls
 		ChildControl:     NewChildControl(),
+		SceneControl:     NewSceneControl(),
 		CollisionControl: NewCollisionControl(config),
 		TextureControl:   NewTextureControl(config),
 		InputControl:     NewInputControl(),
@@ -74,11 +67,13 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 	}
 
 	e.ChildControl.Initialize(&e)
+	e.SceneControl.Initialize(&e)
 	e.ShaderControl.Initialize()
 	e.MaterialControl.Initialize(&e)
 	e.UIControl.Initialize(&e)
 	e.TextControl.Initialize(&e)
 	e.TerrainControl.Initialize(&e)
+	e.CollisionControl.Initialize(&e)
 
 	e.Renderer.Initialize(&e)
 	e.Renderer.AttachCallback(e.Update)
@@ -86,31 +81,22 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 	e.TextControl.LoadFont("../rapidengine/assets/fonts/avenir-next-regular.ttf", "avenir", 32, 0)
 	if e.Config.ShowFPS {
 		e.FPSBox = e.TextControl.NewTextBox("Rapid Engine", "roboto", float32(e.Config.ScreenWidth/2-100), float32(e.Config.ScreenHeight/2-50), 0.5, [3]float32{1, 1, 1})
-		e.TextControl.AddTextBox(e.FPSBox, "scene1")
+		e.SceneControl.GetCurrentScene().InstanceText(e.FPSBox)
 	}
 
-	if e.Config.Dimensions == 2 {
-		l := lighting.NewDirectionLight(
-			e.ShaderControl.GetShader("colorLighting"),
-			[]float32{1, 1, 1},
-			[]float32{0, 0, 0},
-			[]float32{0, 0, 0},
-			[]float32{0, 0, -1},
-		)
-		e.LightControl.SetDirectionalLight(&l)
-	}
 	if e.Config.Dimensions == 3 {
 		l := lighting.NewDirectionLight(
-			e.ShaderControl.GetShader("colorLighting"),
-			[]float32{0.6, 0.6, 0.6},
-			[]float32{0.9, 0.9, 0.9},
-			[]float32{0.3, 0.3, 0.3},
-			[]float32{1, -0.5, 1},
+			e.ShaderControl.GetShader("standard"),
+			[]float32{0.1, 0.1, 0.1},
+			[]float32{1.0, 1.0, 1.0},
+			[]float32{0, 0, 0},
+			[]float32{1, -0.5, 0},
 		)
+
 		e.LightControl.SetDirectionalLight(&l)
 
 		e.Renderer.SkyBoxEnabled = true
-		//e.Renderer.SkyBox = e.TerrainControl.NewSkyBox("TropicalSunnyDay", &e.ShaderControl, &e.TextureControl, e.Config)
+		e.Renderer.SkyBox = e.TerrainControl.NewSkyBox("TropicalSunnyDay", &e.ShaderControl, &e.TextureControl, e.Config)
 	}
 
 	return &e
@@ -125,7 +111,7 @@ func NewEngineConfig(
 }
 
 func (engine *Engine) Initialize() {
-	engine.ChildControl.PreRenderChildren()
+	engine.SceneControl.PreRenderChildren()
 }
 
 func (engine *Engine) Update(renderer *Renderer) {

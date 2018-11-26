@@ -14,7 +14,8 @@ type Camera2D struct {
 	UpAxis    mgl32.Vec3
 	FrontAxis mgl32.Vec3
 
-	View mgl32.Mat4
+	View       mgl32.Mat4
+	StaticView mgl32.Mat4
 
 	config *configuration.EngineConfig
 }
@@ -24,8 +25,13 @@ func NewCamera2D(position mgl32.Vec3, speed float32, config *configuration.Engin
 		Position:  position,
 		UpAxis:    mgl32.Vec3{0, 1, 0},
 		FrontAxis: mgl32.Vec3{0, 0, -1},
-		Speed:     speed,
-		config:    config,
+		StaticView: mgl32.LookAtV(
+			mgl32.Vec3{0, 0, 0},
+			mgl32.Vec3{0, 0, 0}.Add(mgl32.Vec3{0, 0, -1}),
+			mgl32.Vec3{0, 1, 0},
+		),
+		Speed:  speed,
+		config: config,
 	}
 }
 
@@ -35,6 +41,10 @@ func (camera2D *Camera2D) Look() {
 		camera2D.Position.Add(camera2D.FrontAxis),
 		camera2D.UpAxis,
 	)
+}
+
+func (camera2D *Camera2D) GetStaticView() mgl32.Mat4 {
+	return camera2D.StaticView
 }
 
 func (camera2D *Camera2D) MoveUp() {
