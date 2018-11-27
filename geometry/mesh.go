@@ -32,8 +32,8 @@ type Mesh struct {
 	numVertices int32
 
 	// Normal Mapping
-	tangent    []float32
-	bitTangent []float32
+	tangents   []float32
+	bitangents []float32
 }
 
 func (p *Mesh) GetID() string {
@@ -252,7 +252,11 @@ func NewPlane(width, height, density int, heightData [][]float32) Mesh {
 }
 
 func (m *Mesh) ComputeTangents() {
-	usedIndices := []uint32{}
+	for i := 0; i < len(m.vao.vertices); i++ {
+		m.tangents = append(m.tangents, 0)
+		m.bitangents = append(m.bitangents, 0)
+	}
+
 	for i := 0; i < int(len(m.vao.indices)); i += 3 {
 		v0 := mgl32.Vec3{
 			m.vao.vertices[m.vao.indices[i]*3],
@@ -284,107 +288,45 @@ func (m *Mesh) ComputeTangents() {
 			texCoords[m.vao.indices[i+2]*3+1],
 		}
 
-		deltaPos1 := v1.Sub(v0)
-		deltaPos2 := v2.Sub(v0)
+		e1 := v1.Sub(v0)
+		e2 := v2.Sub(v0)
 
 		deltaUV1 := uv1.Sub(uv0)
 		deltaUV2 := uv2.Sub(uv0)
 
-		r := 1.0 / (deltaUV1.X()*deltaUV2.Y() - deltaUV1.Y()*deltaUV2.X())
+		r := float32(1) / (deltaUV1.X()*deltaUV2.Y() - deltaUV1.Y()*deltaUV2.X())
 
-		tangent := mgl32.Vec3{
-			r * (deltaUV2.Y()*deltaPos1.X() - deltaUV1.Y()*deltaPos2.X()),
-			r * (deltaUV2.Y()*deltaPos1.Y() - deltaUV1.Y()*deltaPos2.Y()),
-			r * (deltaUV2.Y()*deltaPos1.Z() - deltaUV1.Y()*deltaPos2.Z()),
-		}.Normalize()
+		tangent := (e1.Mul(deltaUV2.Y()).Sub(e2.Mul(deltaUV1.Y()))).Mul(r)
+		bitangent := (e2.Mul(deltaUV1.X()).Sub(e1.Mul(deltaUV2.X()))).Mul(r)
 
-		bitTangent := mgl32.Vec3{
-			r * (-deltaUV2.X()*deltaPos1.X() - deltaUV1.X()*deltaPos2.X()),
-			r * (-deltaUV2.X()*deltaPos1.Y() - deltaUV1.X()*deltaPos2.Y()),
-			r * (-deltaUV2.X()*deltaPos1.Z() - deltaUV1.X()*deltaPos2.Z()),
-		}.Normalize()
+		m.tangents[m.vao.indices[i]*3] = tangent.X()
+		m.tangents[m.vao.indices[i]*3+1] = tangent.Y()
+		m.tangents[m.vao.indices[i]*3+2] = tangent.Z()
 
-		//m.fixInd(usedIndices, tangent, bitTangent, i)
-		//m.fixInd(usedIndices, tangent, bitTangent, i+1)
-		//m.fixInd(usedIndices, tangent, bitTangent, i+2)
+		m.tangents[m.vao.indices[i+1]*3] = tangent.X()
+		m.tangents[m.vao.indices[i+1]*3+1] = tangent.Y()
+		m.tangents[m.vao.indices[i+1]*3+2] = tangent.Z()
 
-		tanArray := []float32{tangent.X(), tangent.Y(), tangent.Z()}
-		bitTanArray := []float32{bitTangent.X(), bitTangent.Y(), bitTangent.Z()}
+		m.tangents[m.vao.indices[i+2]*3] = tangent.X()
+		m.tangents[m.vao.indices[i+2]*3+1] = tangent.Y()
+		m.tangents[m.vao.indices[i+2]*3+2] = tangent.Z()
 
-		m.tangent = append(m.tangent, tanArray...)
-		m.tangent = append(m.tangent, tanArray...)
-		m.tangent = append(m.tangent, tanArray...)
+		m.bitangents[m.vao.indices[i]*3] = bitangent.X()
+		m.bitangents[m.vao.indices[i]*3+1] = bitangent.Y()
+		m.bitangents[m.vao.indices[i]*3+2] = bitangent.Z()
 
-		m.bitTangent = append(m.bitTangent, bitTanArray...)
-		m.bitTangent = append(m.bitTangent, bitTanArray...)
-		m.bitTangent = append(m.bitTangent, bitTanArray...)
+		m.bitangents[m.vao.indices[i+1]*3] = bitangent.X()
+		m.bitangents[m.vao.indices[i+1]*3+1] = bitangent.Y()
+		m.bitangents[m.vao.indices[i+1]*3+2] = bitangent.Z()
 
-		usedIndices = append(usedIndices, m.vao.indices[i])
+		m.bitangents[m.vao.indices[i+2]*3] = bitangent.X()
+		m.bitangents[m.vao.indices[i+2]*3+1] = bitangent.Y()
+		m.bitangents[m.vao.indices[i+2]*3+2] = bitangent.Z()
 	}
 
-	m.GetVAO().AddVertexAttribute(m.tangent, 3, 3)
-	m.GetVAO().AddVertexAttribute(m.bitTangent, 4, 3)
+	m.GetVAO().AddVertexAttribute(m.tangents, 3, 3)
+	m.GetVAO().AddVertexAttribute(m.bitangents, 4, 3)
 
-}
-
-func (m *Mesh) fixInd(usedIndices []uint32, tangent mgl32.Vec3, bitTangent mgl32.Vec3, i int) {
-	if ind := isIndexUsed(usedIndices, m.vao.indices[i]); ind != -1 {
-		oldTan := mgl32.Vec3{
-			m.tangent[ind*3],
-			m.tangent[ind*3+1],
-			m.tangent[ind*3+2],
-		}
-		oldBit := mgl32.Vec3{
-			m.bitTangent[ind*3],
-			m.bitTangent[ind*3+1],
-			m.bitTangent[ind*3+2],
-		}
-
-		newTan := avgVec(oldTan, tangent)
-		newBit := avgVec(oldBit, bitTangent)
-
-		m.tangent[ind*3] = newTan.X()
-		m.tangent[ind*3+1] = newTan.Y()
-		m.tangent[ind*3+2] = newTan.Z()
-
-		m.bitTangent[ind*3] = newBit.X()
-		m.bitTangent[ind*3+1] = newBit.Y()
-		m.bitTangent[ind*3+2] = newBit.Z()
-
-		tanArray := []float32{newTan.X(), newTan.Y(), newTan.Z()}
-		bitTanArray := []float32{newBit.X(), newBit.Y(), newBit.Z()}
-
-		m.tangent = append(m.tangent, tanArray...)
-		m.bitTangent = append(m.bitTangent, bitTanArray...)
-
-		usedIndices = append(usedIndices, m.vao.indices[i])
-
-	} else {
-		tanArray := []float32{tangent.X(), tangent.Y(), tangent.Z()}
-		bitTanArray := []float32{bitTangent.X(), bitTangent.Y(), bitTangent.Z()}
-
-		m.tangent = append(m.tangent, tanArray...)
-		m.bitTangent = append(m.bitTangent, bitTanArray...)
-
-		usedIndices = append(usedIndices, m.vao.indices[i])
-	}
-}
-
-func isIndexUsed(usedIndices []uint32, v uint32) int {
-	for i, uv := range usedIndices {
-		if uv == v {
-			return i
-		}
-	}
-	return -1
-}
-
-func avgVec(vec1 mgl32.Vec3, vec2 mgl32.Vec3) mgl32.Vec3 {
-	return mgl32.Vec3{
-		(vec1.X() + vec2.X()) / 2,
-		(vec1.Y() + vec2.Y()) / 2,
-		(vec1.Z() + vec2.Z()) / 2,
-	}
 }
 
 func GetHeightMapData(path string, max float32) [][]float32 {
