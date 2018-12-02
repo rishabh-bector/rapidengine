@@ -27,6 +27,8 @@ func NewSkyBox(mat *material.CubemapMaterial, vao *geometry.VertexArray, projMtx
 	}
 }
 
+var e = float32(0)
+
 func (skyBox *SkyBox) Render(mainCamera camera.Camera) {
 	gl.DepthMask(false)
 	skyBox.material.GetShader().Bind()
@@ -36,6 +38,9 @@ func (skyBox *SkyBox) Render(mainCamera camera.Camera) {
 
 	x, y, z := mainCamera.GetPosition()
 	skyBox.modelMatrix = mgl32.Translate3D(x, y, z)
+
+	skyBox.modelMatrix = skyBox.modelMatrix.Mul4(mgl32.HomogRotate3DY(e))
+	e += 0.0007
 
 	gl.UniformMatrix4fv(
 		skyBox.material.GetShader().GetUniform("modelMtx"),

@@ -4,6 +4,8 @@ uniform mat4 modelMtx;
 uniform mat4 viewMtx;
 uniform mat4 projectionMtx;
 
+uniform float scale;
+
 uniform int flipped;
 
 layout (location = 0) in vec3 position;
@@ -13,9 +15,9 @@ out vec3 texCoord;
 
 void main() {
     if(flipped == 0) {
-        texCoord = tex;
+        texCoord = vec3(tex.x / scale, tex.y, tex.z);
     } else {
-        texCoord = vec3(1 - tex.x, tex.y, tex.z);
+        texCoord = vec3(1 - tex.x, tex.y, tex.z) / scale;
     }
 
     gl_Position = projectionMtx * viewMtx * modelMtx * vec4(position, 1.0);

@@ -59,7 +59,7 @@ func (bm *BasicMaterial) Render(delta float64, darkness float32) {
 	gl.Uniform4fv(bm.shader.GetUniform("hue"), 1, &bm.Hue[0])
 
 	gl.Uniform1i(bm.shader.GetUniform("diffuseMap"), 0)
-	gl.Uniform1f(bm.shader.GetUniform("diffuseMapScale"), bm.DiffuseMapScale)
+	gl.Uniform1f(bm.shader.GetUniform("scale"), bm.DiffuseMapScale)
 
 	gl.Uniform1f(bm.shader.GetUniform("alphaMapLevel"), bm.AlphaMapLevel)
 	gl.Uniform1i(bm.shader.GetUniform("alphaMap"), 1)

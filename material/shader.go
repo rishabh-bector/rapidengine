@@ -112,8 +112,8 @@ var BasicProgram = ShaderProgram{
 		"hue":      0,
 		"darkness": 0,
 
-		"diffuseMap":      0,
-		"diffuseMapScale": 0,
+		"diffuseMap": 0,
+		"scale":      0,
 
 		"alphaMapLevel": 0,
 		"alphaMap":      0,

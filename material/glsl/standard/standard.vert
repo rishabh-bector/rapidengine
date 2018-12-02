@@ -3,6 +3,7 @@
 out vec3 FragPos;
 out vec3 TexCoords;
 out mat3 TBN;
+out vec3 Normal;
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 tex;
@@ -28,7 +29,7 @@ void main() {
     gl_Position = projectionMtx * viewMtx * modelMtx * vec4(finalPosition, 1.0);
 
     // Normal vector
-    //Normal = mat3(transpose(inverse(modelMtx))) * normal;
+    Normal = mat3(transpose(inverse(modelMtx))) * normal;
 
     // Fragment position
     FragPos =  vec3(modelMtx * vec4(finalPosition, 1.0));

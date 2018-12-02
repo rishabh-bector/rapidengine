@@ -202,20 +202,25 @@ func NewPlane(width, height, density int, heightData [][]float32) Mesh {
 	vertexPointer := 0
 	for i := 0; i < xCount; i++ {
 		for j := 0; j < yCount; j++ {
+
 			vertices[vertexPointer*3] = float32(j) / (float32(xCount) - 1) * float32(width)
+			vertices[vertexPointer*3+2] = float32(i) / (float32(yCount) - 1) * float32(height)
+
 			if heightData == nil {
 				vertices[vertexPointer*3+1] = 0
+
 				normals[vertexPointer*3] = 0
 				normals[vertexPointer*3+1] = 1
 				normals[vertexPointer*3+2] = 0
 			} else {
 				vertices[vertexPointer*3+1] = heightData[int((float32(i)/float32(xCount))*float32(len(heightData)))][int((float32(j)/float32(yCount))*float32(len(heightData[0])))]
+
 				normal := calculateNormal(i, j, heightData)
 				normals[vertexPointer*3] = normal.X()
 				normals[vertexPointer*3+1] = normal.Y()
 				normals[vertexPointer*3+2] = normal.Z()
 			}
-			vertices[vertexPointer*3+2] = float32(i) / (float32(yCount) - 1) * float32(height)
+
 			textureCoords[vertexPointer*3] = float32(j) / (float32(xCount) - 1)
 			textureCoords[vertexPointer*3+1] = float32(i) / (float32(yCount) - 1)
 			textureCoords[vertexPointer*3+2] = 0
@@ -299,29 +304,29 @@ func (m *Mesh) ComputeTangents() {
 		tangent := (e1.Mul(deltaUV2.Y()).Sub(e2.Mul(deltaUV1.Y()))).Mul(r)
 		bitangent := (e2.Mul(deltaUV1.X()).Sub(e1.Mul(deltaUV2.X()))).Mul(r)
 
-		m.tangents[m.vao.indices[i]*3] = tangent.X()
-		m.tangents[m.vao.indices[i]*3+1] = tangent.Y()
-		m.tangents[m.vao.indices[i]*3+2] = tangent.Z()
+		m.tangents[m.vao.indices[i]*3] += tangent.X()
+		m.tangents[m.vao.indices[i]*3+1] += tangent.Y()
+		m.tangents[m.vao.indices[i]*3+2] += tangent.Z()
 
-		m.tangents[m.vao.indices[i+1]*3] = tangent.X()
-		m.tangents[m.vao.indices[i+1]*3+1] = tangent.Y()
-		m.tangents[m.vao.indices[i+1]*3+2] = tangent.Z()
+		m.tangents[m.vao.indices[i+1]*3] += tangent.X()
+		m.tangents[m.vao.indices[i+1]*3+1] += tangent.Y()
+		m.tangents[m.vao.indices[i+1]*3+2] += tangent.Z()
 
-		m.tangents[m.vao.indices[i+2]*3] = tangent.X()
-		m.tangents[m.vao.indices[i+2]*3+1] = tangent.Y()
-		m.tangents[m.vao.indices[i+2]*3+2] = tangent.Z()
+		m.tangents[m.vao.indices[i+2]*3] += tangent.X()
+		m.tangents[m.vao.indices[i+2]*3+1] += tangent.Y()
+		m.tangents[m.vao.indices[i+2]*3+2] += tangent.Z()
 
-		m.bitangents[m.vao.indices[i]*3] = bitangent.X()
-		m.bitangents[m.vao.indices[i]*3+1] = bitangent.Y()
-		m.bitangents[m.vao.indices[i]*3+2] = bitangent.Z()
+		m.bitangents[m.vao.indices[i]*3] += bitangent.X()
+		m.bitangents[m.vao.indices[i]*3+1] += bitangent.Y()
+		m.bitangents[m.vao.indices[i]*3+2] += bitangent.Z()
 
-		m.bitangents[m.vao.indices[i+1]*3] = bitangent.X()
-		m.bitangents[m.vao.indices[i+1]*3+1] = bitangent.Y()
-		m.bitangents[m.vao.indices[i+1]*3+2] = bitangent.Z()
+		m.bitangents[m.vao.indices[i+1]*3] += bitangent.X()
+		m.bitangents[m.vao.indices[i+1]*3+1] += bitangent.Y()
+		m.bitangents[m.vao.indices[i+1]*3+2] += bitangent.Z()
 
-		m.bitangents[m.vao.indices[i+2]*3] = bitangent.X()
-		m.bitangents[m.vao.indices[i+2]*3+1] = bitangent.Y()
-		m.bitangents[m.vao.indices[i+2]*3+2] = bitangent.Z()
+		m.bitangents[m.vao.indices[i+2]*3] += bitangent.X()
+		m.bitangents[m.vao.indices[i+2]*3+1] += bitangent.Y()
+		m.bitangents[m.vao.indices[i+2]*3+2] += bitangent.Z()
 	}
 
 	m.GetVAO().AddVertexAttribute(m.tangents, 3, 3)
@@ -370,6 +375,6 @@ func calculateNormal(x, z int, heights [][]float32) mgl32.Vec3 {
 	D := heights[x][z-1]
 	U := heights[x][z+1]
 
-	normal := mgl32.Vec3{L - R, 1, D - U}
+	normal := mgl32.Vec3{2 * (R - L), 4, 2 * (D - U)}
 	return normal.Normalize()
 }

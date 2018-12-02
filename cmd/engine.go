@@ -90,7 +90,7 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 			[]float32{0.1, 0.1, 0.1},
 			[]float32{1.0, 1.0, 1.0},
 			[]float32{0, 0, 0},
-			[]float32{1, -0.5, 0},
+			[]float32{0, 0, 0},
 		)
 
 		e.LightControl.SetDirectionalLight(&l)
