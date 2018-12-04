@@ -178,7 +178,7 @@ func (child3D *Child3D) AttachMesh(p geometry.Mesh) {
 	child3D.numVertices = p.GetNumVertices()
 	child3D.mesh.GetVAO().AddVertexAttribute(*p.GetNormals(), 2, 3)
 	child3D.AttachTextureCoords(*p.GetTexCoords())
-	child3D.mesh.ComputeTangents()
+	//child3D.mesh.ComputeTangents()
 }
 
 func (child3D *Child3D) Activate() {

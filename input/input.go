@@ -55,4 +55,8 @@ var KeyMap map[string]glfw.Key = map[string]glfw.Key{
 	"k": glfw.KeyK,
 	"o": glfw.KeyO,
 	"p": glfw.KeyP,
+
+	"q":    glfw.KeyQ,
+	"e":    glfw.KeyE,
+	"ctrl": glfw.KeyLeftControl,
 }

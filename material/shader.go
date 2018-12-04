@@ -96,8 +96,8 @@ func CompileShader(source string, shaderType uint32) (uint32, error) {
 //  --------------------------------------------------
 
 var BasicProgram = ShaderProgram{
-	vertexShader:   "../rapidengine/material/glsl/basic/basic.vert",
-	fragmentShader: "../rapidengine/material/glsl/basic/basic.frag",
+	vertexShader:   "../rapidengine/material/shaders/basic/basic.vert",
+	fragmentShader: "../rapidengine/material/shaders/basic/basic.frag",
 	uniformLocations: map[string]int32{
 		// Vertices
 		"modelMtx":      0,
@@ -125,8 +125,8 @@ var BasicProgram = ShaderProgram{
 }
 
 var StandardProgram = ShaderProgram{
-	vertexShader:   "../rapidengine/material/glsl/standard/standard.vert",
-	fragmentShader: "../rapidengine/material/glsl/standard/standard.frag",
+	vertexShader:   "../rapidengine/material/shaders/standard/standard.vert",
+	fragmentShader: "../rapidengine/material/shaders/standard/standard.frag",
 	uniformLocations: map[string]int32{
 		// Vertices
 		"modelMtx":      0,
@@ -162,8 +162,8 @@ var StandardProgram = ShaderProgram{
 }
 
 var SkyBoxProgram = ShaderProgram{
-	vertexShader:   "../rapidengine/material/glsl/skybox/skybox.vert",
-	fragmentShader: "../rapidengine/material/glsl/skybox/skybox.frag",
+	vertexShader:   "../rapidengine/material/shaders/skybox/skybox.vert",
+	fragmentShader: "../rapidengine/material/shaders/skybox/skybox.frag",
 	uniformLocations: map[string]int32{
 		// Vertices
 		"modelMtx":       0,
@@ -173,5 +173,22 @@ var SkyBoxProgram = ShaderProgram{
 	},
 	attributeLocations: map[string]uint32{
 		"position": 0,
+	},
+}
+
+var PostProcessingProgram = ShaderProgram{
+	vertexShader:   "../rapidengine/material/shaders/postprocessing/post.vert",
+	fragmentShader: "../rapidengine/material/shaders/postprocessing/post.frag",
+	uniformLocations: map[string]int32{
+		// Vertices
+		"modelMtx":      0,
+		"viewMtx":       0,
+		"projectionMtx": 0,
+
+		"screen": 0,
+	},
+	attributeLocations: map[string]uint32{
+		"position": 0,
+		"tex":      0,
 	},
 }

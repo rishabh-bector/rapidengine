@@ -16,9 +16,10 @@ func (shaderControl *ShaderControl) BindShader(name string) {
 
 func (shaderControl *ShaderControl) Initialize() {
 	shaderControl.programs = map[string]*material.ShaderProgram{
-		"basic":    &material.BasicProgram,
-		"standard": &material.StandardProgram,
-		"skybox":   &material.SkyBoxProgram,
+		"basic":          &material.BasicProgram,
+		"standard":       &material.StandardProgram,
+		"skybox":         &material.SkyBoxProgram,
+		"postprocessing": &material.PostProcessingProgram,
 	}
 	for _, prog := range shaderControl.programs {
 		prog.Compile()

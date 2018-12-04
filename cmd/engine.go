@@ -29,6 +29,7 @@ type Engine struct {
 	UIControl        UIControl
 	TerrainControl   TerrainControl
 	TextControl      TextControl
+	PostControl      PostControl
 
 	FPSBox     *ui.TextBox
 	FrameCount int
@@ -55,6 +56,7 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 		TerrainControl:   NewTerrainControl(),
 		UIControl:        NewUIControl(),
 		TextControl:      NewTextControl(config),
+		PostControl:      NewPostControl(),
 
 		// Configuration
 		Config:     config,
@@ -74,6 +76,7 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 	e.TextControl.Initialize(&e)
 	e.TerrainControl.Initialize(&e)
 	e.CollisionControl.Initialize(&e)
+	e.PostControl.Initialize(&e)
 
 	e.Renderer.Initialize(&e)
 	e.Renderer.AttachCallback(e.Update)
@@ -90,7 +93,7 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 			[]float32{0.1, 0.1, 0.1},
 			[]float32{1.0, 1.0, 1.0},
 			[]float32{0, 0, 0},
-			[]float32{0, 0, 0},
+			[]float32{1, 0, 0},
 		)
 
 		e.LightControl.SetDirectionalLight(&l)

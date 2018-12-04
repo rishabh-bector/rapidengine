@@ -92,9 +92,7 @@ func (renderer *Renderer) StartRenderer() {
 
 // RenderFrame renders a single frame to the screen
 func (renderer *Renderer) renderFrame() {
-	// Clear screen buffers
-	gl.Clear(gl.COLOR_BUFFER_BIT)
-	gl.Clear(gl.DEPTH_BUFFER_BIT)
+	renderer.engine.PostControl.UpdateFrameBuffers()
 
 	// Render skybox
 	if renderer.SkyBoxEnabled {
@@ -110,6 +108,9 @@ func (renderer *Renderer) renderFrame() {
 	// Update camera
 	renderer.MainCamera.Look()
 	renderer.camX, renderer.camY, renderer.camZ = renderer.MainCamera.GetPosition()
+
+	// Post processing update
+	renderer.engine.PostControl.Update()
 
 	// Update window buffers
 	renderer.Window.SwapBuffers()
