@@ -43,10 +43,10 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec4 calculateDiffuseColor();
 
 void main() {    
-    /*vec3 norm = texture(normalMap, TexCoords.xy).rgb;
+    vec3 norm = texture(normalMap, TexCoords.xy).rgb;
     norm = normalize(norm * 2.0 - 1.0);
-    norm = normalize(TBN * norm);*/
-    vec3 norm = normalize(Normal);
+    norm = normalize(TBN * norm);
+    //vec3 norm = normalize(Normal);
 
     vec3 viewDir = normalize(viewPos - FragPos);
 

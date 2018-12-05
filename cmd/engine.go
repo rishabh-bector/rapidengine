@@ -91,8 +91,8 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 		l := lighting.NewDirectionLight(
 			e.ShaderControl.GetShader("standard"),
 			[]float32{0.1, 0.1, 0.1},
-			[]float32{1.0, 1.0, 1.0},
-			[]float32{0, 0, 0},
+			[]float32{0.8, 0.8, 0.8},
+			[]float32{0.1, 0.1, 0.1},
 			[]float32{1, 0, 0},
 		)
 

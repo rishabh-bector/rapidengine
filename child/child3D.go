@@ -39,6 +39,10 @@ type Child3D struct {
 	RY float32
 	RZ float32
 
+	ScaleX float32
+	ScaleY float32
+	ScaleZ float32
+
 	Gravity float32
 
 	Group    string
@@ -61,6 +65,9 @@ func NewChild3D(config *configuration.EngineConfig) *Child3D {
 		Gravity:                0,
 		copyingEnabled:         false,
 		specificRenderDistance: 0,
+		ScaleX:                 1,
+		ScaleY:                 1,
+		ScaleZ:                 1,
 	}
 }
 
@@ -113,6 +120,7 @@ func (child3D *Child3D) Update(mainCamera camera.Camera, delta float64, lastFram
 
 func (child3D *Child3D) Render(mainCamera camera.Camera) {
 	child3D.modelMatrix = mgl32.Translate3D(child3D.X, child3D.Y, child3D.Z)
+	child3D.modelMatrix = child3D.modelMatrix.Mul4(mgl32.Scale3D(child3D.ScaleX, child3D.ScaleY, child3D.ScaleZ))
 
 	child3D.modelMatrix = child3D.modelMatrix.Mul4(mgl32.HomogRotate3DX(child3D.RX))
 	child3D.modelMatrix = child3D.modelMatrix.Mul4(mgl32.HomogRotate3DY(child3D.RY))
@@ -178,7 +186,10 @@ func (child3D *Child3D) AttachMesh(p geometry.Mesh) {
 	child3D.numVertices = p.GetNumVertices()
 	child3D.mesh.GetVAO().AddVertexAttribute(*p.GetNormals(), 2, 3)
 	child3D.AttachTextureCoords(*p.GetTexCoords())
-	//child3D.mesh.ComputeTangents()
+}
+
+func (child3D *Child3D) ComputeMeshTangents() {
+	child3D.mesh.ComputeTangents()
 }
 
 func (child3D *Child3D) Activate() {
