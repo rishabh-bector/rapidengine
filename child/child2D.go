@@ -189,7 +189,7 @@ func (child2D *Child2D) AttachTextureCoords(coords []float32) {
 
 	gl.BindVertexArray(child2D.vertexArray.GetID())
 	child2D.material.GetShader().Bind()
-	child2D.vertexArray.AddVertexAttribute(coords, 1, 2)
+	child2D.vertexArray.AddVertexAttribute(coords, 1, 3)
 	gl.BindVertexArray(0)
 }
 
