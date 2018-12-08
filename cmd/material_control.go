@@ -27,3 +27,11 @@ func (mc *MaterialControl) NewStandardMaterial() *material.StandardMaterial {
 func (mc *MaterialControl) NewCubemapMaterial() *material.CubemapMaterial {
 	return material.NewCubemapMaterial(mc.engine.ShaderControl.GetShader("skybox"))
 }
+
+func (mc *MaterialControl) NewTerrainMaterial() *material.TerrainMaterial {
+	return material.NewTerrainMaterial(mc.engine.ShaderControl.GetShader("terrain"))
+}
+
+func (mc *MaterialControl) NewFoliageMaterial() *material.FoliageMaterial {
+	return material.NewFoliageMaterial(mc.engine.ShaderControl.GetShader("foliage"))
+}

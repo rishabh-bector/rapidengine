@@ -5,11 +5,11 @@ import "github.com/sirupsen/logrus"
 type EngineConfig struct {
 	ScreenWidth  int
 	ScreenHeight int
+	FullScreen   bool
 
-	FullScreen bool
-	VSync      bool
-
+	VSync           bool
 	GammaCorrection bool
+	AntiAliasing    bool
 
 	WindowTitle    string
 	PolygonLines   bool
@@ -45,6 +45,7 @@ func NewEngineConfig(
 		VSync:           true,
 		PolygonLines:    false,
 		GammaCorrection: true,
+		AntiAliasing:    true,
 
 		// Misc
 		CollisionLines: false,

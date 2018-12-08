@@ -1,10 +1,10 @@
 package geometry
 
 var RectTextures = []float32{
-	0, 1, //0,
-	1, 1, //0,
-	1, 0, //0,
-	0, 0, //0,
+	0, 1, 0,
+	1, 1, 0,
+	1, 0, 0,
+	0, 0, 0,
 }
 
 var RectNormals = []float32{

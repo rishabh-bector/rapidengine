@@ -18,7 +18,7 @@ type Child3D struct {
 
 	mesh geometry.Mesh
 
-	material material.Material
+	Material material.Material
 
 	modelMatrix      mgl32.Mat4
 	projectionMatrix mgl32.Mat4
@@ -75,17 +75,17 @@ func (child3D *Child3D) PreRender(mainCamera camera.Camera) {
 	child3D.BindChild()
 
 	gl.UniformMatrix4fv(
-		child3D.material.GetShader().GetUniform("modelMtx"),
+		child3D.Material.GetShader().GetUniform("modelMtx"),
 		1, false, &child3D.modelMatrix[0],
 	)
 
 	gl.UniformMatrix4fv(
-		child3D.material.GetShader().GetUniform("viewMtx"),
+		child3D.Material.GetShader().GetUniform("viewMtx"),
 		1, false, mainCamera.GetFirstViewIndex(),
 	)
 
 	gl.UniformMatrix4fv(
-		child3D.material.GetShader().GetUniform("projectionMtx"),
+		child3D.Material.GetShader().GetUniform("projectionMtx"),
 		1, false, &child3D.projectionMatrix[0],
 	)
 
@@ -105,7 +105,7 @@ func (child3D *Child3D) PreRender(mainCamera camera.Camera) {
 
 func (child3D *Child3D) BindChild() {
 	gl.BindVertexArray(child3D.mesh.GetVAO().GetID())
-	child3D.material.GetShader().Bind()
+	child3D.Material.GetShader().Bind()
 }
 
 func (child3D *Child3D) Update(mainCamera camera.Camera, delta float64, lastFrame float64) {
@@ -127,34 +127,34 @@ func (child3D *Child3D) Render(mainCamera camera.Camera) {
 	child3D.modelMatrix = child3D.modelMatrix.Mul4(mgl32.HomogRotate3DZ(child3D.RZ))
 
 	gl.UniformMatrix4fv(
-		child3D.material.GetShader().GetUniform("viewMtx"),
+		child3D.Material.GetShader().GetUniform("viewMtx"),
 		1, false, mainCamera.GetFirstViewIndex(),
 	)
 
 	gl.UniformMatrix4fv(
-		child3D.material.GetShader().GetUniform("modelMtx"),
+		child3D.Material.GetShader().GetUniform("modelMtx"),
 		1, false, &child3D.modelMatrix[0],
 	)
 
-	child3D.material.Render(0, 1)
+	child3D.Material.Render(0, 1)
 }
 
 func (child3D *Child3D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
 	child3D.modelMatrix = mgl32.Translate3D(config.X, config.Y, config.Z)
 
 	gl.UniformMatrix4fv(
-		child3D.material.GetShader().GetUniform("viewMtx"),
+		child3D.Material.GetShader().GetUniform("viewMtx"),
 		1, false, mainCamera.GetFirstViewIndex(),
 	)
 
 	gl.UniformMatrix4fv(
-		child3D.material.GetShader().GetUniform("modelMtx"),
+		child3D.Material.GetShader().GetUniform("modelMtx"),
 		1, false, &child3D.modelMatrix[0],
 	)
 
 	c := []float32{1, 0, 0}
 	gl.Uniform3fv(
-		child3D.material.GetShader().GetUniform("copyingEnabled"),
+		child3D.Material.GetShader().GetUniform("copyingEnabled"),
 		1, &c[0],
 	)
 
@@ -178,7 +178,7 @@ func (child3D *Child3D) SetPosition(x, y, z float32) {
 }
 
 func (child3D *Child3D) AttachMaterial(m material.Material) {
-	child3D.material = m
+	child3D.Material = m
 }
 
 func (child3D *Child3D) AttachMesh(p geometry.Mesh) {
@@ -217,7 +217,7 @@ func (child3D *Child3D) GetZ() float32 {
 }
 
 func (child3D *Child3D) GetShaderProgram() *material.ShaderProgram {
-	return child3D.material.GetShader()
+	return child3D.Material.GetShader()
 }
 
 func (child3D *Child3D) GetVertexArray() *geometry.VertexArray {

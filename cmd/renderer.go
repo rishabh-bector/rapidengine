@@ -299,6 +299,10 @@ func initGLFW(config *configuration.EngineConfig) *glfw.Window {
 
 	window.MakeContextCurrent()
 
+	if config.AntiAliasing {
+		glfw.WindowHint(glfw.Samples, 8)
+	}
+
 	if !config.VSync {
 		glfw.SwapInterval(0)
 	}
@@ -330,6 +334,10 @@ func initOpenGL(config *configuration.EngineConfig) uint32 {
 
 	if config.GammaCorrection {
 		gl.Enable(gl.FRAMEBUFFER_SRGB)
+	}
+
+	if config.AntiAliasing {
+		gl.Enable(gl.MULTISAMPLE)
 	}
 
 	return 0

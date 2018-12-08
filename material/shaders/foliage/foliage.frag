@@ -1,4 +1,5 @@
 #version 410
+out vec4 FragColor;
 
 struct DirLight {
     vec3 direction;
@@ -20,18 +21,14 @@ struct PointLight {
     vec3 specular;
 };
 
-out vec4 FragColor;
-
 in vec3 FragPos;
 in vec3 TexCoords;
-in mat3 TBN;
 in vec3 Normal;
+in mat3 TBN;
 
 uniform sampler2D diffuseMap;
 uniform sampler2D normalMap;
 uniform sampler2D heightMap;
-
-uniform sampler2D terrainNormalMap;
 
 uniform vec3 viewPos;
 
@@ -46,11 +43,10 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec4 calculateDiffuseColor();
 
 void main() {    
-    //vec3 norm = texture(normalMap, TexCoords.xy).rgb;
-    //norm = normalize(norm * 2.0 - 1.0);
-    //norm = normalize(TBN * norm);
-    vec3 norm = normalize(Normal);
-    //vec3 norm = texture(terrainNormalMap, TexCoords.xy).rgb;
+    vec3 norm = texture(normalMap, TexCoords.xy).rgb;
+    norm = normalize(norm * 2.0 - 1.0);
+    norm = normalize(TBN * norm);
+    //vec3 norm = normalize(Normal);
 
     vec3 viewDir = normalize(viewPos - FragPos);
 
@@ -61,21 +57,28 @@ void main() {
     for(int i = 0; i < numPointLights; i++) {
         //result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);    
     }
+
+    vec4 col = calculateDiffuseColor();
+    if(col.a < 0.5) {
+        discard;
+    }
     
-    FragColor = vec4(result, 1.0);
+    FragColor = vec4(col.xyz, 1.0);
 }
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
     vec3 lightDir = normalize(-light.direction);
 
-    // Diffuse shading
+    // diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
 
-    // Specular shading
+    // specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 0.5);
 
+    // combine results
     vec3 color = calculateDiffuseColor().xyz;
+    
     vec3 ambient = light.ambient * color;
     vec3 diffuse = light.diffuse * diff * color;
     vec3 specular = light.specular * spec * color;
@@ -86,14 +89,14 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
     vec3 lightDir = normalize(light.position - fragPos);
 
-    // Diffuse shading
+    // diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
 
-    // Specular shading
+    // specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 0.5);
 
-    // Attenuation
+    // attenuation
     float distance = length(light.position - fragPos);
 
     if(distance > 1.05) {
@@ -118,4 +121,3 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
 vec4 calculateDiffuseColor() {
     return texture(diffuseMap, TexCoords.xy);
 }
-

@@ -20,6 +20,8 @@ func (shaderControl *ShaderControl) Initialize() {
 		"standard":       &material.StandardProgram,
 		"skybox":         &material.SkyBoxProgram,
 		"postprocessing": &material.PostProcessingProgram,
+		"terrain":        &material.TerrainProgram,
+		"foliage":        &material.FoliageProgram,
 	}
 	for _, prog := range shaderControl.programs {
 		prog.Compile()

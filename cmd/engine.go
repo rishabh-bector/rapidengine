@@ -89,11 +89,11 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 
 	if e.Config.Dimensions == 3 {
 		l := lighting.NewDirectionLight(
-			e.ShaderControl.GetShader("standard"),
+			e.ShaderControl.GetShader("terrain"),
 			[]float32{0.1, 0.1, 0.1},
-			[]float32{0.8, 0.8, 0.8},
-			[]float32{0.1, 0.1, 0.1},
-			[]float32{1, 0, 0},
+			[]float32{0.9, 0.9, 0.9},
+			[]float32{0, 0, 0},
+			[]float32{1, -0.25, 0},
 		)
 
 		e.LightControl.SetDirectionalLight(&l)
@@ -134,6 +134,7 @@ func (engine *Engine) Update(renderer *Renderer) {
 	}
 
 	// Update controllers
+	engine.TerrainControl.Update()
 	engine.LightControl.Update(x, y, z)
 	engine.CollisionControl.Update(x, y, inputs)
 	engine.UIControl.Update(inputs)

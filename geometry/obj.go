@@ -139,6 +139,10 @@ func LoadObj(path string) Mesh {
 			normalsArray[vertexIndex*3+2] = currentNormal.Z()
 		}
 
+		if line[0] == "usemtl" {
+			break
+		}
+
 		line = strings.Split(scanner.Text(), " ")
 	}
 

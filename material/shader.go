@@ -9,9 +9,11 @@ import (
 )
 
 type ShaderProgram struct {
-	id             uint32
+	id uint32
+
 	vertexShader   string
 	fragmentShader string
+	geometryShader string
 
 	uniformLocations   map[string]int32
 	attributeLocations map[string]uint32
@@ -58,6 +60,19 @@ func (shaderProgram *ShaderProgram) Compile() {
 	shaderProgram.id = gl.CreateProgram()
 	gl.AttachShader(shaderProgram.id, vertexShader)
 	gl.AttachShader(shaderProgram.id, fragmentShader)
+
+	if shaderProgram.geometryShader != "" {
+		geom, err := ioutil.ReadFile(shaderProgram.geometryShader)
+		if err != nil {
+			panic(err)
+		}
+		geometryShader, err := CompileShader(string(geom)+"\x00", gl.GEOMETRY_SHADER)
+		if err != nil {
+			panic(err)
+		}
+		gl.AttachShader(shaderProgram.id, geometryShader)
+	}
+
 	gl.LinkProgram(shaderProgram.id)
 
 	for uni := range shaderProgram.uniformLocations {
@@ -151,6 +166,76 @@ var StandardProgram = ShaderProgram{
 		"viewPos": 0,
 
 		"numPointLights": 0,
+	},
+	attributeLocations: map[string]uint32{
+		"position":   0,
+		"tex":        1,
+		"normal":     2,
+		"tangent":    3,
+		"bitTangent": 4,
+	},
+}
+
+var TerrainProgram = ShaderProgram{
+	vertexShader:   "../rapidengine/material/shaders/terrain/terrain.vert",
+	fragmentShader: "../rapidengine/material/shaders/terrain/terrain.frag",
+	uniformLocations: map[string]int32{
+		// Vertices
+		"modelMtx":      0,
+		"viewMtx":       0,
+		"projectionMtx": 0,
+
+		// Standard Material
+		"diffuseMap":   0,
+		"normalMap":    0,
+		"heightMap":    0,
+		"displacement": 0,
+		"scale":        0,
+
+		// Terrain Data
+		"terrainHeightMap":    0,
+		"terrainNormalMap":    0,
+		"terrainDisplacement": 0,
+
+		// Lighting
+		"dirLight.direction": 0,
+		"dirLight.ambient":   0,
+		"dirLight.diffuse":   0,
+		"dirLight.specular":  0,
+		"viewPos":            0,
+		"numPointLights":     0,
+	},
+	attributeLocations: map[string]uint32{
+		"position":   0,
+		"tex":        1,
+		"normal":     2,
+		"tangent":    3,
+		"bitTangent": 4,
+	},
+}
+
+var FoliageProgram = ShaderProgram{
+	vertexShader:   "../rapidengine/material/shaders/foliage/foliage.vert",
+	fragmentShader: "../rapidengine/material/shaders/foliage/foliage.frag",
+	geometryShader: "../rapidengine/material/shaders/foliage/foliage.geom",
+	uniformLocations: map[string]int32{
+		// Vertices
+		"modelMtx":      0,
+		"viewMtx":       0,
+		"projectionMtx": 0,
+
+		// Standard Material
+		"diffuseMap": 0,
+		"normalMap":  0,
+		"heightMap":  0,
+
+		// Lighting
+		"dirLight.direction": 0,
+		"dirLight.ambient":   0,
+		"dirLight.diffuse":   0,
+		"dirLight.specular":  0,
+		"viewPos":            0,
+		"numPointLights":     0,
 	},
 	attributeLocations: map[string]uint32{
 		"position":   0,
