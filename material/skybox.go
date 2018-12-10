@@ -14,7 +14,7 @@ func NewCubemapMaterial(shader *ShaderProgram) *CubemapMaterial {
 	}
 }
 
-func (cm *CubemapMaterial) Render(delta float64, darkness float32) {
+func (cm *CubemapMaterial) Render(delta float64, darkness float32, totalTime float64) {
 	if cm.CubeDiffuseMap != nil {
 		gl.ActiveTexture(gl.TEXTURE0)
 		gl.BindTexture(gl.TEXTURE_2D, *cm.CubeDiffuseMap)

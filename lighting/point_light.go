@@ -7,8 +7,6 @@ import (
 )
 
 type PointLight struct {
-	shader *material.ShaderProgram
-
 	ambient  []float32
 	diffuse  []float32
 	specular []float32
@@ -20,10 +18,8 @@ type PointLight struct {
 	position []float32
 }
 
-func NewPointLight(p *material.ShaderProgram, a, d, s []float32, c, l, q float32) PointLight {
+func NewPointLight(a, d, s []float32, c, l, q float32) PointLight {
 	return PointLight{
-		shader: p,
-
 		ambient:  a,
 		diffuse:  d,
 		specular: s,
@@ -36,47 +32,47 @@ func NewPointLight(p *material.ShaderProgram, a, d, s []float32, c, l, q float32
 
 func (light *PointLight) PreRender() {}
 
-func (light *PointLight) UpdateShader(cx, cy, cz float32, ind int) {
+func (light *PointLight) UpdateShader(cx, cy, cz float32, ind int, shader *material.ShaderProgram) {
 	c := []float32{cx, cy, cz}
-	light.shader.Bind()
+	shader.Bind()
 
 	gl.Uniform3fv(
-		gl.GetUniformLocation(light.shader.GetID(), gl.Str("pointLights["+string(ind)+"].ambient"+"\x00")),
+		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+string(ind)+"].ambient"+"\x00")),
 		1, &light.ambient[0],
 	)
 
 	gl.Uniform3fv(
-		gl.GetUniformLocation(light.shader.GetID(), gl.Str("pointLights["+string(ind)+"].diffuse"+"\x00")),
+		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+string(ind)+"].diffuse"+"\x00")),
 		1, &light.diffuse[0],
 	)
 
 	gl.Uniform3fv(
-		gl.GetUniformLocation(light.shader.GetID(), gl.Str("pointLights["+string(ind)+"].specular"+"\x00")),
+		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+string(ind)+"].specular"+"\x00")),
 		1, &light.specular[0],
 	)
 
 	gl.Uniform1f(
-		gl.GetUniformLocation(light.shader.GetID(), gl.Str("pointLights["+string(ind)+"].constant"+"\x00")),
+		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+string(ind)+"].constant"+"\x00")),
 		light.constant,
 	)
 
 	gl.Uniform1f(
-		gl.GetUniformLocation(light.shader.GetID(), gl.Str("pointLights["+string(ind)+"].linear"+"\x00")),
+		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+string(ind)+"].linear"+"\x00")),
 		light.linear,
 	)
 
 	gl.Uniform1f(
-		gl.GetUniformLocation(light.shader.GetID(), gl.Str("pointLights["+string(ind)+"].quadratic"+"\x00")),
+		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+string(ind)+"].quadratic"+"\x00")),
 		light.quadratic,
 	)
 
 	gl.Uniform3fv(
-		gl.GetUniformLocation(light.shader.GetID(), gl.Str("pointLights["+string(ind)+"].position"+"\x00")),
+		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+string(ind)+"].position"+"\x00")),
 		1, &light.position[0],
 	)
 
 	gl.Uniform3fv(
-		gl.GetUniformLocation(light.shader.GetID(), gl.Str("viewPos"+"\x00")),
+		gl.GetUniformLocation(shader.GetID(), gl.Str("viewPos"+"\x00")),
 		1, &c[0],
 	)
 }

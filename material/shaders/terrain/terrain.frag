@@ -26,6 +26,8 @@ in vec3 FragPos;
 in vec3 TexCoords;
 in mat3 TBN;
 in vec3 Normal;
+in float Visibility;
+const vec3 skyColor = vec3(0.9, 0.9, 1.0);
 
 uniform sampler2D diffuseMap;
 uniform sampler2D normalMap;
@@ -62,7 +64,7 @@ void main() {
         //result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);    
     }
     
-    FragColor = vec4(result, 1.0);
+    FragColor = mix(vec4(skyColor, 1.0), vec4(result, 1.0), Visibility);
 }
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {

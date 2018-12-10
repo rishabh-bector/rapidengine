@@ -120,3 +120,5 @@ func (camera2D *Camera2D) SetSpeed(s float32) {
 func (camera2D *Camera2D) ProcessMouse(mx, my, lmx, lmy float64) {
 	return
 }
+
+func (camera2D *Camera2D) ChangeRoll(r float32) {}

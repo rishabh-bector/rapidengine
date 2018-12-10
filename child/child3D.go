@@ -27,6 +27,9 @@ type Child3D struct {
 	currentCopies  []ChildCopy
 	copyingEnabled bool
 
+	instancingEnabled bool
+	numInstances      int
+
 	X float32
 	Y float32
 	Z float32
@@ -108,17 +111,17 @@ func (child3D *Child3D) BindChild() {
 	child3D.Material.GetShader().Bind()
 }
 
-func (child3D *Child3D) Update(mainCamera camera.Camera, delta float64, lastFrame float64) {
+func (child3D *Child3D) Update(mainCamera camera.Camera, delta float64, totalTime float64) {
 	child3D.VY -= child3D.Gravity
 
 	child3D.X += child3D.VX
 	child3D.Y += child3D.VY
 	child3D.X += child3D.VZ
 
-	child3D.Render(mainCamera)
+	child3D.Render(mainCamera, totalTime)
 }
 
-func (child3D *Child3D) Render(mainCamera camera.Camera) {
+func (child3D *Child3D) Render(mainCamera camera.Camera, totalTime float64) {
 	child3D.modelMatrix = mgl32.Translate3D(child3D.X, child3D.Y, child3D.Z)
 	child3D.modelMatrix = child3D.modelMatrix.Mul4(mgl32.Scale3D(child3D.ScaleX, child3D.ScaleY, child3D.ScaleZ))
 
@@ -136,7 +139,7 @@ func (child3D *Child3D) Render(mainCamera camera.Camera) {
 		1, false, &child3D.modelMatrix[0],
 	)
 
-	child3D.Material.Render(0, 1)
+	child3D.Material.Render(0, 1, totalTime)
 }
 
 func (child3D *Child3D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
@@ -158,7 +161,7 @@ func (child3D *Child3D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
 		1, &c[0],
 	)
 
-	config.Material.Render(0, 1)
+	config.Material.Render(0, 1, 0)
 }
 
 func (child3D *Child3D) AttachTextureCoords(coords []float32) {
@@ -290,4 +293,21 @@ func (child3D *Child3D) GetSpecificRenderDistance() float32 {
 
 func (child3D *Child3D) MouseCollisionFunc(collision bool) {
 
+}
+
+//  --------------------------------------------------
+//  GL Instancing
+//  --------------------------------------------------
+
+func (child3D *Child3D) CheckInstancingEnabled() bool {
+	return child3D.instancingEnabled
+}
+
+func (child3D *Child3D) GetNumInstances() int {
+	return child3D.numInstances
+}
+
+func (child3D *Child3D) EnableGLInstancing(num int) {
+	child3D.instancingEnabled = true
+	child3D.numInstances = num
 }

@@ -64,6 +64,7 @@ type Renderer struct {
 	DeltaFrameTime float64
 	LastFrameTime  float64
 	MinFrameTime   float64
+	TotalFrameTime float64
 
 	// Termination Channel
 	Done chan bool
@@ -116,9 +117,9 @@ func (renderer *Renderer) renderFrame() {
 	renderer.Window.SwapBuffers()
 
 	// Frame logic
-	currentFrame := glfw.GetTime()
-	renderer.DeltaFrameTime = currentFrame - renderer.LastFrameTime
-	renderer.LastFrameTime = currentFrame
+	renderer.TotalFrameTime = glfw.GetTime()
+	renderer.DeltaFrameTime = renderer.TotalFrameTime - renderer.LastFrameTime
+	renderer.LastFrameTime = renderer.TotalFrameTime
 
 	if renderer.DeltaFrameTime < renderer.MinFrameTime {
 		time.Sleep(time.Duration(1000000000 * (renderer.MinFrameTime - renderer.DeltaFrameTime)))
@@ -156,15 +157,23 @@ func (renderer *Renderer) RenderChildren() {
 func (renderer *Renderer) RenderChild(c child.Child) {
 	renderer.BindChild(c)
 
-	c.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.LastFrameTime)
+	c.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.TotalFrameTime)
 
-	renderer.drawChild(c)
+	if c.CheckInstancingEnabled() {
+		renderer.drawChildInstanced(c, c.GetNumInstances())
+	} else {
+		renderer.drawChild(c)
+	}
 
 	gl.BindVertexArray(0)
 }
 
 func (renderer *Renderer) drawChild(c child.Child) {
 	gl.DrawElements(gl.TRIANGLES, c.GetNumVertices(), gl.UNSIGNED_INT, gl.PtrOffset(0))
+}
+
+func (renderer *Renderer) drawChildInstanced(c child.Child, num int) {
+	gl.DrawElementsInstanced(gl.TRIANGLES, c.GetNumVertices(), gl.UNSIGNED_INT, gl.PtrOffset(0), int32(num))
 }
 
 // RenderChildCopies renders all copies of a child

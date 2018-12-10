@@ -40,7 +40,7 @@ func NewBasicMaterial(shader *ShaderProgram) *BasicMaterial {
 	}
 }
 
-func (bm *BasicMaterial) Render(delta float64, darkness float32) {
+func (bm *BasicMaterial) Render(delta float64, darkness float32, totalTime float64) {
 	bm.UpdateAnimation(delta)
 	bm.UpdateAttribArrays()
 

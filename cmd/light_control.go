@@ -1,6 +1,9 @@
 package cmd
 
-import "rapidengine/lighting"
+import (
+	"rapidengine/lighting"
+	"rapidengine/material"
+)
 
 type LightControl struct {
 	lightingEnabled    map[int]bool
@@ -8,6 +11,10 @@ type LightControl struct {
 
 	DirLight      map[int]*lighting.DirectionLight
 	pointLightMap map[int]*lighting.PointLight
+
+	Shaders []*material.ShaderProgram
+
+	engine *Engine
 }
 
 func NewLightControl() LightControl {
@@ -21,13 +28,19 @@ func NewLightControl() LightControl {
 	return l
 }
 
+func (lightControl *LightControl) Initialize(engine *Engine) {
+	lightControl.engine = engine
+}
+
 func (lightControl *LightControl) Update(cx, cy, cz float32) {
 	if lightControl.lightingEnabled[0] {
-		if lightControl.DirLight[0] != nil && lightControl.directionalEnabled[0] {
-			lightControl.DirLight[0].UpdateShader(cx, cy, cz)
-		}
-		for ind, light := range lightControl.pointLightMap {
-			light.UpdateShader(cx, cy, cz, ind)
+		for _, shader := range lightControl.Shaders {
+			if lightControl.DirLight[0] != nil && lightControl.directionalEnabled[0] {
+				lightControl.DirLight[0].UpdateShader(cx, cy, cz, shader)
+			}
+			for ind, light := range lightControl.pointLightMap {
+				light.UpdateShader(cx, cy, cz, ind, shader)
+			}
 		}
 	}
 }

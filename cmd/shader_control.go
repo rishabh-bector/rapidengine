@@ -22,6 +22,7 @@ func (shaderControl *ShaderControl) Initialize() {
 		"postprocessing": &material.PostProcessingProgram,
 		"terrain":        &material.TerrainProgram,
 		"foliage":        &material.FoliageProgram,
+		"water":          &material.WaterProgram,
 	}
 	for _, prog := range shaderControl.programs {
 		prog.Compile()

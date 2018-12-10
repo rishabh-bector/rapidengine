@@ -34,7 +34,7 @@ func (skyBox *SkyBox) Render(mainCamera camera.Camera) {
 	skyBox.material.GetShader().Bind()
 	gl.BindVertexArray(skyBox.vao.GetID())
 
-	skyBox.material.Render(0, 1)
+	skyBox.material.Render(0, 1, 0)
 
 	x, y, z := mainCamera.GetPosition()
 	skyBox.modelMatrix = mgl32.Translate3D(x, y, z)

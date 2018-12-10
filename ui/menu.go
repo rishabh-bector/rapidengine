@@ -26,6 +26,8 @@ func (m *Menu) Initialize() {
 
 	m.BackChild.ScaleX = m.transform.SX
 	m.BackChild.ScaleY = m.transform.SY
+
+	m.BackChild.Static = true
 }
 
 func (m *Menu) AddElement(e Element) {

@@ -228,6 +228,21 @@ var FoliageProgram = ShaderProgram{
 		"diffuseMap": 0,
 		"normalMap":  0,
 		"heightMap":  0,
+		"opacityMap": 0,
+
+		// Terrain Info
+		"terrainHeightMap":    0,
+		"terrainNormalMap":    0,
+		"terrainDisplacement": 0,
+
+		"terrainWidth":  0,
+		"terrainLength": 0,
+
+		"foliageDisplacement": 0,
+		"foliageNoiseSeed":    0,
+		"foliageVariation":    0,
+
+		"totalTime": 0,
 
 		// Lighting
 		"dirLight.direction": 0,
@@ -236,6 +251,45 @@ var FoliageProgram = ShaderProgram{
 		"dirLight.specular":  0,
 		"viewPos":            0,
 		"numPointLights":     0,
+	},
+	attributeLocations: map[string]uint32{
+		"position":   0,
+		"tex":        1,
+		"normal":     2,
+		"tangent":    3,
+		"bitTangent": 4,
+	},
+}
+
+var WaterProgram = ShaderProgram{
+	vertexShader:   "../rapidengine/material/shaders/water/water.vert",
+	fragmentShader: "../rapidengine/material/shaders/water/water.frag",
+	uniformLocations: map[string]int32{
+		// Vertices
+		"modelMtx":      0,
+		"viewMtx":       0,
+		"projectionMtx": 0,
+
+		// Standard Material
+		"diffuseMap": 0,
+		"normalMap":  0,
+
+		"heightMap":    0,
+		"displacement": 0,
+
+		"scale": 0,
+
+		// Lighting
+		"dirLight.direction": 0,
+		"dirLight.ambient":   0,
+		"dirLight.diffuse":   0,
+		"dirLight.specular":  0,
+
+		"viewPos": 0,
+
+		"numPointLights": 0,
+
+		"totalTime": 0,
 	},
 	attributeLocations: map[string]uint32{
 		"position":   0,

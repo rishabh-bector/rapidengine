@@ -26,7 +26,7 @@ func NewTerrainMaterial(shader *ShaderProgram) *TerrainMaterial {
 	}
 }
 
-func (tm *TerrainMaterial) Render(delta float64, darkness float32) {
+func (tm *TerrainMaterial) Render(delta float64, darkness float32, totalTime float64) {
 	tm.UpdateAttribArrays()
 
 	if tm.DiffuseMap != nil {

@@ -22,10 +22,11 @@ func LoadObj(path string) Mesh {
 	normals := []mgl32.Vec3{}
 	textures := []mgl32.Vec2{}
 
-	line := strings.Split(scanner.Text(), " ")
+	line := []string{}
 
 	// Load vertex/normal/texture data into slices. This is randomly ordered.
 	for scanner.Scan() {
+		line = strings.Split(scanner.Text(), " ")
 		if line[0] == "v" {
 			x, _ := strconv.ParseFloat(line[1], 32)
 			y, _ := strconv.ParseFloat(line[2], 32)
@@ -52,8 +53,6 @@ func LoadObj(path string) Mesh {
 		if line[0] == "f" {
 			break
 		}
-
-		line = strings.Split(scanner.Text(), " ")
 	}
 
 	indicesArray := []uint32{}
@@ -67,7 +66,7 @@ func LoadObj(path string) Mesh {
 	texturesArray = make([]float32, len(vertices)*3)
 
 	// Load faces into arrays
-	for scanner.Scan() {
+	for {
 		if line[0] == "f" {
 			v1 := strings.Split(line[1], "/")
 			v2 := strings.Split(line[2], "/")
@@ -87,8 +86,9 @@ func LoadObj(path string) Mesh {
 			currentTexture := textures[textureIndex]
 			currentNormal := normals[normalIndex]
 
-			texturesArray[vertexIndex*2] = currentTexture.X()
-			texturesArray[vertexIndex*2+1] = 1 - currentTexture.Y()
+			texturesArray[vertexIndex*3] = currentTexture.X()
+			texturesArray[vertexIndex*3+1] = 1 - currentTexture.Y()
+			texturesArray[vertexIndex*3+2] = 0
 
 			normalsArray[vertexIndex*3] = currentNormal.X()
 			normalsArray[vertexIndex*3+1] = currentNormal.Y()
@@ -108,8 +108,9 @@ func LoadObj(path string) Mesh {
 			currentTexture = textures[textureIndex]
 			currentNormal = normals[normalIndex]
 
-			texturesArray[vertexIndex*2] = currentTexture.X()
-			texturesArray[vertexIndex*2+1] = 1 - currentTexture.Y()
+			texturesArray[vertexIndex*3] = currentTexture.X()
+			texturesArray[vertexIndex*3+1] = 1 - currentTexture.Y()
+			texturesArray[vertexIndex*3+2] = 0
 
 			normalsArray[vertexIndex*3] = currentNormal.X()
 			normalsArray[vertexIndex*3+1] = currentNormal.Y()
@@ -131,8 +132,9 @@ func LoadObj(path string) Mesh {
 			currentTexture = textures[textureIndex]
 			currentNormal = normals[normalIndex]
 
-			texturesArray[vertexIndex*2] = currentTexture.X()
-			texturesArray[vertexIndex*2+1] = 1 - currentTexture.Y()
+			texturesArray[vertexIndex*3] = currentTexture.X()
+			texturesArray[vertexIndex*3+1] = 1 - currentTexture.Y()
+			texturesArray[vertexIndex*3+2] = 0
 
 			normalsArray[vertexIndex*3] = currentNormal.X()
 			normalsArray[vertexIndex*3+1] = currentNormal.Y()
@@ -140,6 +142,10 @@ func LoadObj(path string) Mesh {
 		}
 
 		if line[0] == "usemtl" {
+			break
+		}
+
+		if !scanner.Scan() {
 			break
 		}
 

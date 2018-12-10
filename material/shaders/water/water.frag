@@ -23,18 +23,15 @@ struct PointLight {
 
 in vec3 FragPos;
 in vec3 TexCoords;
-in vec3 Normal;
 in mat3 TBN;
-in float Visibility;
-
-const vec3 skyColor = vec3(0.9, 0.9, 1.0);
+in vec3 Normal;
 
 uniform sampler2D diffuseMap;
 uniform sampler2D normalMap;
 uniform sampler2D heightMap;
-uniform sampler2D opacityMap;
-uniform sampler2D terrainNormalMap;
+
 uniform vec3 viewPos;
+
 uniform DirLight dirLight;
 
 #define MAX_LIGHTS 10
@@ -46,11 +43,6 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec4 calculateDiffuseColor();
 
 void main() {    
-    vec4 col = calculateDiffuseColor();
-    if(col.a < 0.5 || texture(opacityMap, TexCoords.xy).r < 0.5) {
-        discard;
-    }
-
     //vec3 norm = texture(normalMap, TexCoords.xy).rgb;
     //norm = normalize(norm * 2.0 - 1.0);
     //norm = normalize(TBN * norm);
@@ -63,10 +55,10 @@ void main() {
 
     // Point lighting
     for(int i = 0; i < numPointLights; i++) {
-        result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);    
+        //result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);    
     }
-
-    FragColor = mix(vec4(skyColor, 1.0), vec4(result, 1.0), Visibility);
+    
+    FragColor = vec4(result, 0.8);
 }
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
@@ -122,5 +114,5 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
 }
 
 vec4 calculateDiffuseColor() {
-    return texture(diffuseMap, TexCoords.xy);
+    return vec4(0.1, 0.1, 0.7, 1.0);//texture(diffuseMap, TexCoords.xy);
 }

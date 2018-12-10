@@ -36,7 +36,7 @@ func (sm *StandardMaterial) SetDisplacement(d float32) {
 	sm.displacement = d
 }
 
-func (sm *StandardMaterial) Render(delta float64, darkness float32) {
+func (sm *StandardMaterial) Render(delta float64, darkness float32, totalTime float64) {
 	sm.UpdateAttribArrays()
 
 	if sm.diffuseMap != nil {

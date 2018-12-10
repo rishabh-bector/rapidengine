@@ -19,6 +19,7 @@ type Camera interface {
 
 	ChangeYaw(float32)
 	ChangePitch(float32)
+	ChangeRoll(float32)
 
 	GetFirstViewIndex() *float32
 	GetStaticView() mgl32.Mat4

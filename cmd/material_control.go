@@ -35,3 +35,7 @@ func (mc *MaterialControl) NewTerrainMaterial() *material.TerrainMaterial {
 func (mc *MaterialControl) NewFoliageMaterial() *material.FoliageMaterial {
 	return material.NewFoliageMaterial(mc.engine.ShaderControl.GetShader("foliage"))
 }
+
+func (mc *MaterialControl) NewWaterMaterial() *material.WaterMaterial {
+	return material.NewWaterMaterial(mc.engine.ShaderControl.GetShader("water"))
+}

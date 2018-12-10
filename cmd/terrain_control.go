@@ -13,10 +13,11 @@ type TerrainControl struct {
 	engine *Engine
 
 	terrainEnabled bool
+	root           *terrain.Terrain
 
-	root *terrain.Terrain
+	foliages []*terrain.Foliage
 
-	foliage *terrain.Foliage
+	waters []*terrain.Water
 }
 
 func NewTerrainControl() TerrainControl {
@@ -30,8 +31,23 @@ func (tc *TerrainControl) Initialize(engine *Engine) {
 func (tc *TerrainControl) Update() {
 	if tc.terrainEnabled {
 		tc.engine.Renderer.RenderChild(tc.root.TChild)
-		tc.engine.Renderer.RenderChild(tc.foliage.FChild)
+
+		for _, f := range tc.foliages {
+			tc.engine.Renderer.RenderChild(f.FChild)
+		}
+
+		for _, w := range tc.waters {
+			tc.engine.Renderer.RenderChild(w.WChild)
+		}
 	}
+}
+
+func (tc *TerrainControl) InstanceFoliage(f *terrain.Foliage) {
+	tc.foliages = append(tc.foliages, f)
+}
+
+func (tc *TerrainControl) InstanceWater(w *terrain.Water) {
+	tc.waters = append(tc.waters, w)
 }
 
 func (tc *TerrainControl) NewTerrain(width int, height int, vertices int) *terrain.Terrain {
@@ -50,7 +66,7 @@ func (tc *TerrainControl) NewTerrain(width int, height int, vertices int) *terra
 	return &t
 }
 
-func (tc *TerrainControl) NewFoliage(width int, height int) *terrain.Foliage {
+func (tc *TerrainControl) NewFoliage(width int, height int, instances int) *terrain.Foliage {
 	f := terrain.NewFoliage(width, height)
 
 	f.FChild = tc.engine.ChildControl.NewChild3D()
@@ -58,10 +74,24 @@ func (tc *TerrainControl) NewFoliage(width int, height int) *terrain.Foliage {
 	f.FChild.AttachMaterial(tc.engine.MaterialControl.NewFoliageMaterial())
 	f.FChild.AttachMesh(geometry.LoadObj("./billboard.obj"))
 
+	f.FChild.EnableGLInstancing(instances)
+
 	f.FChild.PreRender(tc.engine.Renderer.MainCamera)
 
-	tc.foliage = &f
 	return &f
+}
+
+func (tc *TerrainControl) NewWater(width int, height int, vertices int) *terrain.Water {
+	w := terrain.NewWater(width, height)
+
+	w.WChild = tc.engine.ChildControl.NewChild3D()
+
+	w.WChild.AttachMaterial(tc.engine.MaterialControl.NewWaterMaterial())
+	w.WChild.AttachMesh(geometry.NewPlane(width, height, vertices, nil, 1))
+
+	w.WChild.PreRender(tc.engine.Renderer.MainCamera)
+
+	return &w
 }
 
 func (terrainControl *TerrainControl) NewSkyBox(

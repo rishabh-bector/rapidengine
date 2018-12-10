@@ -7,8 +7,6 @@ import (
 )
 
 type DirectionLight struct {
-	shader *material.ShaderProgram
-
 	Ambient  []float32
 	Diffuse  []float32
 	Specular []float32
@@ -16,9 +14,8 @@ type DirectionLight struct {
 	Direction []float32
 }
 
-func NewDirectionLight(p *material.ShaderProgram, a, d, s, dir []float32) DirectionLight {
+func NewDirectionLight(a, d, s, dir []float32) DirectionLight {
 	return DirectionLight{
-		shader:    p,
 		Ambient:   a,
 		Diffuse:   d,
 		Specular:  s,
@@ -27,34 +24,34 @@ func NewDirectionLight(p *material.ShaderProgram, a, d, s, dir []float32) Direct
 }
 
 func (light *DirectionLight) PreRender() {
-	light.shader.Bind()
+
 }
 
-func (light *DirectionLight) UpdateShader(cx, cy, cz float32) {
+func (light *DirectionLight) UpdateShader(cx, cy, cz float32, shader *material.ShaderProgram) {
 	c := []float32{cx, cy, cz}
-	light.shader.Bind()
+	shader.Bind()
 	gl.Uniform3fv(
-		light.shader.GetUniform("dirLight.direction"),
+		shader.GetUniform("dirLight.direction"),
 		1, &light.Direction[0],
 	)
 
 	gl.Uniform3fv(
-		light.shader.GetUniform("dirLight.ambient"),
+		shader.GetUniform("dirLight.ambient"),
 		1, &light.Ambient[0],
 	)
 
 	gl.Uniform3fv(
-		light.shader.GetUniform("dirLight.diffuse"),
+		shader.GetUniform("dirLight.diffuse"),
 		1, &light.Diffuse[0],
 	)
 
 	gl.Uniform3fv(
-		light.shader.GetUniform("dirLight.specular"),
+		shader.GetUniform("dirLight.specular"),
 		1, &light.Specular[0],
 	)
 
 	gl.Uniform3fv(
-		light.shader.GetUniform("viewPos"),
+		shader.GetUniform("viewPos"),
 		1, &c[0],
 	)
 }

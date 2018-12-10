@@ -37,6 +37,9 @@ type Child2D struct {
 	currentCopies  []ChildCopy
 	copyingEnabled bool
 
+	instancingEnabled bool
+	numInstances      int
+
 	specificRenderDistance float32
 
 	X float32
@@ -102,7 +105,7 @@ func (child2D *Child2D) BindChild() {
 	child2D.material.GetShader().Bind()
 }
 
-func (child2D *Child2D) Update(mainCamera camera.Camera, delta float64, lastFrame float64) {
+func (child2D *Child2D) Update(mainCamera camera.Camera, delta float64, totalTime float64) {
 	//cx, cy, _ := mainCamera.GetPosition()
 	child2D.VY -= child2D.Gravity
 
@@ -117,10 +120,10 @@ func (child2D *Child2D) Update(mainCamera camera.Camera, delta float64, lastFram
 	child2D.X += child2D.VX * -float32(delta*30)
 	child2D.Y += child2D.VY * float32(delta*30)
 
-	child2D.Render(mainCamera, delta)
+	child2D.Render(mainCamera, delta, totalTime)
 }
 
-func (child2D *Child2D) Render(mainCamera camera.Camera, delta float64) {
+func (child2D *Child2D) Render(mainCamera camera.Camera, delta float64, totalTime float64) {
 	sX, sY := ScaleTranslation(child2D.X, child2D.Y, float32(child2D.config.ScreenWidth), float32(child2D.config.ScreenHeight))
 	child2D.modelMatrix = mgl32.Translate3D(sX, sY, 0)
 
@@ -145,7 +148,7 @@ func (child2D *Child2D) Render(mainCamera camera.Camera, delta float64) {
 		1, false, &child2D.modelMatrix[0],
 	)
 
-	child2D.material.Render(delta, child2D.Darkness)
+	child2D.material.Render(delta, child2D.Darkness, totalTime)
 }
 
 func (child2D *Child2D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
@@ -167,7 +170,7 @@ func (child2D *Child2D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
 		1, false, &child2D.modelMatrix[0],
 	)
 
-	config.Material.Render(0, config.Darkness)
+	config.Material.Render(0, config.Darkness, 0)
 }
 
 func (child2D *Child2D) CheckCollision(other Child) int {
@@ -345,4 +348,21 @@ func ScaleTranslation(x, y, sw, sh float32) (float32, float32) {
 
 func ScaleTransformation(x, y, sw, sh float32) (float32, float32) {
 	return (x / sw) * 2, (y / sh) * 2
+}
+
+//  --------------------------------------------------
+//  GL Instancing
+//  --------------------------------------------------
+
+func (child2D *Child2D) CheckInstancingEnabled() bool {
+	return child2D.instancingEnabled
+}
+
+func (child2D *Child2D) GetNumInstances() int {
+	return child2D.numInstances
+}
+
+func (child2D *Child2D) EnableGLInstancing(num int) {
+	child2D.instancingEnabled = true
+	child2D.numInstances = num
 }

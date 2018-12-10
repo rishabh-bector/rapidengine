@@ -18,6 +18,7 @@ type Camera3D struct {
 
 	Pitch float32
 	Yaw   float32
+	Roll  float32
 
 	MouseX float64
 	MouseY float64
@@ -48,7 +49,7 @@ func (camera3D *Camera3D) Look() {
 	camera3D.View = mgl32.LookAtV(
 		camera3D.Position,
 		camera3D.Position.Add(camera3D.FrontAxis),
-		camera3D.UpAxis,
+		mgl32.HomogRotate3D(camera3D.Roll, camera3D.FrontAxis).Mul4x1(mgl32.Vec4{0, 1, 0, 1.0}).Vec3(),
 	)
 }
 
@@ -77,6 +78,7 @@ func (camera3D *Camera3D) DefaultControls(inputs *input.Input) {
 	}
 
 	camera3D.ProcessMouse(inputs.MouseX, inputs.MouseY, inputs.LastMouseX, inputs.LastMouseY)
+
 }
 
 func (camera3D *Camera3D) ProcessMouse(mouseX, mouseY, lastMouseX, lastMouseY float64) {
@@ -91,6 +93,7 @@ func (camera3D *Camera3D) ProcessMouse(mouseX, mouseY, lastMouseX, lastMouseY fl
 		camera3D.Pitch = -89
 	}
 	camera3D.FrontAxis = CalculateDirection(camera3D.Pitch, camera3D.Yaw).Normalize()
+	camera3D.FrontAxis = mgl32.HomogRotate3D(camera3D.Roll, camera3D.FrontAxis).Mul4x1(camera3D.FrontAxis.Vec4(1.0)).Vec3()
 }
 
 func CalculateDirection(pitch, yaw float32) mgl32.Vec3 {
@@ -123,6 +126,10 @@ func (camera3D *Camera3D) MoveLeft() {
 
 func (camera3D *Camera3D) MoveRight() {
 	camera3D.Position = camera3D.Position.Add(camera3D.FrontAxis.Cross(camera3D.UpAxis).Normalize().Mul(camera3D.Speed))
+}
+
+func (camera3D *Camera3D) ChangeRoll(r float32) {
+	camera3D.Roll += r
 }
 
 //  --------------------------------------------------
@@ -158,8 +165,8 @@ func (camera3D *Camera3D) GetFirstViewIndex() *float32 {
 func (camera3D *Camera3D) GetStaticView() mgl32.Mat4 {
 	return mgl32.LookAtV(
 		mgl32.Vec3{0, 0, 0},
-		camera3D.Position.Add(camera3D.FrontAxis),
-		camera3D.UpAxis,
+		mgl32.Vec3{0, 0, 0}.Add(mgl32.Vec3{0, 0, -1}),
+		mgl32.Vec3{0, 1, 0},
 	)
 }
 

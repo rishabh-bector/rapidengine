@@ -15,7 +15,7 @@ func NewPostProcessMaterial(shader *ShaderProgram, screenMap *uint32) *PostProce
 	}
 }
 
-func (pm *PostProcessMaterial) Render(delta float64, darkness float32) {
+func (pm *PostProcessMaterial) Render(delta float64, darkness float32, totalTime float64) {
 	gl.EnableVertexAttribArray(0)
 	gl.EnableVertexAttribArray(1)
 
