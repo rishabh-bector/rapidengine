@@ -315,9 +315,9 @@ var SkyBoxProgram = ShaderProgram{
 	},
 }
 
-var PostProcessingProgram = ShaderProgram{
-	vertexShader:   "../rapidengine/material/shaders/postprocessing/post.vert",
-	fragmentShader: "../rapidengine/material/shaders/postprocessing/post.frag",
+var PostFinalProgram = ShaderProgram{
+	vertexShader:   "../rapidengine/material/shaders/postprocessing/final/final.vert",
+	fragmentShader: "../rapidengine/material/shaders/postprocessing/final/final.frag",
 	uniformLocations: map[string]int32{
 		// Vertices
 		"modelMtx":      0,
@@ -325,6 +325,23 @@ var PostProcessingProgram = ShaderProgram{
 		"projectionMtx": 0,
 
 		"screen": 0,
+	},
+	attributeLocations: map[string]uint32{
+		"position": 0,
+		"tex":      0,
+	},
+}
+
+var PostHDRProgram = ShaderProgram{
+	vertexShader:   "../rapidengine/material/shaders/postprocessing/hdr/hdr.vert",
+	fragmentShader: "../rapidengine/material/shaders/postprocessing/hdr/hdr.frag",
+	uniformLocations: map[string]int32{
+		// Vertices
+		"modelMtx":      0,
+		"viewMtx":       0,
+		"projectionMtx": 0,
+
+		"hdrBuffer": 0,
 	},
 	attributeLocations: map[string]uint32{
 		"position": 0,

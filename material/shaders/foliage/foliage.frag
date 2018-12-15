@@ -51,6 +51,10 @@ void main() {
         discard;
     }
 
+    if(1 - Normal.y > 0.9) {
+        //discard;
+    }
+
     //vec3 norm = texture(normalMap, TexCoords.xy).rgb;
     //norm = normalize(norm * 2.0 - 1.0);
     //norm = normalize(TBN * norm);

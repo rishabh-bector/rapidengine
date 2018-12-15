@@ -98,8 +98,8 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 
 	if e.Config.Dimensions == 3 {
 		l := lighting.NewDirectionLight(
-			[]float32{0.1, 0.1, 0.1},
-			[]float32{0.9, 0.9, 0.9},
+			[]float32{0.2, 0.2, 0.2},
+			[]float32{1.3, 1.3, 1.3},
 			[]float32{0, 0, 0},
 			[]float32{1, -1.7, 0},
 		)

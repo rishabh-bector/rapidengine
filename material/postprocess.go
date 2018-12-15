@@ -28,3 +28,7 @@ func (pm *PostProcessMaterial) Render(delta float64, darkness float32, totalTime
 func (pm *PostProcessMaterial) GetShader() *ShaderProgram {
 	return pm.shader
 }
+
+func (pm *PostProcessMaterial) AttachShader(shader *ShaderProgram) {
+	pm.shader = shader
+}
