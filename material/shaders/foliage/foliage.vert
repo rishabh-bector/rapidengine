@@ -39,7 +39,7 @@ const float windAmplitude = 0.4;
 const float windFrequency = 1;
 
 float rand(vec2 c) {
-	return fract(sin(dot(c.xy, vec2(12.9898,78.233))) * 43758.5453);
+	return fract(sin(dot(c.xy, vec2(12.9898,78.233))) * 437.5453);
 }
 
 float random(float seed, float minimum, float maximum) {
@@ -57,8 +57,8 @@ vec3 getTerrainNormal(vec4 mPos) {
 }
 
 vec3 getInstancePosition() {
-    float xAdd = random(float(gl_InstanceID), 0.0, terrainLength);
-    float zAdd = random(float(gl_InstanceID + 100), 0.0, terrainWidth);
+    float xAdd = random(float(gl_InstanceID) / terrainWidth, 0.0, terrainLength);
+    float zAdd = random(float(gl_InstanceID + 100) / terrainLength, 0.0, terrainWidth);
     return vec3(position.x + float(xAdd), position.y, position.z + float(zAdd));
 }
 
