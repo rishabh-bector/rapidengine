@@ -30,7 +30,7 @@ func (tc *TerrainControl) Initialize(engine *Engine) {
 
 func (tc *TerrainControl) Update() {
 	if tc.terrainEnabled {
-		tc.engine.Renderer.RenderChild(tc.root.TChild)
+		tc.engine.Renderer.RenderTerrainChild(tc.root.TChild)
 
 		for _, f := range tc.foliages {
 			tc.engine.Renderer.RenderChild(f.FChild)

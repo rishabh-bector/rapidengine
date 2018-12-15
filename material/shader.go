@@ -13,7 +13,11 @@ type ShaderProgram struct {
 
 	vertexShader   string
 	fragmentShader string
+
 	geometryShader string
+
+	controlShader string
+	evalShader    string
 
 	uniformLocations   map[string]int32
 	attributeLocations map[string]uint32
@@ -71,6 +75,30 @@ func (shaderProgram *ShaderProgram) Compile() {
 			panic(err)
 		}
 		gl.AttachShader(shaderProgram.id, geometryShader)
+	}
+
+	// Tesselation shaders
+	if shaderProgram.controlShader != "" {
+		println("Compiling tesselation shaders")
+		cont, err := ioutil.ReadFile(shaderProgram.controlShader)
+		if err != nil {
+			panic(err)
+		}
+		controlShader, err := CompileShader(string(cont)+"\x00", gl.TESS_CONTROL_SHADER)
+		if err != nil {
+			panic(err)
+		}
+		gl.AttachShader(shaderProgram.id, controlShader)
+
+		eval, err := ioutil.ReadFile(shaderProgram.evalShader)
+		if err != nil {
+			panic(err)
+		}
+		evalShader, err := CompileShader(string(eval)+"\x00", gl.TESS_EVALUATION_SHADER)
+		if err != nil {
+			panic(err)
+		}
+		gl.AttachShader(shaderProgram.id, evalShader)
 	}
 
 	gl.LinkProgram(shaderProgram.id)
@@ -179,6 +207,8 @@ var StandardProgram = ShaderProgram{
 var TerrainProgram = ShaderProgram{
 	vertexShader:   "../rapidengine/material/shaders/terrain/terrain.vert",
 	fragmentShader: "../rapidengine/material/shaders/terrain/terrain.frag",
+	controlShader:  "../rapidengine/material/shaders/terrain/terrain.cont",
+	evalShader:     "../rapidengine/material/shaders/terrain/terrain.eval",
 	uniformLocations: map[string]int32{
 		// Vertices
 		"modelMtx":      0,

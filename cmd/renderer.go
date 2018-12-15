@@ -172,6 +172,12 @@ func (renderer *Renderer) drawChild(c child.Child) {
 	gl.DrawElements(gl.TRIANGLES, c.GetNumVertices(), gl.UNSIGNED_INT, gl.PtrOffset(0))
 }
 
+func (renderer *Renderer) RenderTerrainChild(c child.Child) {
+	renderer.BindChild(c)
+	c.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.TotalFrameTime)
+	gl.DrawElements(gl.PATCHES, c.GetNumVertices(), gl.UNSIGNED_INT, gl.PtrOffset(0))
+}
+
 func (renderer *Renderer) drawChildInstanced(c child.Child, num int) {
 	gl.DrawElementsInstanced(gl.TRIANGLES, c.GetNumVertices(), gl.UNSIGNED_INT, gl.PtrOffset(0), int32(num))
 }
@@ -353,10 +359,12 @@ func initOpenGL(config *configuration.EngineConfig) uint32 {
 }
 
 func (renderer *Renderer) EnablePolygonLines() {
+	renderer.engine.Config.PolygonLines = true
 	gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
 }
 
 func (renderer *Renderer) DisablePolygonLines() {
+	renderer.engine.Config.PolygonLines = false
 	gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
 }
 

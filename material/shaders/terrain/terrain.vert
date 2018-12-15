@@ -1,5 +1,9 @@
 #version 410
 
+out vec3 WorldPos_CS_in;
+out vec3 TexCoord_CS_in;
+out vec3 MatCoord_CS_in;
+
 out vec3 FragPos;
 out vec3 TexCoords;
 out mat3 TBN;
@@ -25,26 +29,18 @@ uniform mat4 modelMtx;
 uniform mat4 viewMtx;
 uniform mat4 projectionMtx;
 
-const float fogDensity = 0.007;
-const float fogGradient = 1.5;
-
 float getDisplacement();
 float getTerrainDisplacement();
 
 vec3 getTerrainNormal();
-
-float getFogVisibility(vec4 mPos) {
-    vec4 positionRelativeCamera = viewMtx * mPos;
-    float dist = length(positionRelativeCamera.xyz);
-    return clamp(exp(-pow((dist * fogDensity), fogGradient)), 0.0, 1.0);
-}
 
 void main() {
     vec3 finalPosition = vec3(position.x, position.y + getTerrainDisplacement(), position.z);
     vec4 mPos = modelMtx * vec4(finalPosition, 1.0);
 
     //	Vertex position 
-    gl_Position = projectionMtx * viewMtx * modelMtx * vec4(finalPosition, 1.0);
+    //gl_Position = projectionMtx * viewMtx * modelMtx * vec4(finalPosition, 1.0);
+    WorldPos_CS_in = position; 
 
     // Normal vector
     Normal = mat3(transpose(inverse(modelMtx))) * getTerrainNormal();
@@ -53,16 +49,14 @@ void main() {
     FragPos =  vec3(modelMtx * vec4(finalPosition, 1.0));
 
     // Texture coordinates
-    TexCoords = tex / scale;
+    MatCoord_CS_in = tex / scale;
+    TexCoord_CS_in = tex;
 
     // Normal Mapping
     vec3 T = normalize(vec3(modelMtx * vec4(tangent,   0.0)));
     vec3 B = normalize(vec3(modelMtx * vec4(bitTangent, 0.0)));
     vec3 N = normalize(vec3(modelMtx * vec4(normal,    0.0)));
     TBN = mat3(T, B, N);
-
-    // Fog
-    Visibility = getFogVisibility(mPos);
 }
 
 float getTerrainDisplacement() {

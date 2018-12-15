@@ -29,6 +29,10 @@ in vec3 Normal;
 in float Visibility;
 const vec3 skyColor = vec3(0.9, 0.9, 1.0);
 
+in vec3 TexCoord_FS_in;
+in vec3 MatCoord_FS_in;
+in float Visibility_FS_in;
+
 uniform sampler2D diffuseMap;
 uniform sampler2D normalMap;
 uniform sampler2D heightMap;
@@ -51,8 +55,8 @@ void main() {
     //vec3 norm = texture(normalMap, TexCoords.xy).rgb;
     //norm = normalize(norm * 2.0 - 1.0);
     //norm = normalize(TBN * norm);
-    vec3 norm = normalize(Normal);
-    //vec3 norm = texture(terrainNormalMap, TexCoords.xy).rgb;
+    //vec3 norm = normalize(Normal);
+    vec3 norm = texture(terrainNormalMap, TexCoord_FS_in.xy).rgb;
 
     vec3 viewDir = normalize(viewPos - FragPos);
 
@@ -64,7 +68,8 @@ void main() {
         //result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);    
     }
     
-    FragColor = mix(vec4(skyColor, 1.0), vec4(result, 1.0), Visibility);
+    FragColor = mix(vec4(skyColor, 1.0), vec4(result, 1.0), Visibility_FS_in);
+    //FragColor = vec4(0.5, 1.0, 0.0, 1.0);
 }
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
@@ -118,6 +123,6 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
 }
 
 vec4 calculateDiffuseColor() {
-    return texture(diffuseMap, TexCoords.xy);
+    return texture(diffuseMap, MatCoord_FS_in.xy);
 }
 

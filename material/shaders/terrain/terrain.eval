@@ -1,1 +1,51 @@
 #version 410
+
+layout(triangles, fractional_odd_spacing, ccw) in;
+
+in vec3 WorldPos_ES_in[];
+in vec3 TexCoord_ES_in[];
+in vec3 MatCoord_ES_in[];
+
+out vec3 WorldPos_FS_in;
+out vec3 TexCoord_FS_in;
+out vec3 MatCoord_FS_in;
+out float Visibility_FS_in;
+
+uniform mat4 modelMtx;
+uniform mat4 viewMtx;
+uniform mat4 projectionMtx;
+
+uniform sampler2D terrainHeightMap;
+uniform sampler2D terrainNormalMap;
+uniform float terrainDisplacement;
+
+const float fogDensity = 0.002;//0.007;
+const float fogGradient = 1.5;
+
+vec3 interpolate3D(vec3 v0, vec3 v1, vec3 v2) {
+   	return vec3(gl_TessCoord.x) * v0 + vec3(gl_TessCoord.y) * v1 + vec3(gl_TessCoord.z) * v2;
+}
+
+float getTerrainDisplacement(vec3 texCoords) {
+    return texture(terrainHeightMap, texCoords.xy).x * terrainDisplacement;
+}
+
+float getFogVisibility(vec4 mPos) {
+    vec4 positionRelativeCamera = viewMtx * mPos;
+    float dist = length(positionRelativeCamera.xyz);
+    return clamp(exp(-pow((dist * fogDensity), fogGradient)), 0.0, 1.0);
+}
+
+void main() {
+    vec3 texCoords = interpolate3D(TexCoord_ES_in[0], TexCoord_ES_in[1], TexCoord_ES_in[2]);
+    TexCoord_FS_in = texCoords;
+
+    MatCoord_FS_in = interpolate3D(MatCoord_ES_in[0], MatCoord_ES_in[1], MatCoord_ES_in[2]);
+
+    WorldPos_FS_in = interpolate3D(WorldPos_ES_in[0], WorldPos_ES_in[1], WorldPos_ES_in[2]);
+    WorldPos_FS_in.y += getTerrainDisplacement(texCoords);
+
+    Visibility_FS_in = getFogVisibility(modelMtx * vec4(WorldPos_FS_in, 1.0));
+
+    gl_Position = projectionMtx * viewMtx * modelMtx * vec4(WorldPos_FS_in, 1.0);
+}
