@@ -19,6 +19,8 @@ uniform mat4 modelMtx;
 uniform mat4 viewMtx;
 uniform mat4 projectionMtx;
 
+uniform vec3 viewPos;
+
 uniform float totalTime;
 
 uniform sampler2D terrainHeightMap;
@@ -32,19 +34,22 @@ uniform float foliageDisplacement;
 uniform float foliageNoiseSeed;
 uniform float foliageVariation;
 
-const float fogDensity = 0.007;
+const float fogDensity = 0.0001;//0.007;
 const float fogGradient = 1.5;
 
 const float windAmplitude = 0.4;
 const float windFrequency = 1;
 
 float rand(vec2 c) {
-	return fract(sin(dot(c.xy, vec2(12.9898,78.233))) * 437.5453);
+	return fract(sin(dot(c.xy, vec2(12.9898,78.233))) * 78.5453);
+}
+
+float rand2(vec2 c) {
+	return fract(cos(dot(c.xy, vec2(4824.135,3.62557))) * 32.5453);
 }
 
 float random(float seed, float minimum, float maximum) {
-    //float initial = fract(sin(seed) * 100000.0);
-    float initial = rand(vec2(seed, foliageNoiseSeed));
+    float initial = rand(vec2(seed, rand2(vec2(foliageNoiseSeed, sin(seed)))));
     return minimum + initial * (maximum - minimum);
 }
 
@@ -72,6 +77,8 @@ void main() {
     vec3 instancePosition = getInstancePosition();
     vec4 mPos = modelMtx * vec4(instancePosition, 1.0);
     vec3 finalPosition = vec3(instancePosition.x, getFoliageHeight(mPos), instancePosition.z);
+
+    gl_ClipDistance[0] = 100 - distance(viewPos, finalPosition);
 
     // Wind simulation
     if(tex.y == 0) {

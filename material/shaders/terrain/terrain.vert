@@ -3,6 +3,7 @@
 out vec3 WorldPos_CS_in;
 out vec3 TexCoord_CS_in;
 out vec3 MatCoord_CS_in;
+out vec3 Normal_CS_in;
 
 out vec3 FragPos;
 out vec3 TexCoords;
@@ -29,6 +30,8 @@ uniform mat4 modelMtx;
 uniform mat4 viewMtx;
 uniform mat4 projectionMtx;
 
+uniform vec3 viewPos;
+
 float getDisplacement();
 float getTerrainDisplacement();
 
@@ -44,6 +47,7 @@ void main() {
 
     // Normal vector
     Normal = mat3(transpose(inverse(modelMtx))) * getTerrainNormal();
+    Normal_CS_in = normal;
 
     // Fragment position
     FragPos =  vec3(modelMtx * vec4(finalPosition, 1.0));

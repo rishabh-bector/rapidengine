@@ -12,35 +12,45 @@ import (
 type SkyBox struct {
 	material *material.CubemapMaterial
 
+	shaders []*material.ShaderProgram
+
 	vao *geometry.VertexArray
 
 	projectionMatrix mgl32.Mat4
 	modelMatrix      mgl32.Mat4
 }
 
-func NewSkyBox(mat *material.CubemapMaterial, vao *geometry.VertexArray, projMtx, modelMtx mgl32.Mat4) *SkyBox {
+func NewSkyBox(mat *material.CubemapMaterial, vao *geometry.VertexArray, projMtx, modelMtx mgl32.Mat4, shaders []*material.ShaderProgram) *SkyBox {
 	return &SkyBox{
 		material:         mat,
 		vao:              vao,
 		projectionMatrix: projMtx,
 		modelMatrix:      modelMtx,
+		shaders:          shaders,
 	}
 }
 
 var e = float32(0)
 
 func (skyBox *SkyBox) Render(mainCamera camera.Camera) {
-	gl.DepthMask(false)
-	skyBox.material.GetShader().Bind()
-	gl.BindVertexArray(skyBox.vao.GetID())
 
+	for _, shader := range skyBox.shaders {
+		shader.Bind()
+		skyBox.material.Render(0, 1, 0)
+		gl.Uniform1i(shader.GetUniform("cubeDiffuseMap"), 6)
+	}
+
+	gl.DepthMask(false)
+
+	skyBox.material.GetShader().Bind()
 	skyBox.material.Render(0, 1, 0)
+	gl.BindVertexArray(skyBox.vao.GetID())
 
 	x, y, z := mainCamera.GetPosition()
 	skyBox.modelMatrix = mgl32.Translate3D(x, y, z)
 
 	skyBox.modelMatrix = skyBox.modelMatrix.Mul4(mgl32.HomogRotate3DY(e))
-	e += 0.0007
+	e += 0.00001
 
 	gl.UniformMatrix4fv(
 		skyBox.material.GetShader().GetUniform("modelMtx"),

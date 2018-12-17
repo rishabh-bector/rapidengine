@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"rapidengine/configuration"
 	"rapidengine/geometry"
+	"rapidengine/material"
 	"rapidengine/terrain"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -66,15 +67,34 @@ func (tc *TerrainControl) NewTerrain(width int, height int, vertices int) *terra
 	return &t
 }
 
+func (tc *TerrainControl) NewPlanetaryTerrain(width int, height int, vertices int) *terrain.Terrain {
+	t := terrain.NewTerrain(width, height)
+
+	t.TChild = tc.engine.ChildControl.NewChild3D()
+
+	t.TChild.AttachMaterial(tc.engine.MaterialControl.NewTerrainMaterial())
+	//t.TChild.AttachMesh(geometry.NewPlane(width, height, vertices, nil, 1))
+	t.TChild.AttachMesh(geometry.LoadObj("../rapidengine/assets/obj/sphere.obj", 10000))
+	t.TChild.SetInstanceRenderDistance(1000000000)
+
+	t.TChild.PreRender(tc.engine.Renderer.MainCamera)
+
+	tc.terrainEnabled = true
+	tc.root = &t
+
+	return &t
+}
+
 func (tc *TerrainControl) NewFoliage(width int, height int, instances int) *terrain.Foliage {
 	f := terrain.NewFoliage(width, height)
 
 	f.FChild = tc.engine.ChildControl.NewChild3D()
 
 	f.FChild.AttachMaterial(tc.engine.MaterialControl.NewFoliageMaterial())
-	f.FChild.AttachMesh(geometry.LoadObj("./billboard.obj"))
+	f.FChild.AttachMesh(geometry.LoadObj("./billboard.obj", 1))
 
 	f.FChild.EnableGLInstancing(instances)
+	f.FChild.SetInstanceRenderDistance(10000)
 
 	f.FChild.PreRender(tc.engine.Renderer.MainCamera)
 
@@ -115,8 +135,8 @@ func (terrainControl *TerrainControl) NewSkyBox(
 		"skybox",
 	)
 
-	material := terrainControl.engine.MaterialControl.NewCubemapMaterial()
-	material.CubeDiffuseMap = textureControl.GetTexture("skybox")
+	cmaterial := terrainControl.engine.MaterialControl.NewCubemapMaterial()
+	cmaterial.CubeDiffuseMap = textureControl.GetTexture("skybox")
 
 	indices := []uint32{}
 	for i := 0; i < len(terrain.SkyBoxVertices); i++ {
@@ -127,7 +147,7 @@ func (terrainControl *TerrainControl) NewSkyBox(
 	vao.AddVertexAttribute(geometry.CubeTextures, 1, 2)
 
 	return terrain.NewSkyBox(
-		material,
+		cmaterial,
 		vao,
 		mgl32.Perspective(
 			mgl32.DegToRad(45),
@@ -135,5 +155,8 @@ func (terrainControl *TerrainControl) NewSkyBox(
 			0.1, 100,
 		),
 		mgl32.Ident4(),
+		[]*material.ShaderProgram{
+			terrainControl.engine.ShaderControl.GetShader("standard"),
+		},
 	)
 }

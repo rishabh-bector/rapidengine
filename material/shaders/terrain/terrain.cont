@@ -5,17 +5,24 @@ layout (vertices = 3) out;
 in vec3 WorldPos_CS_in[];
 in vec3 TexCoord_CS_in[];
 in vec3 MatCoord_CS_in[];
+in vec3 Normal_CS_in[];
 
 out vec3 WorldPos_ES_in[];
 out vec3 TexCoord_ES_in[];
 out vec3 MatCoord_ES_in[];
+out vec3 Normal_ES_in[];
 
 uniform vec3 viewPos;
+
+uniform sampler2D terrainHeightMap;
+uniform sampler2D terrainNormalMap;
+uniform float terrainDisplacement;
 
 float GetTessLevel(float Distance0, float Distance1) {
     float AvgDistance = (Distance0 + Distance1) / 2.0;
 
-    return 64.0 / AvgDistance;
+    float tessLevel = 128 / (AvgDistance);
+    return tessLevel;
 
     if (AvgDistance <= 2.0) {
         return 10.0;
@@ -28,14 +35,19 @@ float GetTessLevel(float Distance0, float Distance1) {
     }
 }
 
+float getTerrainDisplacement(vec3 texCoords) {
+    return texture(terrainHeightMap, texCoords.xy).x * terrainDisplacement;
+}
+
 void main() {
     WorldPos_ES_in[gl_InvocationID] = WorldPos_CS_in[gl_InvocationID];
     TexCoord_ES_in[gl_InvocationID] = TexCoord_CS_in[gl_InvocationID];
     MatCoord_ES_in[gl_InvocationID] = MatCoord_CS_in[gl_InvocationID];
+    Normal_ES_in[gl_InvocationID] = Normal_CS_in[gl_InvocationID];
 
-    float EyeToVertexDistance0 = distance(vec3(viewPos.x, 0, viewPos.z), WorldPos_ES_in[0]);
-    float EyeToVertexDistance1 = distance(vec3(viewPos.x, 0, viewPos.z), WorldPos_ES_in[1]);
-    float EyeToVertexDistance2 = distance(vec3(viewPos.x, 0, viewPos.z), WorldPos_ES_in[2]);
+    float EyeToVertexDistance0 = distance(viewPos, WorldPos_ES_in[0] + normalize(Normal_CS_in[gl_InvocationID]) * getTerrainDisplacement(TexCoord_CS_in[0]));
+    float EyeToVertexDistance1 = distance(viewPos, WorldPos_ES_in[1] + normalize(Normal_CS_in[gl_InvocationID]) * getTerrainDisplacement(TexCoord_CS_in[1]));
+    float EyeToVertexDistance2 = distance(viewPos, WorldPos_ES_in[2] + normalize(Normal_CS_in[gl_InvocationID]) * getTerrainDisplacement(TexCoord_CS_in[2]));
     
     if(gl_InvocationID == 0) {
         gl_TessLevelOuter[0] = GetTessLevel(EyeToVertexDistance1, EyeToVertexDistance2);

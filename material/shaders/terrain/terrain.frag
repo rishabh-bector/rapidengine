@@ -27,7 +27,7 @@ in vec3 TexCoords;
 in mat3 TBN;
 in vec3 Normal;
 in float Visibility;
-const vec3 skyColor = vec3(0.9, 0.9, 1.0);
+const vec3 skyColor = vec3(0.2, 0.2, 0.2);
 
 in vec3 TexCoord_FS_in;
 in vec3 MatCoord_FS_in;
@@ -40,6 +40,8 @@ uniform sampler2D heightMap;
 uniform sampler2D terrainNormalMap;
 
 uniform vec3 viewPos;
+
+uniform float scale;
 
 uniform DirLight dirLight;
 
@@ -56,7 +58,7 @@ void main() {
     //norm = normalize(norm * 2.0 - 1.0);
     //norm = normalize(TBN * norm);
     //vec3 norm = normalize(Normal);
-    vec3 norm = texture(terrainNormalMap, TexCoord_FS_in.xy).rgb;
+    vec3 norm = texture(terrainNormalMap, TexCoord_FS_in.xy).rgb * texture(normalMap, TexCoord_FS_in.xy / scale).rgb;
 
     vec3 viewDir = normalize(viewPos - FragPos);
 

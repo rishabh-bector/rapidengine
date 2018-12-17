@@ -177,13 +177,18 @@ var StandardProgram = ShaderProgram{
 		"projectionMtx": 0,
 
 		// Standard Material
-		"diffuseMap": 0,
-		"normalMap":  0,
-
+		"diffuseMap":   0,
+		"normalMap":    0,
 		"heightMap":    0,
+		"hue":          0,
+		"diffuseLevel": 0,
 		"displacement": 0,
+		"scale":        0,
+		"reflectivity": 0,
+		"refractivity": 0,
+		"refractLevel": 0,
 
-		"scale": 0,
+		"cubeDiffuseMap": 0,
 
 		// Lighting
 		"dirLight.direction": 0,
@@ -335,13 +340,15 @@ var SkyBoxProgram = ShaderProgram{
 	fragmentShader: "../rapidengine/material/shaders/skybox/skybox.frag",
 	uniformLocations: map[string]int32{
 		// Vertices
-		"modelMtx":       0,
-		"viewMtx":        0,
-		"projectionMtx":  0,
+		"modelMtx":      0,
+		"viewMtx":       0,
+		"projectionMtx": 0,
+
 		"cubeDiffuseMap": 0,
 	},
 	attributeLocations: map[string]uint32{
 		"position": 0,
+		"tex":      0,
 	},
 }
 
