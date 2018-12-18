@@ -9,8 +9,15 @@ type StandardMaterial struct {
 	normalMap  *uint32
 	heightMap  *uint32
 
-	displacement float32
+	Hue          [4]float32
+	DiffuseLevel float32
+
+	Displacement float32
 	Scale        float32
+
+	Reflectivity float32
+	Refractivity float32
+	RefractLevel float32
 }
 
 func NewStandardMaterial(shader *ShaderProgram) *StandardMaterial {
@@ -30,10 +37,6 @@ func (sm *StandardMaterial) AttachNormalMap(nm *uint32) {
 
 func (sm *StandardMaterial) AttachHeightMap(hm *uint32) {
 	sm.heightMap = hm
-}
-
-func (sm *StandardMaterial) SetDisplacement(d float32) {
-	sm.displacement = d
 }
 
 func (sm *StandardMaterial) Render(delta float64, darkness float32, totalTime float64) {
@@ -60,16 +63,23 @@ func (sm *StandardMaterial) Render(delta float64, darkness float32, totalTime fl
 
 	gl.Uniform1i(sm.shader.GetUniform("heightMap"), 2)
 
-	gl.Uniform1f(sm.shader.GetUniform("displacement"), sm.displacement)
+	gl.Uniform4fv(sm.shader.GetUniform("hue"), 1, &sm.Hue[0])
+	gl.Uniform1f(sm.shader.GetUniform("diffuseLevel"), sm.DiffuseLevel)
+
+	gl.Uniform1f(sm.shader.GetUniform("displacement"), sm.Displacement)
 	gl.Uniform1f(sm.shader.GetUniform("scale"), sm.Scale)
+
+	gl.Uniform1f(sm.shader.GetUniform("reflectivity"), sm.Reflectivity)
+	gl.Uniform1f(sm.shader.GetUniform("refractivity"), sm.Refractivity)
+	gl.Uniform1f(sm.shader.GetUniform("refractLevel"), sm.RefractLevel)
 }
 
 func (sm *StandardMaterial) UpdateAttribArrays() {
 	gl.EnableVertexAttribArray(0)
 	gl.EnableVertexAttribArray(1)
 	gl.EnableVertexAttribArray(2)
-	gl.EnableVertexAttribArray(3)
-	gl.EnableVertexAttribArray(4)
+	//gl.EnableVertexAttribArray(3)
+	//gl.EnableVertexAttribArray(4)
 }
 
 func (sm *StandardMaterial) GetShader() *ShaderProgram {

@@ -2,13 +2,53 @@
 
 layout (vertices = 3) out;
 
-void main() {
-    if(gl_InvocationID == 0) {
-        gl_TessLevelInner[0] = 7.0;
-        gl_TessLevelOuter[0] = 2.0;
-        gl_TessLevelOuter[1] = 3.0;
-        gl_TessLevelOuter[2] = 7.0;
-    }
+in vec3 WorldPos_CS_in[];
+in vec3 TexCoord_CS_in[];
+in vec3 MatCoord_CS_in[];
+in vec3 Normal_CS_in[];
 
-    gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
+out vec3 WorldPos_ES_in[];
+out vec3 TexCoord_ES_in[];
+out vec3 MatCoord_ES_in[];
+out vec3 Normal_ES_in[];
+
+uniform vec3 viewPos;
+
+uniform sampler2D terrainHeightMap;
+uniform sampler2D terrainNormalMap;
+uniform float terrainDisplacement;
+
+const float tesselationFactor = 600;
+const float tesselationSlope = 1.8;
+const float tesselationShift = 0;
+
+const float maxTesselationLevel = 64;
+
+float GetTessLevel(float Distance0, float Distance1) {
+    float AvgDistance = (Distance0 + Distance1) / 2.0;
+
+    float tessLevel = max(0.0, tesselationFactor / pow(AvgDistance, tesselationSlope) + tesselationShift);
+    return tessLevel;
+}
+
+float getTerrainDisplacement(vec3 texCoords) {
+    return texture(terrainHeightMap, texCoords.xy).x * terrainDisplacement;
+}
+
+void main() {
+    WorldPos_ES_in[gl_InvocationID] = WorldPos_CS_in[gl_InvocationID];
+    TexCoord_ES_in[gl_InvocationID] = TexCoord_CS_in[gl_InvocationID];
+    MatCoord_ES_in[gl_InvocationID] = MatCoord_CS_in[gl_InvocationID];
+    Normal_ES_in[gl_InvocationID] = Normal_CS_in[gl_InvocationID];
+
+    float EyeToVertexDistance0 = distance(viewPos, WorldPos_ES_in[0] + normalize(Normal_CS_in[gl_InvocationID]) * getTerrainDisplacement(TexCoord_CS_in[0]));
+    float EyeToVertexDistance1 = distance(viewPos, WorldPos_ES_in[1] + normalize(Normal_CS_in[gl_InvocationID]) * getTerrainDisplacement(TexCoord_CS_in[1]));
+    float EyeToVertexDistance2 = distance(viewPos, WorldPos_ES_in[2] + normalize(Normal_CS_in[gl_InvocationID]) * getTerrainDisplacement(TexCoord_CS_in[2]));
+    
+    //if(gl_InvocationID == 0) {
+        gl_TessLevelOuter[0] = mix(1, maxTesselationLevel, GetTessLevel(EyeToVertexDistance1, EyeToVertexDistance2));
+        gl_TessLevelOuter[1] = mix(1, maxTesselationLevel, GetTessLevel(EyeToVertexDistance2, EyeToVertexDistance0));
+        gl_TessLevelOuter[2] = mix(1, maxTesselationLevel, GetTessLevel(EyeToVertexDistance0, EyeToVertexDistance1));
+        gl_TessLevelInner[0] = gl_TessLevelOuter[2];
+    //}
 }

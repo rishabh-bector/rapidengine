@@ -9,7 +9,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 )
 
-func LoadObj(path string) Mesh {
+func LoadObj(path string, scale float32) Mesh {
 	f, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -24,6 +24,8 @@ func LoadObj(path string) Mesh {
 
 	line := []string{}
 
+	scaleMatrix := mgl32.Scale3D(scale, scale, scale)
+
 	// Load vertex/normal/texture data into slices. This is randomly ordered.
 	for scanner.Scan() {
 		line = strings.Split(scanner.Text(), " ")
@@ -32,7 +34,10 @@ func LoadObj(path string) Mesh {
 			y, _ := strconv.ParseFloat(line[2], 32)
 			z, _ := strconv.ParseFloat(line[3], 32)
 
-			vertices = append(vertices, mgl32.Vec3{float32(x), float32(y), float32(z)})
+			vertex := mgl32.Vec3{float32(x), float32(y), float32(z)}
+			vertex = scaleMatrix.Mul4x1(vertex.Vec4(1.0)).Vec3()
+
+			vertices = append(vertices, vertex)
 		}
 
 		if line[0] == "vn" {

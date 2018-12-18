@@ -311,3 +311,11 @@ func (child3D *Child3D) EnableGLInstancing(num int) {
 	child3D.instancingEnabled = true
 	child3D.numInstances = num
 }
+
+func (child3D *Child3D) SetInstanceRenderDistance(dist float32) {
+	child3D.projectionMatrix = mgl32.Perspective(
+		mgl32.DegToRad(45),
+		float32(child3D.config.ScreenWidth)/float32(child3D.config.ScreenHeight),
+		0.1, dist,
+	)
+}

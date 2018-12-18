@@ -107,7 +107,7 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 		e.LightControl.SetDirectionalLight(&l)
 
 		e.Renderer.SkyBoxEnabled = true
-		e.Renderer.SkyBox = e.TerrainControl.NewSkyBox("TropicalSunnyDay", &e.ShaderControl, &e.TextureControl, e.Config)
+		e.Renderer.SkyBox = e.TerrainControl.NewSkyBox("FullMoon", &e.ShaderControl, &e.TextureControl, e.Config)
 	}
 
 	return &e

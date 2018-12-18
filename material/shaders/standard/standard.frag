@@ -25,11 +25,21 @@ in vec3 FragPos;
 in vec3 TexCoords;
 in mat3 TBN;
 in vec3 Normal;
+in vec3 ReflectedVector;
+in vec3 RefractedVector;
 
+// Standard Material
 uniform sampler2D diffuseMap;
 uniform sampler2D normalMap;
 uniform sampler2D heightMap;
+uniform vec4 hue;
+uniform float diffuseLevel;
+uniform float reflectivity;
+uniform float refractLevel;
 
+
+// Environment Info
+uniform samplerCube cubeDiffuseMap;
 uniform vec3 viewPos;
 
 uniform DirLight dirLight;
@@ -42,10 +52,18 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec4 calculateDiffuseColor();
 
+vec3 calculateReflection() {
+    return texture(cubeDiffuseMap, ReflectedVector).xyz;
+}
+
+vec3 calculateRefraction() {
+    return texture(cubeDiffuseMap, RefractedVector).xyz;
+}
+
 void main() {    
     vec3 norm = texture(normalMap, TexCoords.xy).rgb;
-    norm = normalize(norm * 2.0 - 1.0);
-    norm = normalize(TBN * norm);
+    //norm = normalize(norm * 2.0 - 1.0);
+    //norm = normalize(TBN * norm);
     //vec3 norm = normalize(Normal);
 
     vec3 viewDir = normalize(viewPos - FragPos);
@@ -58,7 +76,7 @@ void main() {
         //result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);    
     }
     
-    FragColor = vec4(result, 1.0);
+    FragColor = vec4(mix(result, mix(calculateReflection(), calculateRefraction(), refractLevel), reflectivity), 1.0);
 }
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
@@ -69,7 +87,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
 
     // specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 64);
 
     // combine results
     vec3 color = calculateDiffuseColor().xyz;
@@ -114,5 +132,5 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
 }
 
 vec4 calculateDiffuseColor() {
-    return texture(diffuseMap, TexCoords.xy);
+    return mix(hue, texture(diffuseMap, TexCoords.xy), diffuseLevel);
 }
