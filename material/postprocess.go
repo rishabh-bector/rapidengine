@@ -5,6 +5,9 @@ import "github.com/go-gl/gl/v4.1-core/gl"
 type PostProcessMaterial struct {
 	shader *ShaderProgram
 
+	FboWidth  float32
+	FboHeight float32
+
 	ScreenMap *uint32
 }
 
@@ -23,6 +26,9 @@ func (pm *PostProcessMaterial) Render(delta float64, darkness float32, totalTime
 	gl.BindTexture(gl.TEXTURE_2D, *pm.ScreenMap)
 
 	gl.Uniform1i(pm.shader.GetUniform("screen"), 0)
+
+	gl.Uniform1f(pm.shader.GetUniform("fboWidth"), pm.FboWidth)
+	gl.Uniform1f(pm.shader.GetUniform("fboHeight"), pm.FboHeight)
 }
 
 func (pm *PostProcessMaterial) GetShader() *ShaderProgram {

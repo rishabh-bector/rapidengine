@@ -27,7 +27,7 @@ in vec3 TexCoords;
 in mat3 TBN;
 in vec3 Normal;
 in float Visibility;
-const vec3 skyColor = vec3(0.2, 0.2, 0.2);
+const vec3 skyColor = vec3(0.9, 0.9, 1.0);
 
 in vec3 TexCoord_FS_in;
 in vec3 MatCoord_FS_in;

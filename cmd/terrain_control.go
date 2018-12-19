@@ -94,7 +94,7 @@ func (tc *TerrainControl) NewFoliage(width int, height int, instances int) *terr
 	f.FChild.AttachMesh(geometry.LoadObj("./billboard.obj", 1))
 
 	f.FChild.EnableGLInstancing(instances)
-	f.FChild.SetInstanceRenderDistance(10000)
+	f.FChild.SetInstanceRenderDistance(100000)
 
 	f.FChild.PreRender(tc.engine.Renderer.MainCamera)
 

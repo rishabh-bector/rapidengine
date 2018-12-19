@@ -170,6 +170,22 @@ func NewRectangle() Mesh {
 	return r
 }
 
+// NewScreenQuad creates a rectangle mesh that fills the screen.
+// This is useful for post processing effects.
+func NewScreenQuad() Mesh {
+	indices := []uint32{
+		0, 1, 2,
+		2, 0, 3,
+	}
+
+	return Mesh{
+		id:          "screen",
+		vao:         NewVertexArray(ScreenQuadPoints, indices),
+		texCoords:   &RectTextures,
+		numVertices: int32(len(indices)),
+	}
+}
+
 // NewCube creates a 3D cube Mesh
 func NewCube() Mesh {
 	indices := []uint32{}

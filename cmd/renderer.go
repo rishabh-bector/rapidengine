@@ -129,10 +129,9 @@ func (renderer *Renderer) renderFrame() {
 
 // ForceUpdate forces a frame render
 func (renderer *Renderer) ForceUpdate() {
-	gl.Clear(gl.COLOR_BUFFER_BIT)
-	gl.Clear(gl.DEPTH_BUFFER_BIT)
-
+	renderer.engine.PostControl.UpdateFrameBuffers()
 	renderer.RenderChildren()
+	renderer.engine.PostControl.Update()
 	renderer.engine.TextControl.Update()
 
 	renderer.Window.SwapBuffers()

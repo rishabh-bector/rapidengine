@@ -23,8 +23,12 @@ func (shaderControl *ShaderControl) Initialize() {
 		"foliage":  &material.FoliageProgram,
 		"water":    &material.WaterProgram,
 
-		"post_final": &material.PostFinalProgram,
-		"post_hdr":   &material.PostHDRProgram,
+		"post_final":      &material.PostFinalProgram,
+		"post_hdr":        &material.PostHDRProgram,
+		"post_horizontal": &material.PostHorizontalProgram,
+		"post_vertical":   &material.PostVerticalProgram,
+		"post_prebloom":   &material.PostPreBloomProgram,
+		"post_postbloom":  &material.PostPostBloomProgram,
 	}
 	for _, prog := range shaderControl.programs {
 		prog.Compile()

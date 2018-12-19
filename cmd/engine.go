@@ -99,15 +99,15 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 	if e.Config.Dimensions == 3 {
 		l := lighting.NewDirectionLight(
 			[]float32{0.2, 0.2, 0.2},
-			[]float32{1.3, 1.3, 1.3},
-			[]float32{0, 0, 0},
-			[]float32{1, -1.7, 0},
+			[]float32{0.9, 0.9, 0.9},
+			[]float32{0.4, 0.4, 0.4},
+			[]float32{1, 0, 0},
 		)
 
 		e.LightControl.SetDirectionalLight(&l)
 
 		e.Renderer.SkyBoxEnabled = true
-		e.Renderer.SkyBox = e.TerrainControl.NewSkyBox("FullMoon", &e.ShaderControl, &e.TextureControl, e.Config)
+		e.Renderer.SkyBox = e.TerrainControl.NewSkyBox("TropicalSunnyDay", &e.ShaderControl, &e.TextureControl, e.Config)
 	}
 
 	return &e

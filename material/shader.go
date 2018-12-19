@@ -361,7 +361,9 @@ var PostFinalProgram = ShaderProgram{
 		"viewMtx":       0,
 		"projectionMtx": 0,
 
-		"screen": 0,
+		"screen":    0,
+		"fboWidth":  0,
+		"fboHeight": 0,
 	},
 	attributeLocations: map[string]uint32{
 		"position": 0,
@@ -378,7 +380,90 @@ var PostHDRProgram = ShaderProgram{
 		"viewMtx":       0,
 		"projectionMtx": 0,
 
-		"hdrBuffer": 0,
+		"screen":    0,
+		"fboWidth":  0,
+		"fboHeight": 0,
+	},
+	attributeLocations: map[string]uint32{
+		"position": 0,
+		"tex":      0,
+	},
+}
+
+var PostHorizontalProgram = ShaderProgram{
+	vertexShader:   "../rapidengine/material/shaders/postprocessing/blur/horizontal/horizontal.vert",
+	fragmentShader: "../rapidengine/material/shaders/postprocessing/blur/horizontal/horizontal.frag",
+	uniformLocations: map[string]int32{
+		// Vertices
+		"modelMtx":      0,
+		"viewMtx":       0,
+		"projectionMtx": 0,
+
+		"screen":    0,
+		"fboWidth":  0,
+		"fboHeight": 0,
+	},
+	attributeLocations: map[string]uint32{
+		"position": 0,
+		"tex":      0,
+	},
+}
+
+var PostVerticalProgram = ShaderProgram{
+	vertexShader:   "../rapidengine/material/shaders/postprocessing/blur/vertical/vertical.vert",
+	fragmentShader: "../rapidengine/material/shaders/postprocessing/blur/vertical/vertical.frag",
+	uniformLocations: map[string]int32{
+		// Vertices
+		"modelMtx":      0,
+		"viewMtx":       0,
+		"projectionMtx": 0,
+
+		"screen":    0,
+		"fboWidth":  0,
+		"fboHeight": 0,
+	},
+	attributeLocations: map[string]uint32{
+		"position": 0,
+		"tex":      0,
+	},
+}
+
+var PostPreBloomProgram = ShaderProgram{
+	vertexShader:   "../rapidengine/material/shaders/postprocessing/bloom/prebloom/prebloom.vert",
+	fragmentShader: "../rapidengine/material/shaders/postprocessing/bloom/prebloom/prebloom.frag",
+	uniformLocations: map[string]int32{
+		// Vertices
+		"modelMtx":      0,
+		"viewMtx":       0,
+		"projectionMtx": 0,
+
+		"screen":    0,
+		"fboWidth":  0,
+		"fboHeight": 0,
+
+		"bloomThreshold": 0,
+	},
+	attributeLocations: map[string]uint32{
+		"position": 0,
+		"tex":      0,
+	},
+}
+
+var PostPostBloomProgram = ShaderProgram{
+	vertexShader:   "../rapidengine/material/shaders/postprocessing/bloom/postbloom/postbloom.vert",
+	fragmentShader: "../rapidengine/material/shaders/postprocessing/bloom/postbloom/postbloom.frag",
+	uniformLocations: map[string]int32{
+		// Vertices
+		"modelMtx":      0,
+		"viewMtx":       0,
+		"projectionMtx": 0,
+
+		"screen":    0,
+		"fboWidth":  0,
+		"fboHeight": 0,
+
+		"bloomInput":     0,
+		"bloomIntensity": 0,
 	},
 	attributeLocations: map[string]uint32{
 		"position": 0,

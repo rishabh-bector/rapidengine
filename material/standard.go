@@ -78,8 +78,8 @@ func (sm *StandardMaterial) UpdateAttribArrays() {
 	gl.EnableVertexAttribArray(0)
 	gl.EnableVertexAttribArray(1)
 	gl.EnableVertexAttribArray(2)
-	//gl.EnableVertexAttribArray(3)
-	//gl.EnableVertexAttribArray(4)
+	gl.EnableVertexAttribArray(3)
+	gl.EnableVertexAttribArray(4)
 }
 
 func (sm *StandardMaterial) GetShader() *ShaderProgram {

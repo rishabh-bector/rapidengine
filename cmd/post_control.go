@@ -21,12 +21,10 @@ type PostControl struct {
 	PostProcessingEnabled bool
 
 	// Post Processing Effects
-	hdrEnabled   bool
-	bloomEnabled bool
-	waterEnabled bool
-
-	// Post Processing buffers
-	HDRBuffers EffectBuffers
+	hdrEnabled      bool
+	gaussianEnabled bool
+	bloomEnabled    bool
+	waterEnabled    bool
 
 	ScreenChild    *child.Child2D
 	ScreenMaterial *material.PostProcessMaterial
@@ -35,6 +33,20 @@ type PostControl struct {
 	PBuffer1            EffectBuffers
 	PBuffer2            EffectBuffers
 	PIntermediateBuffer EffectBuffers
+
+	// Gaussian Blur
+	gaussianIterations int
+	gaussianScale      int
+	GaussianBuffer1    EffectBuffers
+	GaussianBuffer2    EffectBuffers
+	GaussianBuffer3    EffectBuffers
+
+	// Bloom
+	BloomThreshold float32
+	BloomIntensity float32
+	BloomOffsetX   int32
+	BloomOffsetY   int32
+	BloomBuffer1   EffectBuffers
 
 	engine *Engine
 }
@@ -53,15 +65,18 @@ func (pc *PostControl) EnablePostProcessing() {
 	pc.PostProcessingEnabled = true
 
 	// Create buffers
-	pc.PBuffer1 = pc.NewEffectBuffers(true)
-	pc.PBuffer2 = pc.NewEffectBuffers(true)
+	pc.PBuffer1 = pc.NewEffectBuffers(int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight), true)
+	pc.PBuffer2 = pc.NewEffectBuffers(int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight), true)
+	pc.PIntermediateBuffer = pc.NewEffectBuffers(int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight), true)
 
 	pc.ScreenMaterial = material.NewPostProcessMaterial(pc.engine.ShaderControl.GetShader("post_final"), &pc.PBuffer2.RenderedTexture)
+	pc.ScreenMaterial.FboWidth = float32(pc.engine.Config.ScreenWidth)
+	pc.ScreenMaterial.FboHeight = float32(pc.engine.Config.ScreenHeight)
 
 	// Create screen child
 	pc.ScreenChild = pc.engine.ChildControl.NewChild2D()
 	pc.ScreenChild.AttachMaterial(pc.ScreenMaterial)
-	pc.ScreenChild.AttachMesh(geometry.NewRectangle())
+	pc.ScreenChild.AttachMesh(geometry.NewScreenQuad())
 	pc.ScreenChild.ScaleX = float32(pc.engine.Config.ScreenWidth)
 	pc.ScreenChild.ScaleY = float32(pc.engine.Config.ScreenHeight)
 	pc.ScreenChild.Static = true
@@ -109,6 +124,23 @@ func (pc *PostControl) Update() {
 		pc.SwapPingPongBuffers()
 	}
 
+	if pc.bloomEnabled {
+		pc.ApplyPreBloom(&pc.PBuffer1, &pc.BloomBuffer1)
+		pc.ApplyGaussianBlur(&pc.BloomBuffer1, &pc.PBuffer2)
+		pc.ApplyPostBloom(&pc.PBuffer1, &pc.PBuffer2, &pc.BloomBuffer1)
+
+		pc.PIntermediateBuffer = pc.PBuffer2
+		pc.PBuffer2 = pc.BloomBuffer1
+		pc.BloomBuffer1 = pc.PIntermediateBuffer
+
+		pc.SwapPingPongBuffers()
+	}
+
+	if pc.gaussianEnabled {
+		//pc.ApplyGaussianBlur(&pc.PBuffer1, &pc.PBuffer2)
+		//pc.SwapPingPongBuffers()
+	}
+
 	// Render final buffer to screen
 	pc.ScreenMaterial.ScreenMap = &pc.PBuffer1.RenderedTexture
 	pc.ScreenMaterial.AttachShader(pc.engine.ShaderControl.GetShader("post_final"))
@@ -131,19 +163,65 @@ func (pc *PostControl) ApplyHDR(input, output *EffectBuffers) {
 }
 
 func (pc *PostControl) ApplyHorizontalGaussian(input, output *EffectBuffers) {
+	pc.ScreenMaterial.ScreenMap = &input.RenderedTexture
+	pc.ScreenMaterial.AttachShader(pc.engine.ShaderControl.GetShader("post_horizontal"))
 
+	output.BindAndClear()
+
+	pc.engine.Renderer.RenderChild(pc.ScreenChild)
 }
 
 func (pc *PostControl) ApplyVerticalGaussian(input, output *EffectBuffers) {
+	pc.ScreenMaterial.ScreenMap = &input.RenderedTexture
+	pc.ScreenMaterial.AttachShader(pc.engine.ShaderControl.GetShader("post_vertical"))
 
+	output.BindAndClear()
+
+	pc.engine.Renderer.RenderChild(pc.ScreenChild)
 }
 
 func (pc *PostControl) ApplyGaussianBlur(input, output *EffectBuffers) {
+	gl.Viewport(0, 0, int32(pc.engine.Config.ScreenWidth/pc.gaussianScale), int32(pc.engine.Config.ScreenHeight/pc.gaussianScale))
+	pc.ApplyHorizontalGaussian(input, &pc.GaussianBuffer1)
+	pc.ApplyVerticalGaussian(&pc.GaussianBuffer1, &pc.GaussianBuffer2)
+	pc.swapGaussianPingPongBuffers()
 
+	for i := 0; i < pc.gaussianIterations; i++ {
+		pc.ApplyHorizontalGaussian(&pc.GaussianBuffer1, &pc.GaussianBuffer2)
+		pc.ApplyVerticalGaussian(&pc.GaussianBuffer2, &pc.GaussianBuffer1)
+	}
+
+	gl.Viewport(pc.BloomOffsetX, pc.BloomOffsetY, int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight))
+	pc.ApplyHorizontalGaussian(&pc.GaussianBuffer1, &pc.GaussianBuffer3)
+	pc.ApplyVerticalGaussian(&pc.GaussianBuffer3, output)
+	gl.Viewport(0, 0, int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight))
 }
 
-func (pc *PostControl) ApplyBloom(input, output *EffectBuffers) {
+func (pc *PostControl) ApplyPreBloom(input, output *EffectBuffers) {
+	pc.ScreenMaterial.ScreenMap = &input.RenderedTexture
+	pc.ScreenMaterial.AttachShader(pc.engine.ShaderControl.GetShader("post_prebloom"))
+	pc.ScreenMaterial.GetShader().Bind()
+	gl.Uniform1f(pc.ScreenMaterial.GetShader().GetUniform("bloomThreshold"), pc.BloomThreshold)
 
+	output.BindAndClear()
+
+	pc.engine.Renderer.RenderChild(pc.ScreenChild)
+}
+
+func (pc *PostControl) ApplyPostBloom(mainInput, bloomInput, output *EffectBuffers) {
+	pc.ScreenMaterial.ScreenMap = &mainInput.RenderedTexture
+	pc.ScreenMaterial.AttachShader(pc.engine.ShaderControl.GetShader("post_postbloom"))
+
+	pc.ScreenMaterial.GetShader().Bind()
+	gl.ActiveTexture(gl.TEXTURE1)
+	gl.BindTexture(gl.TEXTURE_2D, bloomInput.RenderedTexture)
+	gl.Uniform1i(pc.ScreenMaterial.GetShader().GetUniform("bloomInput"), 1)
+
+	gl.Uniform1f(pc.ScreenMaterial.GetShader().GetUniform("bloomIntensity"), pc.BloomIntensity)
+
+	output.BindAndClear()
+
+	pc.engine.Renderer.RenderChild(pc.ScreenChild)
 }
 
 // SwapPingPongBuffers swaps PBuffer1 and PBuffer2 so that
@@ -155,9 +233,32 @@ func (pc *PostControl) SwapPingPongBuffers() {
 	pc.PBuffer1 = pc.PIntermediateBuffer
 }
 
+func (pc *PostControl) swapGaussianPingPongBuffers() {
+	pc.PIntermediateBuffer = pc.GaussianBuffer2
+	pc.GaussianBuffer2 = pc.GaussianBuffer1
+	pc.GaussianBuffer1 = pc.PIntermediateBuffer
+}
+
 func (pc *PostControl) EnableHDR() {
 	pc.hdrEnabled = true
-	pc.HDRBuffers = pc.NewEffectBuffers(true)
+}
+
+func (pc *PostControl) EnableGaussianBlur(iterations int, scale int) {
+	pc.gaussianEnabled = true
+	pc.gaussianIterations = iterations
+	pc.gaussianScale = scale
+
+	pc.GaussianBuffer1 = pc.NewEffectBuffers(int32(pc.engine.Config.ScreenWidth/pc.gaussianScale), int32(pc.engine.Config.ScreenHeight/pc.gaussianScale), true)
+	pc.GaussianBuffer2 = pc.NewEffectBuffers(int32(pc.engine.Config.ScreenWidth/pc.gaussianScale), int32(pc.engine.Config.ScreenHeight/pc.gaussianScale), true)
+	pc.GaussianBuffer3 = pc.NewEffectBuffers(int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight), true)
+}
+
+func (pc *PostControl) EnableBloom(blurIterations int, blurScale int) {
+	pc.EnableGaussianBlur(blurIterations, blurScale)
+	pc.bloomEnabled = true
+	pc.BloomThreshold = 0.7
+	pc.BloomIntensity = 1
+	pc.BloomBuffer1 = pc.NewEffectBuffers(int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight), true)
 }
 
 type EffectBuffers struct {
@@ -174,7 +275,7 @@ func (eb *EffectBuffers) BindAndClear() {
 	gl.Clear(gl.DEPTH_BUFFER_BIT)
 }
 
-func (pc *PostControl) NewEffectBuffers(highPrecision bool) EffectBuffers {
+func (pc *PostControl) NewEffectBuffers(width, height int32, highPrecision bool) EffectBuffers {
 	frameBuffer := uint32(0)
 	depthRenderBuffer := uint32(0)
 	renderedTexture := uint32(0)
@@ -190,13 +291,13 @@ func (pc *PostControl) NewEffectBuffers(highPrecision bool) EffectBuffers {
 	if highPrecision {
 		gl.TexImage2D(
 			gl.TEXTURE_2D, 0, gl.RGBA16F,
-			int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight),
+			width, height,
 			0, gl.RGBA, gl.FLOAT, gl.PtrOffset(0),
 		)
 	} else {
 		gl.TexImage2D(
 			gl.TEXTURE_2D, 0, gl.RGB,
-			int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight),
+			width, height,
 			0, gl.RGB, gl.UNSIGNED_BYTE, gl.PtrOffset(0),
 		)
 	}
@@ -207,7 +308,7 @@ func (pc *PostControl) NewEffectBuffers(highPrecision bool) EffectBuffers {
 	// Generate depth buffer
 	gl.GenRenderbuffers(1, &depthRenderBuffer)
 	gl.BindRenderbuffer(gl.RENDERBUFFER, depthRenderBuffer)
-	gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT, int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight))
+	gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT, width, height)
 	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthRenderBuffer)
 
 	// Configure framebuffer

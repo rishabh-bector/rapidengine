@@ -34,14 +34,14 @@ uniform float foliageDisplacement;
 uniform float foliageNoiseSeed;
 uniform float foliageVariation;
 
-const float fogDensity = 0.0001;//0.007;
+const float fogDensity = 0.007;
 const float fogGradient = 1.5;
 
 const float windAmplitude = 0.4;
 const float windFrequency = 1;
 
 float rand(vec2 c) {
-	return fract(sin(dot(c.xy, vec2(12.9898,78.233))) * 78.5453);
+	return fract(sin(dot(c.xy, vec2(12.9898,78.233))) * 34.5453);
 }
 
 float rand2(vec2 c) {

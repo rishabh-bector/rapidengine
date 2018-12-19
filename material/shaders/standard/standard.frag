@@ -63,7 +63,7 @@ vec3 calculateRefraction() {
 void main() {    
     vec3 norm = texture(normalMap, TexCoords.xy).rgb;
     //norm = normalize(norm * 2.0 - 1.0);
-    //norm = normalize(TBN * norm);
+    norm = normalize(TBN * norm);
     //vec3 norm = normalize(Normal);
 
     vec3 viewDir = normalize(viewPos - FragPos);
@@ -87,7 +87,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
 
     // specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 64);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 0);
 
     // combine results
     vec3 color = calculateDiffuseColor().xyz;

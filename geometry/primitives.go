@@ -1,5 +1,12 @@
 package geometry
 
+var ScreenQuadPoints = []float32{
+	-1, -1, 0,
+	1, -1, 0,
+	1, 1, 0,
+	-1, 1, 0,
+}
+
 var RectTextures = []float32{
 	0, 1, 0,
 	1, 1, 0,

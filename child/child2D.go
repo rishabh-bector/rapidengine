@@ -366,3 +366,7 @@ func (child2D *Child2D) EnableGLInstancing(num int) {
 	child2D.instancingEnabled = true
 	child2D.numInstances = num
 }
+
+func (child2D *Child2D) SetProjection(proj mgl32.Mat4) {
+	child2D.projectionMatrix = proj
+}
