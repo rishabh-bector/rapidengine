@@ -60,8 +60,9 @@ func (sc *SceneControl) ClearActivation() {
 type Scene struct {
 	ID string
 
-	children []child.Child
-	texts    []*ui.TextBox
+	children   []child.Child
+	uiElements []ui.Element
+	texts      []*ui.TextBox
 
 	subscenes []*Scene
 
@@ -87,6 +88,10 @@ func (sc *SceneControl) NewScene(id string) *Scene {
 
 func (s *Scene) InstanceChild(c child.Child) {
 	s.children = append(s.children, c)
+}
+
+func (s *Scene) InstanceUIElement(e ui.Element) {
+	s.uiElements = append(s.uiElements, e)
 }
 
 func (s *Scene) InstanceText(t *ui.TextBox) {
@@ -120,14 +125,24 @@ func (s *Scene) IsActive() bool {
 
 func (s *Scene) GetChildren() []child.Child {
 	children := []child.Child{}
+
+	// Local children
 	if s.active {
 		children = s.children
 	}
+
+	// UI children
+	for _, element := range s.uiElements {
+		children = append(children, element.GetChildren()...)
+	}
+
+	// Subscene children
 	for _, scn := range s.subscenes {
 		if scn.active {
 			children = append(children, scn.GetChildren()...)
 		}
 	}
+
 	return children
 }
 

@@ -67,15 +67,14 @@ func (tc *TerrainControl) NewTerrain(width int, height int, vertices int) *terra
 	return &t
 }
 
-func (tc *TerrainControl) NewPlanetaryTerrain(width int, height int, vertices int) *terrain.Terrain {
-	t := terrain.NewTerrain(width, height)
+func (tc *TerrainControl) NewPlanetaryTerrain(scale float32) *terrain.Terrain {
+	t := terrain.NewTerrain(int(scale), int(scale))
 
 	t.TChild = tc.engine.ChildControl.NewChild3D()
 
-	t.TChild.AttachMaterial(tc.engine.MaterialControl.NewTerrainMaterial())
-	//t.TChild.AttachMesh(geometry.NewPlane(width, height, vertices, nil, 1))
-	t.TChild.AttachMesh(geometry.LoadObj("../rapidengine/assets/obj/sphere.obj", 10000))
-	t.TChild.SetInstanceRenderDistance(1000000000)
+	t.TChild.AttachMaterial(tc.engine.MaterialControl.NewProceduralMaterial())
+	t.TChild.AttachMesh(geometry.LoadObj("../rapidengine/assets/obj/sphere_ico_high.obj", scale))
+	t.TChild.SetInstanceRenderDistance(10000000000)
 
 	t.TChild.PreRender(tc.engine.Renderer.MainCamera)
 

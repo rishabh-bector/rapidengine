@@ -7,7 +7,7 @@ import (
 )
 
 type UIControl struct {
-	Elements []ui.Element
+	RootElement ui.Element
 
 	engine *Engine
 }
@@ -18,37 +18,39 @@ func NewUIControl() UIControl {
 
 func (uiControl *UIControl) Initialize(engine *Engine) {
 	uiControl.engine = engine
+	uiControl.RootElement = uiControl.NewRootElement(float32(engine.Config.ScreenWidth), float32(engine.Config.ScreenHeight))
 }
 
 func (uiControl *UIControl) Update(inputs *input.Input) {
-	for _, element := range uiControl.Elements {
-		element.Update(inputs)
-	}
+	uiControl.RootElement.Update(inputs)
 }
 
 func (uiControl *UIControl) InstanceElement(e ui.Element, scene *Scene) {
 	for _, c := range e.GetChildren() {
-		scene.InstanceChild(c)
+		c.PreRender(uiControl.engine.Renderer.MainCamera)
 	}
+
+	scene.InstanceUIElement(e)
+
 	for _, t := range e.GetTextBoxes() {
 		if t != nil {
 			scene.InstanceText(t)
 		}
 	}
-	uiControl.addElement(e)
 }
 
-func (uiControl *UIControl) addElement(e ui.Element) {
-	uiControl.Elements = append(uiControl.Elements, e)
-}
-
-func (uiControl *UIControl) AlignCenter(e ui.Element) {
-	e.SetPosition(float32(uiControl.engine.Config.ScreenWidth/2)-e.GetTransform().SX/2, e.GetTransform().Y)
-}
+//func (uiControl *UIControl) AlignCenter(e ui.Element) {
+//	e.SetPosition(float32(uiControl.engine.Config.ScreenWidth/2)-e.GetTransform().SX/2, e.GetTransform().Y)
+//}
 
 //  --------------------------------------------------
 //  Element Constructors
 //  --------------------------------------------------
+
+func (uiControl *UIControl) NewRootElement(width, height float32) *ui.RootElement {
+	root := ui.NewRootElement(width, height)
+	return &root
+}
 
 func (uiControl *UIControl) NewUIButton(x, y, width, height float32) *ui.Button {
 	button := ui.NewUIButton(x, y, width, height)

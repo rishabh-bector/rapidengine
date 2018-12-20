@@ -42,6 +42,10 @@ func (mc *MaterialControl) NewTerrainMaterial() *material.TerrainMaterial {
 	return material.NewTerrainMaterial(mc.engine.ShaderControl.GetShader("terrain"))
 }
 
+func (mc *MaterialControl) NewProceduralMaterial() *material.ProceduralMaterial {
+	return material.NewProceduralMaterial(mc.engine.ShaderControl.GetShader("planet"))
+}
+
 func (mc *MaterialControl) NewFoliageMaterial() *material.FoliageMaterial {
 	return material.NewFoliageMaterial(mc.engine.ShaderControl.GetShader("foliage"))
 }

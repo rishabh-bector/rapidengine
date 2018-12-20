@@ -88,6 +88,7 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 		e.ShaderControl.GetShader("terrain"),
 		e.ShaderControl.GetShader("foliage"),
 		e.ShaderControl.GetShader("water"),
+		e.ShaderControl.GetShader("planet"),
 	}
 
 	e.Renderer.Initialize(&e)

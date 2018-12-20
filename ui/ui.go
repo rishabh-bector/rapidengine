@@ -9,11 +9,11 @@ import (
 type Element interface {
 	Update(inputs *input.Input)
 
-	SetPosition(x, y float32)
-	SetDimensions(width, height float32)
+	// Get all children (for scene instancing)
+	GetChildren() []child.Child
 
-	GetTransform() geometry.Transform
-
-	GetChildren() []*child.Child2D
+	GetTransform() *geometry.Transform
 	GetTextBoxes() []*TextBox
+
+	GetElements() []Element
 }

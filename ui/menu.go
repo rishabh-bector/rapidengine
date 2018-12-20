@@ -58,8 +58,8 @@ func (m *Menu) GetTransform() geometry.Transform {
 	return m.transform
 }
 
-func (m *Menu) GetChildren() []*child.Child2D {
-	children := []*child.Child2D{m.BackChild}
+func (m *Menu) GetChildren() []child.Child {
+	children := []child.Child{m.BackChild}
 	for _, e := range m.elements {
 		children = append(children, e.GetChildren()...)
 	}

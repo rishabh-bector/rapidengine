@@ -251,6 +251,41 @@ var TerrainProgram = ShaderProgram{
 	},
 }
 
+var PlanetProgram = ShaderProgram{
+	vertexShader:   "../rapidengine/material/shaders/planet/planet.vert",
+	fragmentShader: "../rapidengine/material/shaders/planet/planet.frag",
+	controlShader:  "../rapidengine/material/shaders/planet/planet.cont",
+	evalShader:     "../rapidengine/material/shaders/planet/planet.eval",
+	uniformLocations: map[string]int32{
+		// Vertices
+		"modelMtx":      0,
+		"viewMtx":       0,
+		"projectionMtx": 0,
+
+		// Standard Material
+		"diffuseMap":   0,
+		"normalMap":    0,
+		"heightMap":    0,
+		"displacement": 0,
+		"scale":        0,
+
+		// Lighting
+		"dirLight.direction": 0,
+		"dirLight.ambient":   0,
+		"dirLight.diffuse":   0,
+		"dirLight.specular":  0,
+		"viewPos":            0,
+		"numPointLights":     0,
+	},
+	attributeLocations: map[string]uint32{
+		"position":   0,
+		"tex":        1,
+		"normal":     2,
+		"tangent":    3,
+		"bitTangent": 4,
+	},
+}
+
 var FoliageProgram = ShaderProgram{
 	vertexShader:   "../rapidengine/material/shaders/foliage/foliage.vert",
 	fragmentShader: "../rapidengine/material/shaders/foliage/foliage.frag",

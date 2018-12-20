@@ -20,6 +20,7 @@ func (shaderControl *ShaderControl) Initialize() {
 		"standard": &material.StandardProgram,
 		"skybox":   &material.SkyBoxProgram,
 		"terrain":  &material.TerrainProgram,
+		"planet":   &material.PlanetProgram,
 		"foliage":  &material.FoliageProgram,
 		"water":    &material.WaterProgram,
 		"sun":      &material.SunProgram,
