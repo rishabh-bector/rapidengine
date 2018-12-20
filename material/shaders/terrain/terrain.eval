@@ -24,7 +24,7 @@ uniform float terrainDisplacement;
 uniform sampler2D heightMap;
 uniform float displacement;
 
-const float fogDensity = 0.007;
+const float fogDensity = 0.001;
 const float fogGradient = 1.5;
 
 vec3 interpolate3D(vec3 v0, vec3 v1, vec3 v2) {

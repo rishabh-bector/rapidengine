@@ -34,7 +34,7 @@ uniform float foliageDisplacement;
 uniform float foliageNoiseSeed;
 uniform float foliageVariation;
 
-const float fogDensity = 0.007;
+const float fogDensity = 0.001;
 const float fogGradient = 1.5;
 
 const float windAmplitude = 0.4;
