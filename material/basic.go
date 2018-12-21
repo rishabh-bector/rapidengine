@@ -1,6 +1,10 @@
 package material
 
-import "github.com/go-gl/gl/v4.1-core/gl"
+import (
+	"rapidengine/state"
+
+	"github.com/go-gl/gl/v4.1-core/gl"
+)
 
 type BasicMaterial struct {
 	shader *ShaderProgram
@@ -44,14 +48,16 @@ func (bm *BasicMaterial) Render(delta float64, darkness float32, totalTime float
 	bm.UpdateAnimation(delta)
 	bm.UpdateAttribArrays()
 
-	if bm.DiffuseMap != nil {
+	if bm.DiffuseMap != nil && state.BoundTexture0 != bm.DiffuseMap {
 		gl.ActiveTexture(gl.TEXTURE0)
 		gl.BindTexture(gl.TEXTURE_2D, *bm.DiffuseMap)
+		state.BoundTexture0 = bm.DiffuseMap
 	}
 
-	if bm.AlphaMap != nil {
+	if bm.AlphaMap != nil && state.BoundTexture1 != bm.AlphaMap {
 		gl.ActiveTexture(gl.TEXTURE1)
 		gl.BindTexture(gl.TEXTURE_2D, *bm.AlphaMap)
+		state.BoundTexture1 = bm.AlphaMap
 	}
 
 	gl.Uniform1f(bm.shader.GetUniform("diffuseLevel"), bm.DiffuseLevel)

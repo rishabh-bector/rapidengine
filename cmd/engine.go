@@ -91,9 +91,10 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 	e.Renderer.AttachCallback(e.Update)
 
 	e.TextControl.LoadFont("../rapidengine/assets/fonts/avenir-next-regular.ttf", "avenir", 32, 0)
+
 	if e.Config.ShowFPS {
-		e.FPSBox = e.TextControl.NewTextBox("Rapid Engine", "roboto", float32(e.Config.ScreenWidth/2-100), float32(e.Config.ScreenHeight/2-50), 0.5, [3]float32{1, 1, 1})
-		e.SceneControl.GetCurrentScene().InstanceText(e.FPSBox)
+		e.FPSBox = e.TextControl.NewTextBox("Rapid Engine", "avenir", float32(e.Config.ScreenWidth-100), float32(e.Config.ScreenHeight-50), 1, [3]float32{50, 50, 50})
+		//e.SceneControl.GetCurrentScene().InstanceText(e.FPSBox)
 	}
 
 	if e.Config.Dimensions == 3 {

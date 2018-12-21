@@ -71,11 +71,18 @@ type Scene struct {
 }
 
 func (sc *SceneControl) NewScene(id string) *Scene {
-	return &Scene{
+	s := &Scene{
 		ID:                 id,
 		automaticRendering: true,
 		active:             true,
+		texts:              []*ui.TextBox{},
 	}
+
+	if sc.engine.Config.ShowFPS {
+		s.InstanceText(sc.engine.FPSBox)
+	}
+
+	return s
 }
 
 func (s *Scene) InstanceChild(c child.Child) {

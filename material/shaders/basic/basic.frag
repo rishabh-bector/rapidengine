@@ -25,7 +25,7 @@ void main() {
     
     float finalAlpha = calculateAlpha();
 
-    if(finalColor.a == 0 || finalAlpha == 0) {
+    if(finalColor.a == 0 || finalAlpha < 0.15) {
         discard;
     }
 

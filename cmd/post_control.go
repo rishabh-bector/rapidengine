@@ -21,10 +21,11 @@ type PostControl struct {
 	PostProcessingEnabled bool
 
 	// Post Processing Effects
-	hdrEnabled      bool
-	gaussianEnabled bool
-	bloomEnabled    bool
-	waterEnabled    bool
+	hdrEnabled        bool
+	gaussianEnabled   bool
+	bloomEnabled      bool
+	scatteringEnabled bool
+	waterEnabled      bool
 
 	ScreenChild    *child.Child2D
 	ScreenMaterial *material.PostProcessMaterial
@@ -48,6 +49,9 @@ type PostControl struct {
 	BloomOffsetY   int32
 	BloomBuffer1   EffectBuffers
 
+	// Volumetric Scattering
+	ScatteringTexture uint32
+
 	engine *Engine
 }
 
@@ -65,7 +69,7 @@ func (pc *PostControl) EnablePostProcessing() {
 	pc.PostProcessingEnabled = true
 
 	// Create buffers
-	pc.PBuffer1 = pc.NewEffectBuffers(int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight), true)
+	pc.PBuffer1, pc.ScatteringTexture = pc.NewDoubleEffectBuffers(int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight), true)
 	pc.PBuffer2 = pc.NewEffectBuffers(int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight), true)
 	pc.PIntermediateBuffer = pc.NewEffectBuffers(int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight), true)
 
@@ -328,4 +332,83 @@ func (pc *PostControl) NewEffectBuffers(width, height int32, highPrecision bool)
 		DepthRenderBuffer: depthRenderBuffer,
 		RenderedTexture:   renderedTexture,
 	}
+}
+
+func (pc *PostControl) NewDoubleEffectBuffers(width, height int32, highPrecision bool) (EffectBuffers, uint32) {
+	frameBuffer := uint32(0)
+	depthRenderBuffer := uint32(0)
+
+	renderedTexture1 := uint32(0)
+	renderedTexture2 := uint32(0)
+
+	// Generate frame buffer
+	gl.GenFramebuffers(1, &frameBuffer)
+	gl.BindFramebuffer(gl.FRAMEBUFFER, frameBuffer)
+
+	// Generate rendered texture 1
+	gl.GenTextures(1, &renderedTexture1)
+	gl.BindTexture(gl.TEXTURE_2D, renderedTexture1)
+
+	if highPrecision {
+		gl.TexImage2D(
+			gl.TEXTURE_2D, 0, gl.RGBA16F,
+			width, height,
+			0, gl.RGBA, gl.FLOAT, gl.PtrOffset(0),
+		)
+	} else {
+		gl.TexImage2D(
+			gl.TEXTURE_2D, 0, gl.RGB,
+			width, height,
+			0, gl.RGB, gl.UNSIGNED_BYTE, gl.PtrOffset(0),
+		)
+	}
+
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+
+	// Generate rendered texture 2
+	gl.GenTextures(1, &renderedTexture2)
+	gl.BindTexture(gl.TEXTURE_2D, renderedTexture2)
+
+	if highPrecision {
+		gl.TexImage2D(
+			gl.TEXTURE_2D, 0, gl.RGBA16F,
+			width, height,
+			0, gl.RGBA, gl.FLOAT, gl.PtrOffset(0),
+		)
+	} else {
+		gl.TexImage2D(
+			gl.TEXTURE_2D, 0, gl.RGB,
+			width, height,
+			0, gl.RGB, gl.UNSIGNED_BYTE, gl.PtrOffset(0),
+		)
+	}
+
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+
+	// Generate depth buffer
+	gl.GenRenderbuffers(1, &depthRenderBuffer)
+	gl.BindRenderbuffer(gl.RENDERBUFFER, depthRenderBuffer)
+	gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT, width, height)
+	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthRenderBuffer)
+
+	// Configure framebuffer
+	gl.FramebufferTexture(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, renderedTexture1, 0)
+	gl.FramebufferTexture(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT1, renderedTexture2, 0)
+	drawBuffers := []uint32{gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1}
+	gl.DrawBuffers(1, &drawBuffers[0])
+
+	// Check for errors
+	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
+		panic("Framebuffer Invalid")
+	}
+
+	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+
+	return EffectBuffers{
+		FrameBuffer:       frameBuffer,
+		DepthRenderBuffer: depthRenderBuffer,
+		RenderedTexture:   renderedTexture1,
+	}, renderedTexture2
 }
