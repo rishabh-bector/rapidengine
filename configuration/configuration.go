@@ -50,7 +50,7 @@ func NewEngineConfig(
 		// Misc
 		CollisionLines: false,
 		ShowFPS:        false,
-		MaxFPS:         60,
+		MaxFPS:         70,
 		Profiling:      false,
 		SingleMaterial: false,
 		Logger:         logrus.New(),

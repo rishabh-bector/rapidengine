@@ -31,6 +31,7 @@ type PostControl struct {
 	ScreenMaterial *material.PostProcessMaterial
 
 	// Ping pong buffers
+	PInputBuffer        EffectBuffers
 	PBuffer1            EffectBuffers
 	PBuffer2            EffectBuffers
 	PIntermediateBuffer EffectBuffers
@@ -50,7 +51,14 @@ type PostControl struct {
 	BloomBuffer1   EffectBuffers
 
 	// Volumetric Scattering
+	ScatteringDecay    float32
+	ScatteringDensity  float32
+	ScatteringWeight   float32
+	ScatteringExposure float32
+
+	SunChild          child.Child
 	ScatteringTexture uint32
+	ScatteringBuffer  EffectBuffers
 
 	engine *Engine
 }
@@ -69,7 +77,8 @@ func (pc *PostControl) EnablePostProcessing() {
 	pc.PostProcessingEnabled = true
 
 	// Create buffers
-	pc.PBuffer1, pc.ScatteringTexture = pc.NewDoubleEffectBuffers(int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight), true)
+	pc.PInputBuffer, pc.ScatteringTexture = pc.NewDoubleEffectBuffers(int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight), true)
+	pc.PBuffer1 = pc.NewEffectBuffers(int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight), true)
 	pc.PBuffer2 = pc.NewEffectBuffers(int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight), true)
 	pc.PIntermediateBuffer = pc.NewEffectBuffers(int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight), true)
 
@@ -103,13 +112,16 @@ func (pc *PostControl) IsPostProcessingEnabled() bool {
 // PostControl in preparation for the post processing stage.
 func (pc *PostControl) UpdateFrameBuffers() {
 	if pc.PostProcessingEnabled {
-		gl.BindFramebuffer(gl.FRAMEBUFFER, pc.PBuffer1.FrameBuffer)
+		gl.BindFramebuffer(gl.FRAMEBUFFER, pc.PInputBuffer.FrameBuffer)
 	} else {
 		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 	}
 
 	gl.Clear(gl.COLOR_BUFFER_BIT)
 	gl.Clear(gl.DEPTH_BUFFER_BIT)
+
+	drawBuffers := []uint32{gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1}
+	gl.DrawBuffers(2, &drawBuffers[0])
 }
 
 // Update applies the post processing effect chain every frame.
@@ -121,6 +133,9 @@ func (pc *PostControl) Update() {
 	if !pc.PostProcessingEnabled {
 		return
 	}
+
+	// Apply input buffer
+	pc.ApplyInput()
 
 	// Apply HDR
 	if pc.hdrEnabled {
@@ -145,6 +160,12 @@ func (pc *PostControl) Update() {
 		//pc.SwapPingPongBuffers()
 	}
 
+	if pc.scatteringEnabled {
+		pc.ApplyPreScattering(&EffectBuffers{RenderedTexture: pc.ScatteringTexture}, &pc.ScatteringBuffer)
+		pc.ApplyPostScattering(&pc.PBuffer1, &pc.ScatteringBuffer, &pc.PBuffer2)
+		pc.SwapPingPongBuffers()
+	}
+
 	// Render final buffer to screen
 	pc.ScreenMaterial.ScreenMap = &pc.PBuffer1.RenderedTexture
 	pc.ScreenMaterial.AttachShader(pc.engine.ShaderControl.GetShader("post_final"))
@@ -152,6 +173,16 @@ func (pc *PostControl) Update() {
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 	gl.Clear(gl.COLOR_BUFFER_BIT)
 	gl.Clear(gl.DEPTH_BUFFER_BIT)
+
+	pc.engine.Renderer.RenderChild(pc.ScreenChild)
+}
+
+// ApplyInput moves the screen data from the input buffer to the 1st pingpong buffer
+func (pc *PostControl) ApplyInput() {
+	pc.ScreenMaterial.ScreenMap = &pc.PInputBuffer.RenderedTexture
+	pc.ScreenMaterial.AttachShader(pc.engine.ShaderControl.GetShader("post_final"))
+
+	pc.PBuffer1.BindAndClear()
 
 	pc.engine.Renderer.RenderChild(pc.ScreenChild)
 }
@@ -199,6 +230,46 @@ func (pc *PostControl) ApplyGaussianBlur(input, output *EffectBuffers) {
 	pc.ApplyHorizontalGaussian(&pc.GaussianBuffer1, &pc.GaussianBuffer3)
 	pc.ApplyVerticalGaussian(&pc.GaussianBuffer3, output)
 	gl.Viewport(0, 0, int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight))
+}
+
+var SunX float32
+var SunY float32
+
+func (pc *PostControl) ApplyPreScattering(input, output *EffectBuffers) {
+	pc.ScreenMaterial.ScreenMap = &input.RenderedTexture
+	pc.ScreenMaterial.AttachShader(pc.engine.ShaderControl.GetShader("post_prescattering"))
+
+	pc.ScreenMaterial.GetShader().Bind()
+	pos := []float32{
+		SunX, SunY,
+	}
+	gl.Uniform2fv(
+		pc.ScreenMaterial.GetShader().GetUniform("lightPos"),
+		1, &pos[0],
+	)
+
+	gl.Uniform1f(pc.ScreenMaterial.GetShader().GetUniform("decay"), pc.ScatteringDecay)
+	gl.Uniform1f(pc.ScreenMaterial.GetShader().GetUniform("density"), pc.ScatteringDensity)
+	gl.Uniform1f(pc.ScreenMaterial.GetShader().GetUniform("weight"), pc.ScatteringWeight)
+	gl.Uniform1f(pc.ScreenMaterial.GetShader().GetUniform("exposure"), pc.ScatteringExposure)
+
+	output.BindAndClear()
+
+	pc.engine.Renderer.RenderChild(pc.ScreenChild)
+}
+
+func (pc *PostControl) ApplyPostScattering(input, scatterInput, output *EffectBuffers) {
+	pc.ScreenMaterial.ScreenMap = &input.RenderedTexture
+	pc.ScreenMaterial.AttachShader(pc.engine.ShaderControl.GetShader("post_postscattering"))
+
+	pc.ScreenMaterial.GetShader().Bind()
+	gl.ActiveTexture(gl.TEXTURE1)
+	gl.BindTexture(gl.TEXTURE_2D, scatterInput.RenderedTexture)
+	gl.Uniform1i(pc.ScreenMaterial.GetShader().GetUniform("scatterInput"), 1)
+
+	output.BindAndClear()
+
+	pc.engine.Renderer.RenderChild(pc.ScreenChild)
 }
 
 func (pc *PostControl) ApplyPreBloom(input, output *EffectBuffers) {
@@ -255,6 +326,17 @@ func (pc *PostControl) EnableGaussianBlur(iterations int, scale int) {
 	pc.GaussianBuffer1 = pc.NewEffectBuffers(int32(pc.engine.Config.ScreenWidth/pc.gaussianScale), int32(pc.engine.Config.ScreenHeight/pc.gaussianScale), true)
 	pc.GaussianBuffer2 = pc.NewEffectBuffers(int32(pc.engine.Config.ScreenWidth/pc.gaussianScale), int32(pc.engine.Config.ScreenHeight/pc.gaussianScale), true)
 	pc.GaussianBuffer3 = pc.NewEffectBuffers(int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight), true)
+}
+
+func (pc *PostControl) EnableLightScattering(sun child.Child) {
+	pc.scatteringEnabled = true
+	pc.ScatteringBuffer = pc.NewEffectBuffers(int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight), true)
+	pc.SunChild = sun
+
+	pc.ScatteringDecay = 1.0
+	pc.ScatteringDensity = 0.84
+	pc.ScatteringWeight = 1.0
+	pc.ScatteringExposure = 0.01
 }
 
 func (pc *PostControl) EnableBloom(blurIterations int, blurScale int) {
@@ -346,6 +428,7 @@ func (pc *PostControl) NewDoubleEffectBuffers(width, height int32, highPrecision
 	gl.BindFramebuffer(gl.FRAMEBUFFER, frameBuffer)
 
 	// Generate rendered texture 1
+	//gl.ActiveTexture(gl.TEXTURE0)
 	gl.GenTextures(1, &renderedTexture1)
 	gl.BindTexture(gl.TEXTURE_2D, renderedTexture1)
 
@@ -367,6 +450,7 @@ func (pc *PostControl) NewDoubleEffectBuffers(width, height int32, highPrecision
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 
 	// Generate rendered texture 2
+	//gl.ActiveTexture(gl.TEXTURE1)
 	gl.GenTextures(1, &renderedTexture2)
 	gl.BindTexture(gl.TEXTURE_2D, renderedTexture2)
 
@@ -397,7 +481,7 @@ func (pc *PostControl) NewDoubleEffectBuffers(width, height int32, highPrecision
 	gl.FramebufferTexture(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, renderedTexture1, 0)
 	gl.FramebufferTexture(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT1, renderedTexture2, 0)
 	drawBuffers := []uint32{gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1}
-	gl.DrawBuffers(1, &drawBuffers[0])
+	gl.DrawBuffers(2, &drawBuffers[0])
 
 	// Check for errors
 	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {

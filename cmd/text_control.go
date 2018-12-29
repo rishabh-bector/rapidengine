@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"rapidengine/configuration"
+	"rapidengine/state"
 	"rapidengine/ui"
 
 	"github.com/4ydx/gltext"
@@ -32,6 +33,7 @@ func (tc *TextControl) Update() {
 	for _, t := range tc.engine.SceneControl.GetCurrentTexts() {
 		t.Update(tc.engine.Config)
 	}
+	state.BoundTexture0 = 999
 }
 
 func (tc *TextControl) NewTextBox(text string, font string, x, y, scale float32, color [3]float32) *ui.TextBox {

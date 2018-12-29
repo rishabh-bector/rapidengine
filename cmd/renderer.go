@@ -255,8 +255,10 @@ func NewRenderer(camera camera.Camera, config *configuration.EngineConfig) Rende
 		MainCamera:     camera,
 		Config:         config,
 	}
+
 	r.Window.SetCursorPosCallback(input.MouseCallback)
 	r.Window.SetMouseButtonCallback(input.MouseButtonCallback)
+	r.Window.SetScrollCallback(input.ScrollCallback)
 
 	return r
 }

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"rapidengine/material"
+	"rapidengine/state"
 )
 
 type MaterialControl struct {
@@ -14,6 +15,15 @@ func NewMaterialControl() MaterialControl {
 
 func (mc *MaterialControl) Initialize(engine *Engine) {
 	mc.engine = engine
+
+	e := uint32(1000)
+	state.BoundTexture0 = e
+	state.BoundTexture1 = e
+	state.BoundTexture2 = e
+	state.BoundTexture3 = e
+	state.BoundTexture4 = e
+	state.BoundTexture5 = e
+	state.BoundTexture6 = e
 }
 
 func (mc *MaterialControl) NewBasicMaterial() *material.BasicMaterial {

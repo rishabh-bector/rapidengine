@@ -23,11 +23,18 @@ func (inputControl *InputControl) Update(window *glfw.Window) *input.Input {
 	}
 	return &input.Input{
 		current,
+
 		input.MouseX,
 		input.MouseY,
+
 		input.LastMouseX,
 		input.LastMouseY,
+
 		input.LeftMouseButton,
 		input.RightMouseButton,
+
+		input.ScrollXOff,
+		input.ScrollYOff,
+		input.Scroll,
 	}
 }

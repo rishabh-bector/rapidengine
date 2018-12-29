@@ -149,6 +149,8 @@ var BasicProgram = ShaderProgram{
 
 		"flipped": 0,
 
+		"scatterLevel": 0,
+
 		// Basic Material
 		"diffuseLevel": 0,
 
@@ -352,6 +354,37 @@ var SkyBoxProgram = ShaderProgram{
 	},
 }
 
+var SunProgram = ShaderProgram{
+	vertexShader:   "../rapidengine/material/shaders/sun/basic.vert",
+	fragmentShader: "../rapidengine/material/shaders/sun/basic.frag",
+	uniformLocations: map[string]int32{
+		// Vertices
+		"modelMtx":      0,
+		"viewMtx":       0,
+		"projectionMtx": 0,
+
+		"flipped": 0,
+
+		"scatterLevel": 0,
+
+		// Basic Material
+		"diffuseLevel": 0,
+
+		"hue":      0,
+		"darkness": 0,
+
+		"diffuseMap": 0,
+		"scale":      0,
+
+		"alphaMapLevel": 0,
+		"alphaMap":      0,
+	},
+	attributeLocations: map[string]uint32{
+		"position": 0,
+		"tex":      1,
+	},
+}
+
 var PostFinalProgram = ShaderProgram{
 	vertexShader:   "../rapidengine/material/shaders/postprocessing/final/final.vert",
 	fragmentShader: "../rapidengine/material/shaders/postprocessing/final/final.frag",
@@ -421,6 +454,53 @@ var PostVerticalProgram = ShaderProgram{
 		"screen":    0,
 		"fboWidth":  0,
 		"fboHeight": 0,
+	},
+	attributeLocations: map[string]uint32{
+		"position": 0,
+		"tex":      0,
+	},
+}
+
+var PostPreScatteringProgram = ShaderProgram{
+	vertexShader:   "../rapidengine/material/shaders/postprocessing/scattering/prescattering/prescattering.vert",
+	fragmentShader: "../rapidengine/material/shaders/postprocessing/scattering/prescattering/prescattering.frag",
+	uniformLocations: map[string]int32{
+		// Vertices
+		"modelMtx":      0,
+		"viewMtx":       0,
+		"projectionMtx": 0,
+
+		"screen":    0,
+		"fboWidth":  0,
+		"fboHeight": 0,
+
+		"lightPos": 0,
+
+		"decay":    0,
+		"density":  0,
+		"weight":   0,
+		"exposure": 0,
+	},
+	attributeLocations: map[string]uint32{
+		"position": 0,
+		"tex":      0,
+	},
+}
+
+var PostPostScatteringProgram = ShaderProgram{
+	vertexShader:   "../rapidengine/material/shaders/postprocessing/scattering/postscattering/postscattering.vert",
+	fragmentShader: "../rapidengine/material/shaders/postprocessing/scattering/postscattering/postscattering.frag",
+	uniformLocations: map[string]int32{
+		// Vertices
+		"modelMtx":      0,
+		"viewMtx":       0,
+		"projectionMtx": 0,
+
+		"screen":    0,
+		"fboWidth":  0,
+		"fboHeight": 0,
+
+		"scatterInput": 0,
 	},
 	attributeLocations: map[string]uint32{
 		"position": 0,

@@ -117,8 +117,8 @@ func (child2D *Child2D) Update(mainCamera camera.Camera, delta float64, totalTim
 		child2D.VX = 0
 	}*/
 
-	child2D.X += child2D.VX * -float32(delta*30)
-	child2D.Y += child2D.VY * float32(delta*30)
+	child2D.X += child2D.VX * -float32(delta)
+	child2D.Y += child2D.VY * float32(delta)
 
 	child2D.Render(mainCamera, delta, totalTime)
 }
@@ -142,6 +142,11 @@ func (child2D *Child2D) Render(mainCamera camera.Camera, delta float64, totalTim
 			1, false, &ident[0],
 		)
 	}
+
+	gl.UniformMatrix4fv(
+		child2D.material.GetShader().GetUniform("projectionMtx"),
+		1, false, &child2D.projectionMatrix[0],
+	)
 
 	gl.UniformMatrix4fv(
 		child2D.material.GetShader().GetUniform("modelMtx"),

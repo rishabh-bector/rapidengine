@@ -7,7 +7,7 @@ import (
 )
 
 type BasicMaterial struct {
-	shader *ShaderProgram
+	Shader *ShaderProgram
 
 	DiffuseLevel float32
 
@@ -21,6 +21,8 @@ type BasicMaterial struct {
 
 	Flipped int
 
+	ScatterLevel float32
+
 	animationPlaying     string
 	animationTextures    map[string][]*uint32
 	animationCurrent     int
@@ -30,9 +32,9 @@ type BasicMaterial struct {
 	animationEnabled     bool
 }
 
-func NewBasicMaterial(shader *ShaderProgram) *BasicMaterial {
+func NewBasicMaterial(Shader *ShaderProgram) *BasicMaterial {
 	return &BasicMaterial{
-		shader:            shader,
+		Shader:            Shader,
 		DiffuseLevel:      0,
 		Hue:               [4]float32{200, 200, 200, 255},
 		DiffuseMapScale:   1,
@@ -48,31 +50,33 @@ func (bm *BasicMaterial) Render(delta float64, darkness float32, totalTime float
 	bm.UpdateAnimation(delta)
 	bm.UpdateAttribArrays()
 
-	if bm.DiffuseMap != nil && state.BoundTexture0 != bm.DiffuseMap {
+	if bm.DiffuseMap != nil && state.BoundTexture0 != *bm.DiffuseMap {
 		gl.ActiveTexture(gl.TEXTURE0)
 		gl.BindTexture(gl.TEXTURE_2D, *bm.DiffuseMap)
-		state.BoundTexture0 = bm.DiffuseMap
+		state.BoundTexture0 = *bm.DiffuseMap
 	}
 
-	if bm.AlphaMap != nil && state.BoundTexture1 != bm.AlphaMap {
+	if bm.AlphaMap != nil && state.BoundTexture1 != *bm.AlphaMap {
 		gl.ActiveTexture(gl.TEXTURE1)
 		gl.BindTexture(gl.TEXTURE_2D, *bm.AlphaMap)
-		state.BoundTexture1 = bm.AlphaMap
+		state.BoundTexture1 = *bm.AlphaMap
 	}
 
-	gl.Uniform1f(bm.shader.GetUniform("diffuseLevel"), bm.DiffuseLevel)
+	gl.Uniform1f(bm.Shader.GetUniform("diffuseLevel"), bm.DiffuseLevel)
 
-	gl.Uniform4fv(bm.shader.GetUniform("hue"), 1, &bm.Hue[0])
+	gl.Uniform4fv(bm.Shader.GetUniform("hue"), 1, &bm.Hue[0])
 
-	gl.Uniform1i(bm.shader.GetUniform("diffuseMap"), 0)
-	gl.Uniform1f(bm.shader.GetUniform("scale"), bm.DiffuseMapScale)
+	gl.Uniform1i(bm.Shader.GetUniform("diffuseMap"), 0)
+	gl.Uniform1f(bm.Shader.GetUniform("scale"), bm.DiffuseMapScale)
 
-	gl.Uniform1f(bm.shader.GetUniform("alphaMapLevel"), bm.AlphaMapLevel)
-	gl.Uniform1i(bm.shader.GetUniform("alphaMap"), 1)
+	gl.Uniform1f(bm.Shader.GetUniform("alphaMapLevel"), bm.AlphaMapLevel)
+	gl.Uniform1i(bm.Shader.GetUniform("alphaMap"), 1)
 
-	gl.Uniform1f(bm.shader.GetUniform("darkness"), darkness)
+	gl.Uniform1f(bm.Shader.GetUniform("darkness"), darkness)
 
-	gl.Uniform1i(bm.shader.GetUniform("flipped"), int32(bm.Flipped))
+	gl.Uniform1f(bm.Shader.GetUniform("scatterLevel"), bm.ScatterLevel)
+
+	gl.Uniform1i(bm.Shader.GetUniform("flipped"), int32(bm.Flipped))
 }
 
 func (bm *BasicMaterial) UpdateAttribArrays() {
@@ -82,7 +86,7 @@ func (bm *BasicMaterial) UpdateAttribArrays() {
 }
 
 func (bm *BasicMaterial) GetShader() *ShaderProgram {
-	return bm.shader
+	return bm.Shader
 }
 
 func (bm *BasicMaterial) UpdateAnimation(delta float64) {

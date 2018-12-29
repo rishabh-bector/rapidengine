@@ -11,8 +11,12 @@ uniform float diffuseMapScale;
 uniform sampler2D alphaMap;
 uniform float alphaMapLevel;
 
+uniform float scatterLevel;
+
 in vec3 texCoord;
-out vec4 outColor;
+
+layout(location = 0) out vec4 outColor;
+layout(location = 1) out vec4 scatterColor;
 
 vec4 calculateDiffuseColor();
 vec4 calculateHueColor();
@@ -25,11 +29,12 @@ void main() {
     
     float finalAlpha = calculateAlpha();
 
-    if(finalColor.a == 0 || finalAlpha < 0.15) {
+    if(finalColor.a < 0.2 || finalAlpha < 0.2) {
         discard;
     }
 
     outColor = vec4(darkness * finalColor.xyz, finalColor.a * finalAlpha);
+    scatterColor = outColor * scatterLevel;
 }
 
 vec4 calculateDiffuseColor() {
@@ -42,7 +47,7 @@ vec4 calculateHueColor() {
 
 float calculateAlpha() {
     if(alphaMapLevel == 0) {
-        return 1;
+        return 1.0;
     }
     return texture(alphaMap, texCoord.xy).x;
 }
