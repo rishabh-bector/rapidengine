@@ -23,13 +23,15 @@ type BasicMaterial struct {
 
 	ScatterLevel float32
 
-	animationPlaying     string
-	animationTextures    map[string][]*uint32
-	animationCurrent     int
-	animationFrame       float64
-	animationFPS         map[string]float64
-	animationPlayingOnce bool
-	animationEnabled     bool
+	animationPlaying  string
+	animationTextures map[string][]*uint32
+	animationCurrent  int
+	animationFrame    float64
+	animationFPS      map[string]float64
+	animationEnabled  bool
+
+	animationPlayingOnce  bool
+	animationOnceCallback func()
 }
 
 func NewBasicMaterial(Shader *ShaderProgram) *BasicMaterial {
@@ -98,6 +100,10 @@ func (bm *BasicMaterial) UpdateAnimation(delta float64) {
 				if bm.animationPlayingOnce {
 					bm.animationPlaying = ""
 					bm.animationPlayingOnce = false
+					if bm.animationOnceCallback != nil {
+						bm.animationOnceCallback()
+						bm.animationOnceCallback = nil
+					}
 					return
 				}
 				bm.animationCurrent = 0
@@ -133,4 +139,10 @@ func (bm *BasicMaterial) PlayAnimation(anim string) {
 func (bm *BasicMaterial) PlayAnimationOnce(anim string) {
 	bm.PlayAnimation(anim)
 	bm.animationPlayingOnce = true
+}
+
+func (bm *BasicMaterial) PlayAnimationOnceCallback(anim string, callback func()) {
+	bm.PlayAnimation(anim)
+	bm.animationPlayingOnce = true
+	bm.animationOnceCallback = callback
 }
