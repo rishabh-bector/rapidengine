@@ -30,6 +30,7 @@ type Engine struct {
 	UIControl        UIControl
 	TerrainControl   TerrainControl
 	TextControl      TextControl
+	AudioControl     AudioControl
 	PostControl      PostControl
 
 	FPSBox     *ui.TextBox
@@ -57,6 +58,7 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 		TerrainControl:   NewTerrainControl(),
 		UIControl:        NewUIControl(),
 		TextControl:      NewTextControl(config),
+		AudioControl:     NewAudioControl(),
 		PostControl:      NewPostControl(),
 
 		// Configuration
@@ -77,6 +79,7 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 	e.TextControl.Initialize(&e)
 	e.TerrainControl.Initialize(&e)
 	e.CollisionControl.Initialize(&e)
+	e.AudioControl.Initialize(&e)
 	e.PostControl.Initialize(&e)
 	e.LightControl.Initialize(&e)
 

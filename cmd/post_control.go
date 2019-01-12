@@ -334,7 +334,7 @@ func (pc *PostControl) EnableLightScattering(sun child.Child) {
 	pc.SunChild = sun
 
 	pc.ScatteringDecay = 1.0
-	pc.ScatteringDensity = 0.84
+	pc.ScatteringDensity = 1.2 //0.84
 	pc.ScatteringWeight = 1.0
 	pc.ScatteringExposure = 0.01
 }

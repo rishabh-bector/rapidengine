@@ -34,3 +34,7 @@ func (t *TextBox) Update(config *configuration.EngineConfig) {
 func (t *TextBox) SetV41Text(textObj *v41.Text) {
 	t.textObj = textObj
 }
+
+func (t *TextBox) GetLength() int {
+	return t.textObj.GetLength()
+}
