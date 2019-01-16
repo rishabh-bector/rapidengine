@@ -21,7 +21,11 @@ func NewTextureControl(config *configuration.EngineConfig) TextureControl {
 }
 
 func (textureControl *TextureControl) GetTexture(name string) *uint32 {
-	return textureControl.TexMap[name]
+	if tx, ok := textureControl.TexMap[name]; ok {
+		return tx
+	} else {
+		panic("couldn't find texture: " + name)
+	}
 }
 
 func (textureControl *TextureControl) NewTexture(path string, name string, filter string) error {
