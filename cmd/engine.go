@@ -127,6 +127,13 @@ func NewEngineConfig(
 }
 
 func (engine *Engine) Initialize() {
+	// Initialize UI trees
+	engine.UIControl.InitializeTrees()
+
+	// Reactivate current scene to include UI children
+	engine.SceneControl.GetCurrentScene().Activate()
+
+	// Prerender all children
 	engine.SceneControl.PreRenderChildren()
 }
 

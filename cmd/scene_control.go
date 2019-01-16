@@ -83,6 +83,8 @@ func (sc *SceneControl) NewScene(id string) *Scene {
 		s.InstanceText(sc.engine.FPSBox)
 	}
 
+	sc.engine.UIControl.SceneSetup(s)
+
 	return s
 }
 

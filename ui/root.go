@@ -2,7 +2,6 @@ package ui
 
 import (
 	"rapidengine/child"
-	"rapidengine/geometry"
 	"rapidengine/input"
 )
 
@@ -13,17 +12,38 @@ type RootElement struct {
 	Elements []Element
 
 	// Position
-	transform geometry.Transform
+	Transform UITransform
 }
 
 func NewRootElement(width, height float32) RootElement {
 	return RootElement{
-		transform: geometry.NewTransform(0, 0, 0, width, height, 0),
+		Transform: UITransform{
+			SX: width,
+			SY: width,
+		},
 	}
 }
 
 func (re *RootElement) Update(inputs *input.Input) {
+	for _, e := range re.Elements {
+		e.Update(inputs)
+	}
+}
 
+// GetElements returns all the elements in the tree
+func (re *RootElement) GetElements() []Element {
+	elements := []Element{}
+
+	for _, e := range re.Elements {
+		elements = append(elements, e.GetElements()...)
+		elements = append(elements, e)
+	}
+
+	return elements
+}
+
+func (re *RootElement) InstanceElement(element Element) {
+	re.Elements = append(re.Elements, element)
 }
 
 func (re *RootElement) GetChildren() []child.Child {
@@ -34,12 +54,8 @@ func (re *RootElement) GetChildren() []child.Child {
 	return children
 }
 
-func (re *RootElement) GetElements() []Element {
-	return re.Elements
-}
-
-func (re *RootElement) GetTransform() *geometry.Transform {
-	return &re.transform
+func (re *RootElement) GetTransform() *UITransform {
+	return &re.Transform
 }
 
 func (re *RootElement) GetTextBoxes() []*TextBox {

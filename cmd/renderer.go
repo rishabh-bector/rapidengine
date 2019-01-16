@@ -369,6 +369,14 @@ func (renderer *Renderer) DisablePolygonLines() {
 	gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
 }
 
+func (renderer *Renderer) EnableCursor() {
+	renderer.Window.SetInputMode(glfw.CursorMode, glfw.CursorNormal)
+}
+
+func (renderer *Renderer) DisableCursor() {
+	renderer.Window.SetInputMode(glfw.CursorMode, glfw.CursorDisabled)
+}
+
 // SetRenderDistance sets the render distance
 func (renderer *Renderer) SetRenderDistance(distance float32) {
 	renderer.RenderDistance = distance

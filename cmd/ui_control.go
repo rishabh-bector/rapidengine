@@ -1,13 +1,31 @@
 package cmd
 
 import (
+	"rapidengine/child"
 	"rapidengine/geometry"
 	"rapidengine/input"
 	"rapidengine/ui"
 )
 
+//  --------------------------------------------------
+//  UIControl manages the user interface system within
+//  RapidEngine. The system is set up as a tree (one per scene):
+//
+//  - Each scene has an associated RootElement
+//
+//  - The RootElement has any number of child elements,
+//    and those child elements can also have children
+//
+//  - To initialize, all the elements in each RootElement
+//    are instanced into their respective scenes, and all
+//    children of each element are prerendered.
+//
+//	- If the UI tree changes, such as if a new element is instanced,
+//    that element is initialized and inserted into the tree.
+//  --------------------------------------------------
+
 type UIControl struct {
-	RootElement ui.Element
+	roots map[*Scene]*ui.RootElement
 
 	engine *Engine
 }
@@ -18,30 +36,56 @@ func NewUIControl() UIControl {
 
 func (uiControl *UIControl) Initialize(engine *Engine) {
 	uiControl.engine = engine
-	uiControl.RootElement = uiControl.NewRootElement(float32(engine.Config.ScreenWidth), float32(engine.Config.ScreenHeight))
+	uiControl.roots = make(map[*Scene]*ui.RootElement)
 }
 
 func (uiControl *UIControl) Update(inputs *input.Input) {
-	uiControl.RootElement.Update(inputs)
+	if currentRoot, ok := uiControl.roots[uiControl.engine.SceneControl.GetCurrentScene()]; ok {
+		currentRoot.Update(inputs)
+	} else {
+		panic("UIControl: Could not determine root element")
+	}
 }
 
 func (uiControl *UIControl) InstanceElement(e ui.Element, scene *Scene) {
-	for _, c := range e.GetChildren() {
-		c.PreRender(uiControl.engine.Renderer.MainCamera)
+	if root, ok := uiControl.roots[scene]; ok {
+		root.InstanceElement(e)
+		e.GetTransform().Parent = root
 	}
+}
 
-	scene.InstanceUIElement(e)
+// InitializeTrees traverses all UI trees and prerenders all children,
+// instances each element into it's scene, and instances each textbox
+// into it's scene.
+func (uiControl *UIControl) InitializeTrees() {
+	for scene, root := range uiControl.roots {
+		for _, element := range root.GetElements() {
+			for _, c := range element.GetChildren() {
+				c.PreRender(uiControl.engine.Renderer.MainCamera)
+			}
 
-	for _, t := range e.GetTextBoxes() {
-		if t != nil {
-			scene.InstanceText(t)
+			scene.InstanceUIElement(element)
+
+			for _, t := range element.GetTextBoxes() {
+				if t != nil {
+					scene.InstanceText(t)
+				}
+			}
 		}
 	}
 }
 
-//func (uiControl *UIControl) AlignCenter(e ui.Element) {
-//	e.SetPosition(float32(uiControl.engine.Config.ScreenWidth/2)-e.GetTransform().SX/2, e.GetTransform().Y)
-//}
+func (uiControl *UIControl) SetupChild(loc *child.Child2D) {
+	loc.AttachMaterial(uiControl.engine.Renderer.DefaultMaterial1)
+	loc.AttachMesh(geometry.NewRectangle())
+}
+
+func (uiControl *UIControl) SceneSetup(scene *Scene) {
+	uiControl.roots[scene] = uiControl.NewRootElement(
+		float32(uiControl.engine.Config.ScreenWidth),
+		float32(uiControl.engine.Config.ScreenHeight),
+	)
+}
 
 //  --------------------------------------------------
 //  Element Constructors
@@ -56,8 +100,7 @@ func (uiControl *UIControl) NewUIButton(x, y, width, height float32) *ui.Button 
 	button := ui.NewUIButton(x, y, width, height)
 
 	button.ButtonChild = uiControl.engine.ChildControl.NewChild2D()
-	button.ButtonChild.AttachMaterial(uiControl.engine.Renderer.DefaultMaterial2)
-	button.ButtonChild.AttachMesh(geometry.NewRectangle())
+	uiControl.SetupChild(button.ButtonChild)
 
 	uiControl.engine.CollisionControl.CreateMouseCollision(button.ButtonChild)
 

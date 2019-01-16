@@ -2,7 +2,6 @@ package ui
 
 import (
 	"rapidengine/child"
-	"rapidengine/geometry"
 	"rapidengine/input"
 )
 
@@ -15,13 +14,10 @@ type Button struct {
 	TextBx        *TextBox
 
 	// Tree
-	Parent   Element
 	Elements []Element
 
 	// Position
-	transform geometry.Transform
-	AlignX    int
-	AlignY    int
+	Transform *UITransform
 }
 
 func NewUIButton(x, y, width, height float32) Button {
@@ -30,9 +26,14 @@ func NewUIButton(x, y, width, height float32) Button {
 		colliding:   make(map[int]bool),
 		TextBx:      nil,
 
-		transform: geometry.NewTransform(x, y, 0, width, height, 0),
-		AlignX:    -1,
-		AlignY:    -1,
+		Transform: &UITransform{
+			X:    x,
+			Y:    y,
+			PadX: x,
+			PadY: y,
+			SX:   width,
+			SY:   height,
+		},
 	}
 
 	return button
@@ -41,8 +42,8 @@ func NewUIButton(x, y, width, height float32) Button {
 func (button *Button) Initialize() {
 	button.ButtonChild.AttachCollider(
 		0, 0,
-		button.transform.SX,
-		button.transform.SY,
+		button.Transform.SX,
+		button.Transform.SY,
 	)
 	button.ButtonChild.SetMouseFunc(button.MouseFunc)
 	button.ButtonChild.Static = true
@@ -70,17 +71,19 @@ func (button *Button) Block() {
 //  --------------------------------------------------
 
 func (button *Button) Update(inputs *input.Input) {
-	button.ButtonChild.X = button.transform.X
-	button.ButtonChild.Y = button.transform.Y
+	// Align in parent
+	button.Transform.AlignToParent()
 
-	button.ButtonChild.ScaleX = button.transform.SX
-	button.ButtonChild.ScaleY = button.transform.SY
+	// Update child transform
+	button.Transform.UpdateChild(button.ButtonChild)
 
+	// Update textbox transform
 	if button.TextBx != nil {
 		button.TextBx.X = button.ButtonChild.X + button.GetTransform().SX/2
 		button.TextBx.Y = button.ButtonChild.Y + button.GetTransform().SY/2
 	}
 
+	// Collision logic
 	if button.colliding[0] {
 		if inputs.LeftMouseButton {
 			if !button.justClicked {
@@ -91,10 +94,31 @@ func (button *Button) Update(inputs *input.Input) {
 			button.justClicked = false
 		}
 	}
+
+	// Tree
+	for _, e := range button.Elements {
+		e.Update(inputs)
+	}
 }
 
-func (button *Button) GetTransform() *geometry.Transform {
-	return &button.transform
+func (button *Button) InstanceElement(e Element) {
+	button.Elements = append(button.Elements, e)
+	e.GetTransform().Parent = button
+}
+
+func (button *Button) GetElements() []Element {
+	elements := []Element{}
+
+	for _, e := range button.Elements {
+		elements = append(elements, e)
+		elements = append(elements, e.GetElements()...)
+	}
+
+	return elements
+}
+
+func (button *Button) GetTransform() *UITransform {
+	return button.Transform
 }
 
 func (button *Button) GetChildren() []child.Child {
@@ -103,8 +127,4 @@ func (button *Button) GetChildren() []child.Child {
 
 func (button *Button) GetTextBoxes() []*TextBox {
 	return []*TextBox{button.TextBx}
-}
-
-func (button *Button) GetElements() []Element {
-	return button.Elements
 }
