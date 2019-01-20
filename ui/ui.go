@@ -17,7 +17,7 @@ type Element interface {
 
 	// Components
 	GetTransform() *UITransform
-	GetTextBoxes() []*TextBox
+	GetTextBox() *TextBox
 }
 
 type UITransform struct {

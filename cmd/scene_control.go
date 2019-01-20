@@ -94,6 +94,9 @@ func (s *Scene) InstanceChild(c child.Child) {
 
 func (s *Scene) InstanceUIElement(e ui.Element) {
 	s.uiElements = append(s.uiElements, e)
+	if tb := e.GetTextBox(); tb != nil {
+		s.InstanceText(tb)
+	}
 }
 
 func (s *Scene) InstanceText(t *ui.TextBox) {

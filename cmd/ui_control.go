@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"rapidengine/child"
 	"rapidengine/geometry"
 	"rapidengine/input"
+	"rapidengine/material"
 	"rapidengine/ui"
 )
 
@@ -27,6 +27,8 @@ import (
 type UIControl struct {
 	roots map[*Scene]*ui.RootElement
 
+	roundedMat *material.BasicMaterial
+
 	engine *Engine
 }
 
@@ -37,6 +39,14 @@ func NewUIControl() UIControl {
 func (uiControl *UIControl) Initialize(engine *Engine) {
 	uiControl.engine = engine
 	uiControl.roots = make(map[*Scene]*ui.RootElement)
+
+	// Load default textures
+	uiControl.engine.TextureControl.NewTexture("../rapidengine/assets/ui/rounded_rect.png", "rounded_rect", "linear")
+
+	// Create default materials
+	uiControl.roundedMat = uiControl.engine.MaterialControl.NewBasicMaterial()
+	uiControl.roundedMat.DiffuseMap = uiControl.engine.TextureControl.GetTexture("rounded_rect")
+	uiControl.roundedMat.DiffuseLevel = 1
 }
 
 func (uiControl *UIControl) Update(inputs *input.Input) {
@@ -65,19 +75,8 @@ func (uiControl *UIControl) InitializeTrees() {
 			}
 
 			scene.InstanceUIElement(element)
-
-			for _, t := range element.GetTextBoxes() {
-				if t != nil {
-					scene.InstanceText(t)
-				}
-			}
 		}
 	}
-}
-
-func (uiControl *UIControl) SetupChild(loc *child.Child2D) {
-	loc.AttachMaterial(uiControl.engine.Renderer.DefaultMaterial1)
-	loc.AttachMesh(geometry.NewRectangle())
 }
 
 func (uiControl *UIControl) SceneSetup(scene *Scene) {
@@ -99,8 +98,12 @@ func (uiControl *UIControl) NewRootElement(width, height float32) *ui.RootElemen
 func (uiControl *UIControl) NewUIButton(x, y, width, height float32) *ui.Button {
 	button := ui.NewUIButton(x, y, width, height)
 
+	buttonMat := *uiControl.roundedMat
 	button.ButtonChild = uiControl.engine.ChildControl.NewChild2D()
-	uiControl.SetupChild(button.ButtonChild)
+	button.ButtonChild.AttachMaterial(&buttonMat)
+	button.ButtonChild.AttachMesh(geometry.NewRectangle())
+
+	button.TextBx = uiControl.engine.TextControl.NewTextBox("", "avenir", 100, 100, 1, [3]float32{255, 255, 255})
 
 	uiControl.engine.CollisionControl.CreateMouseCollision(button.ButtonChild)
 

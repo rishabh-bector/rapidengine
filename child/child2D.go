@@ -54,7 +54,7 @@ type Child2D struct {
 	ScaleY float32
 
 	Group          string
-	collider       physics.Collider
+	Collider       physics.Collider
 	mouseCollision func(bool)
 
 	config *configuration.EngineConfig
@@ -179,11 +179,11 @@ func (child2D *Child2D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
 }
 
 func (child2D *Child2D) CheckCollision(other Child) int {
-	return child2D.collider.CheckCollision(child2D.X, child2D.Y, child2D.VX, child2D.VY, other.GetX(), other.GetY(), other.GetCollider())
+	return child2D.Collider.CheckCollision(child2D.X, child2D.Y, child2D.VX, child2D.VY, other.GetX(), other.GetY(), other.GetCollider())
 }
 
 func (child2D *Child2D) CheckCollisionRaw(otherX, otherY float32, otherCollider *physics.Collider) int {
-	return child2D.collider.CheckCollision(child2D.X, child2D.Y, child2D.VX, child2D.VY, otherX, otherY, otherCollider)
+	return child2D.Collider.CheckCollision(child2D.X, child2D.Y, child2D.VX, child2D.VY, otherX, otherY, otherCollider)
 }
 
 //  --------------------------------------------------
@@ -202,7 +202,7 @@ func (child2D *Child2D) AttachTextureCoords(coords []float32) {
 }
 
 func (child2D *Child2D) AttachCollider(x, y, w, h float32) {
-	child2D.collider = physics.NewCollider(x, y, w, h)
+	child2D.Collider = physics.NewCollider(x, y, w, h)
 }
 
 func (child2D *Child2D) AttachVertexArray(vao *geometry.VertexArray, numVertices int32) {
@@ -279,7 +279,7 @@ func (child2D *Child2D) GetNumVertices() int32 {
 }
 
 func (child2D *Child2D) GetCollider() *physics.Collider {
-	return &child2D.collider
+	return &child2D.Collider
 }
 
 func (child2D *Child2D) GetX() float32 {

@@ -6,6 +6,7 @@ package v41
 
 import (
 	"fmt"
+
 	"github.com/4ydx/gltext"
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
@@ -295,11 +296,13 @@ func (t *Text) Draw() {
 		return
 	}
 	gl.Enable(gl.BLEND)
+	gl.Disable(gl.DEPTH_TEST)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	gl.BindVertexArray(t.vao)
 	gl.DrawElements(gl.TRIANGLES, drawCount, gl.UNSIGNED_INT, nil)
 	gl.BindVertexArray(0)
 	gl.Disable(gl.BLEND)
+	gl.Enable(gl.DEPTH_TEST)
 }
 
 func (t *Text) BeginFadeOut() {

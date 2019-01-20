@@ -111,6 +111,7 @@ func (renderer *Renderer) renderFrame() {
 	renderer.camX, renderer.camY, renderer.camZ = renderer.MainCamera.GetPosition()
 
 	// Post processing update
+	renderer.engine.TextControl.Update()
 	renderer.engine.PostControl.Update()
 
 	// Update window buffers

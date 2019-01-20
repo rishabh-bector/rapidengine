@@ -58,6 +58,6 @@ func (re *RootElement) GetTransform() *UITransform {
 	return &re.Transform
 }
 
-func (re *RootElement) GetTextBoxes() []*TextBox {
-	return []*TextBox{}
+func (re *RootElement) GetTextBox() *TextBox {
+	return nil
 }

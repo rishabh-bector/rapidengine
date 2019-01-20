@@ -66,10 +66,6 @@ func (m *Menu) GetChildren() []child.Child {
 	return children
 }
 
-func (m *Menu) GetTextBoxes() []*TextBox {
-	tbs := []*TextBox{}
-	for _, e := range m.elements {
-		tbs = append(tbs, e.GetTextBoxes()...)
-	}
-	return tbs
+func (m *Menu) GetTextBox() *TextBox {
+	return nil
 }

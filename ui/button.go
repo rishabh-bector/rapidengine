@@ -11,7 +11,9 @@ type Button struct {
 	clickCallback func()
 	justClicked   bool
 	colliding     map[int]bool
-	TextBx        *TextBox
+
+	TextBx  *TextBox
+	TextPad float32
 
 	// Tree
 	Elements []Element
@@ -55,7 +57,6 @@ func (button *Button) SetClickCallback(f func()) {
 
 func (button *Button) AttachText(tb *TextBox) {
 	button.TextBx = tb
-	button.Initialize()
 }
 
 func (button *Button) MouseFunc(c bool) {
@@ -78,9 +79,11 @@ func (button *Button) Update(inputs *input.Input) {
 	button.Transform.UpdateChild(button.ButtonChild)
 
 	// Update textbox transform
-	if button.TextBx != nil {
-		button.TextBx.X = button.ButtonChild.X + button.GetTransform().SX/2
-		button.TextBx.Y = button.ButtonChild.Y + button.GetTransform().SY/2
+	button.TextBx.X = button.ButtonChild.X + button.GetTransform().SX/2
+	button.TextBx.Y = button.ButtonChild.Y + button.GetTransform().SY/2
+	if button.TextBx.Text != "" {
+		//button.Transform.SX = float32(button.TextBx.GetLength())*20 + button.TextPad
+		//button.ButtonChild.Collider.Width = button.Transform.SX
 	}
 
 	// Collision logic
@@ -108,12 +111,10 @@ func (button *Button) InstanceElement(e Element) {
 
 func (button *Button) GetElements() []Element {
 	elements := []Element{}
-
 	for _, e := range button.Elements {
 		elements = append(elements, e)
 		elements = append(elements, e.GetElements()...)
 	}
-
 	return elements
 }
 
@@ -125,6 +126,6 @@ func (button *Button) GetChildren() []child.Child {
 	return []child.Child{button.ButtonChild}
 }
 
-func (button *Button) GetTextBoxes() []*TextBox {
-	return []*TextBox{button.TextBx}
+func (button *Button) GetTextBox() *TextBox {
+	return button.TextBx
 }
