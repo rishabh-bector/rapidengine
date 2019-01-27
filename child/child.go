@@ -19,6 +19,8 @@ type Child interface {
 
 	BindChild()
 
+	GetDimensions() int
+
 	RenderCopy(ChildCopy, camera.Camera)
 	CheckCopyingEnabled() bool
 

@@ -216,11 +216,11 @@ func (child2D *Child2D) AttachMesh(p geometry.Mesh) {
 	child2D.AttachVertexArray(p.GetVAO(), p.GetNumVertices())
 
 	if p.GetNormals() != nil {
-		child2D.vertexArray.AddVertexAttribute(*p.GetNormals(), 2, 3)
+		child2D.vertexArray.AddVertexAttribute(p.GetNormals(), 2, 3)
 	}
 
 	if p.GetTexCoords() != nil {
-		child2D.AttachTextureCoords(*p.GetTexCoords())
+		child2D.AttachTextureCoords(p.GetTexCoords())
 	}
 }
 
@@ -292,6 +292,10 @@ func (child2D *Child2D) GetY() float32 {
 
 func (child2D *Child2D) GetSpecificRenderDistance() float32 {
 	return child2D.specificRenderDistance
+}
+
+func (child2D *Child2D) GetDimensions() int {
+	return 2
 }
 
 //  --------------------------------------------------

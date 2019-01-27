@@ -166,8 +166,8 @@ func LoadObj(path string, scale float32) Mesh {
 	return Mesh{
 		id:          path,
 		vao:         NewVertexArray(verticesArray, indicesArray),
-		normals:     &normalsArray,
-		texCoords:   &texturesArray,
+		normals:     normalsArray,
+		texCoords:   texturesArray,
 		numVertices: int32(len(indicesArray)),
 	}
 }

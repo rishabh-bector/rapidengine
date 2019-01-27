@@ -154,6 +154,11 @@ func (renderer *Renderer) RenderChildren() {
 
 // RenderChild renders a single child to the screen
 func (renderer *Renderer) RenderChild(c child.Child) {
+	/*if c.GetDimensions() == 3 {
+		renderer.render3DChild(c)
+		return
+	}*/
+
 	renderer.BindChild(c)
 
 	c.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.TotalFrameTime)
@@ -165,6 +170,10 @@ func (renderer *Renderer) RenderChild(c child.Child) {
 	}
 
 	gl.BindVertexArray(0)
+}
+
+func (renderer *Renderer) render3DChild(c child.Child) {
+
 }
 
 func (renderer *Renderer) drawChild(c child.Child) {

@@ -16,7 +16,8 @@ type Child3D struct {
 
 	numVertices int32
 
-	mesh geometry.Mesh
+	mesh  geometry.Mesh
+	model geometry.Model
 
 	Material material.Material
 
@@ -184,11 +185,17 @@ func (child3D *Child3D) AttachMaterial(m material.Material) {
 	child3D.Material = m
 }
 
+// Single mesh
 func (child3D *Child3D) AttachMesh(p geometry.Mesh) {
 	child3D.mesh = p
 	child3D.numVertices = p.GetNumVertices()
-	child3D.mesh.GetVAO().AddVertexAttribute(*p.GetNormals(), 2, 3)
-	child3D.AttachTextureCoords(*p.GetTexCoords())
+	child3D.mesh.GetVAO().AddVertexAttribute(p.GetNormals(), 2, 3)
+	child3D.AttachTextureCoords(p.GetTexCoords())
+}
+
+// Full model
+func (child3D *Child3D) AttachModel(m geometry.Model) {
+	child3D.model = m
 }
 
 func (child3D *Child3D) ComputeMeshTangents() {
@@ -233,6 +240,10 @@ func (child3D *Child3D) GetNumVertices() int32 {
 
 func (child3D *Child3D) GetCollider() *physics.Collider {
 	return nil
+}
+
+func (child3D *Child3D) GetDimensions() int {
+	return 3
 }
 
 //  --------------------------------------------------
