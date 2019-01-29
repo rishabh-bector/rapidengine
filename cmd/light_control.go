@@ -3,6 +3,8 @@ package cmd
 import (
 	"rapidengine/lighting"
 	"rapidengine/material"
+
+	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
 type LightControl struct {
@@ -41,6 +43,7 @@ func (lightControl *LightControl) Update(cx, cy, cz float32) {
 			for ind, light := range lightControl.pointLightMap {
 				light.UpdateShader(cx, cy, cz, ind, shader)
 			}
+			gl.Uniform1i(gl.GetUniformLocation(shader.GetID(), gl.Str("numPointLights\x00")), int32(len(lightControl.pointLightMap)))
 		}
 	}
 }

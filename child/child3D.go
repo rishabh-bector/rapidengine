@@ -16,8 +16,7 @@ type Child3D struct {
 
 	numVertices int32
 
-	mesh  geometry.Mesh
-	model geometry.Model
+	Model geometry.Model
 
 	Material material.Material
 
@@ -76,40 +75,7 @@ func NewChild3D(config *configuration.EngineConfig) *Child3D {
 }
 
 func (child3D *Child3D) PreRender(mainCamera camera.Camera) {
-	child3D.BindChild()
 
-	gl.UniformMatrix4fv(
-		child3D.Material.GetShader().GetUniform("modelMtx"),
-		1, false, &child3D.modelMatrix[0],
-	)
-
-	gl.UniformMatrix4fv(
-		child3D.Material.GetShader().GetUniform("viewMtx"),
-		1, false, mainCamera.GetFirstViewIndex(),
-	)
-
-	gl.UniformMatrix4fv(
-		child3D.Material.GetShader().GetUniform("projectionMtx"),
-		1, false, &child3D.projectionMatrix[0],
-	)
-
-	/*
-		if child3D.copyingEnabled {
-			vData := []float32{}
-			for _, c := range child3D.GetCopies() {
-				vData = append(vData, c.X, c.Y, c.Z)
-			}
-			child3D.vertexArray.AddVertexAttribute(vData, 3, 3)
-			gl.VertexAttribDivisor(3, 1)
-		}
-		gl.BindAttribLocation(child3D.shaderProgram, 3, gl.Str("copyPosition\x00"))*/
-
-	gl.BindVertexArray(0)
-}
-
-func (child3D *Child3D) BindChild() {
-	gl.BindVertexArray(child3D.mesh.GetVAO().GetID())
-	child3D.Material.GetShader().Bind()
 }
 
 func (child3D *Child3D) Update(mainCamera camera.Camera, delta float64, totalTime float64) {
@@ -130,17 +96,7 @@ func (child3D *Child3D) Render(mainCamera camera.Camera, totalTime float64) {
 	child3D.modelMatrix = child3D.modelMatrix.Mul4(mgl32.HomogRotate3DY(child3D.RY))
 	child3D.modelMatrix = child3D.modelMatrix.Mul4(mgl32.HomogRotate3DZ(child3D.RZ))
 
-	gl.UniformMatrix4fv(
-		child3D.Material.GetShader().GetUniform("viewMtx"),
-		1, false, mainCamera.GetFirstViewIndex(),
-	)
-
-	gl.UniformMatrix4fv(
-		child3D.Material.GetShader().GetUniform("modelMtx"),
-		1, false, &child3D.modelMatrix[0],
-	)
-
-	child3D.Material.Render(0, 1, totalTime)
+	child3D.Model.Render(mainCamera.GetFirstViewIndex(), &child3D.modelMatrix[0], &child3D.projectionMatrix[0])
 }
 
 func (child3D *Child3D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
@@ -165,14 +121,8 @@ func (child3D *Child3D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
 	config.Material.Render(0, 1, 0)
 }
 
-func (child3D *Child3D) AttachTextureCoords(coords []float32) {
-	if child3D.mesh.GetVAO() == nil {
-		panic("Cannot attach texture without VertexArray")
-	}
+func (child3D *Child3D) BindChild() {
 
-	child3D.BindChild()
-	child3D.mesh.GetVAO().AddVertexAttribute(coords, 1, 3)
-	gl.BindVertexArray(0)
 }
 
 func (child3D *Child3D) SetPosition(x, y, z float32) {
@@ -185,22 +135,11 @@ func (child3D *Child3D) AttachMaterial(m material.Material) {
 	child3D.Material = m
 }
 
-// Single mesh
-func (child3D *Child3D) AttachMesh(p geometry.Mesh) {
-	child3D.mesh = p
-	child3D.numVertices = p.GetNumVertices()
-	child3D.mesh.GetVAO().AddVertexAttribute(p.GetNormals(), 2, 3)
-	child3D.AttachTextureCoords(p.GetTexCoords())
-}
-
-// Full model
 func (child3D *Child3D) AttachModel(m geometry.Model) {
-	child3D.model = m
+	child3D.Model = m
 }
 
-func (child3D *Child3D) ComputeMeshTangents() {
-	child3D.mesh.ComputeTangents()
-}
+func (child3D *Child3D) AttachMesh(m geometry.Mesh) {}
 
 func (child3D *Child3D) Activate() {
 	child3D.active = true
@@ -228,10 +167,6 @@ func (child3D *Child3D) GetZ() float32 {
 
 func (child3D *Child3D) GetShaderProgram() *material.ShaderProgram {
 	return child3D.Material.GetShader()
-}
-
-func (child3D *Child3D) GetVertexArray() *geometry.VertexArray {
-	return child3D.mesh.GetVAO()
 }
 
 func (child3D *Child3D) GetNumVertices() int32 {

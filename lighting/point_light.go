@@ -1,6 +1,7 @@
 package lighting
 
 import (
+	"fmt"
 	"rapidengine/material"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
@@ -15,11 +16,11 @@ type PointLight struct {
 	linear    float32
 	quadratic float32
 
-	position []float32
+	Position []float32
 }
 
-func NewPointLight(a, d, s []float32, c, l, q float32) PointLight {
-	return PointLight{
+func NewPointLight(a, d, s []float32, c, l, q float32) *PointLight {
+	return &PointLight{
 		ambient:  a,
 		diffuse:  d,
 		specular: s,
@@ -37,38 +38,38 @@ func (light *PointLight) UpdateShader(cx, cy, cz float32, ind int, shader *mater
 	shader.Bind()
 
 	gl.Uniform3fv(
-		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+string(ind)+"].ambient"+"\x00")),
+		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+fmt.Sprint(ind)+"].ambient"+"\x00")),
 		1, &light.ambient[0],
 	)
 
 	gl.Uniform3fv(
-		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+string(ind)+"].diffuse"+"\x00")),
+		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+fmt.Sprint(ind)+"].diffuse"+"\x00")),
 		1, &light.diffuse[0],
 	)
 
 	gl.Uniform3fv(
-		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+string(ind)+"].specular"+"\x00")),
+		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+fmt.Sprint(ind)+"].specular"+"\x00")),
 		1, &light.specular[0],
 	)
 
 	gl.Uniform1f(
-		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+string(ind)+"].constant"+"\x00")),
+		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+fmt.Sprint(ind)+"].constant"+"\x00")),
 		light.constant,
 	)
 
 	gl.Uniform1f(
-		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+string(ind)+"].linear"+"\x00")),
+		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+fmt.Sprint(ind)+"].linear"+"\x00")),
 		light.linear,
 	)
 
 	gl.Uniform1f(
-		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+string(ind)+"].quadratic"+"\x00")),
+		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+fmt.Sprint(ind)+"].quadratic"+"\x00")),
 		light.quadratic,
 	)
 
 	gl.Uniform3fv(
-		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+string(ind)+"].position"+"\x00")),
-		1, &light.position[0],
+		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+fmt.Sprint(ind)+"].position"+"\x00")),
+		1, &light.Position[0],
 	)
 
 	gl.Uniform3fv(
@@ -78,7 +79,7 @@ func (light *PointLight) UpdateShader(cx, cy, cz float32, ind int, shader *mater
 }
 
 func (light *PointLight) SetPosition(pos []float32) {
-	light.position = pos
+	light.Position = pos
 }
 
 func (light *PointLight) SetLevels(linear, quad float32) {

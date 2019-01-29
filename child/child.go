@@ -2,7 +2,7 @@ package child
 
 import "rapidengine/camera"
 import "rapidengine/material"
-import "rapidengine/geometry"
+
 import "rapidengine/physics"
 
 type ChildCopy struct {
@@ -29,7 +29,6 @@ type Child interface {
 	GetNumInstances() int
 
 	GetShaderProgram() *material.ShaderProgram
-	GetVertexArray() *geometry.VertexArray
 	GetNumVertices() int32
 
 	GetCollider() *physics.Collider

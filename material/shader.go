@@ -179,9 +179,11 @@ var StandardProgram = ShaderProgram{
 		"projectionMtx": 0,
 
 		// Standard Material
-		"diffuseMap":   0,
-		"normalMap":    0,
-		"heightMap":    0,
+		"diffuseMap":  0,
+		"normalMap":   0,
+		"heightMap":   0,
+		"specularMap": 0,
+
 		"hue":          0,
 		"diffuseLevel": 0,
 		"displacement": 0,
@@ -201,6 +203,7 @@ var StandardProgram = ShaderProgram{
 		"viewPos": 0,
 
 		"numPointLights": 0,
+		"pointLights":    0,
 	},
 	attributeLocations: map[string]uint32{
 		"position":   0,

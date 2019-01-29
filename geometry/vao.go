@@ -78,3 +78,7 @@ func UnbindBuffers() {
 func (vertexArray *VertexArray) GetID() uint32 {
 	return vertexArray.id
 }
+
+func (vertexArray *VertexArray) GetIndices() []uint32 {
+	return vertexArray.indices
+}

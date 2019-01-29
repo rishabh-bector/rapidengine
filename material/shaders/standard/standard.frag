@@ -31,7 +31,8 @@ in vec3 RefractedVector;
 // Standard Material
 uniform sampler2D diffuseMap;
 uniform sampler2D normalMap;
-uniform sampler2D heightMap;
+uniform sampler2D specularMap;
+
 uniform vec4 hue;
 uniform float diffuseLevel;
 uniform float reflectivity;
@@ -48,8 +49,10 @@ uniform DirLight dirLight;
 uniform int numPointLights;
 uniform PointLight pointLights[MAX_LIGHTS];
 
-vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
-vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
+uniform vec3 plAmbient[MAX_LIGHTS];
+
+vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec4 inColor);
+vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec4 inColor);
 vec4 calculateDiffuseColor();
 
 vec3 calculateReflection() {
@@ -61,25 +64,30 @@ vec3 calculateRefraction() {
 }
 
 void main() {    
-    vec3 norm = texture(normalMap, TexCoords.xy).rgb;
+    //vec3 norm = texture(normalMap, TexCoords.xy).rgb;
     //norm = normalize(norm * 2.0 - 1.0);
-    norm = normalize(TBN * norm);
-    //vec3 norm = normalize(Normal);
+    //vec3 norm = normalize(TBN * norm);
+    vec3 norm = normalize(Normal);
 
     vec3 viewDir = normalize(viewPos - FragPos);
 
+    vec4 color = calculateDiffuseColor();
+    if(color.a < 0.6) {
+        discard;
+    }
+
     // Directional lighting
-    vec3 result = CalcDirLight(dirLight, norm, viewDir);
+    vec3 result = CalcDirLight(dirLight, norm, viewDir, color);
 
     // Point lighting
     for(int i = 0; i < numPointLights; i++) {
-        //result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);    
+        result += CalcPointLight(pointLights[i], norm, FragPos, viewDir, color);    
     }
     
     FragColor = vec4(mix(result, mix(calculateReflection(), calculateRefraction(), refractLevel), reflectivity), 1.0);
 }
 
-vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
+vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec4 inColor) {
     vec3 lightDir = normalize(-light.direction);
 
     // diffuse shading
@@ -89,8 +97,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 0);
 
-    // combine results
-    vec3 color = calculateDiffuseColor().xyz;
+    vec3 color = inColor.xyz;
     
     vec3 ambient = light.ambient * color;
     vec3 diffuse = light.diffuse * diff * color;
@@ -99,7 +106,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
     return ambient + diffuse + specular;
 }
 
-vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
+vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec4 inColor) {
     vec3 lightDir = normalize(light.position - fragPos);
 
     // diffuse shading
@@ -107,22 +114,22 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
 
     // specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 0.5);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
 
     // attenuation
-    float distance = length(light.position - fragPos);
+    float d = length(light.position - fragPos);
 
-    if(distance > 1.05) {
+    if(d > 1.05) {
         //return vec3(0, 0, 0);
     }
 
-    float attenuation = 1.0 / ((light.constant) + (light.linear * distance) + (light.quadratic * (distance * distance))); 
+    float attenuation = 1.0 / ((light.constant) + (light.linear * d) + (light.quadratic * (d * d))); 
 
-    vec3 color = calculateDiffuseColor().xyz;
+    vec3 color = inColor.xyz;
 
     vec3 ambient = light.ambient * color;
     vec3 diffuse = light.diffuse * diff * color;
-    vec3 specular = light.specular * spec * color;
+    vec3 specular = light.specular * spec * color * texture(specularMap, TexCoords.xy).x;
     
     ambient *= attenuation;
     diffuse *= attenuation;
@@ -132,5 +139,5 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
 }
 
 vec4 calculateDiffuseColor() {
-    return mix(hue, texture(diffuseMap, TexCoords.xy), diffuseLevel);
+    return mix(hue / 255.0, texture(diffuseMap, TexCoords.xy), diffuseLevel);
 }

@@ -16,59 +16,73 @@ import (
 type Mesh struct {
 
 	// Mesh type
-	id string
+	ID string
 
 	// VAO containing vertices & indices
-	vao *VertexArray
+	VAO *VertexArray
 
 	// Texture coordinates
-	texCoords []float32
+	TexCoords        []float32
+	TexCoordsEnabled bool
 
 	// Face normals
-	normals []float32
+	Normals        []float32
+	NormalsEnabled bool
 
 	// Number of vertices
-	numVertices int32
+	NumVertices int32
 
 	// Normal Mapping
-	tangents   []float32
-	bitangents []float32
+	Tangents        []float32
+	TangentsEnabled bool
+
+	Bitangents        []float32
+	BitangentsEnabled bool
 
 	// Material
-	Material material.Material
+	ModelMaterial int
 }
 
-func (p *Mesh) Render(viewMtx *float32, modelMtx *float32) {
+func (p *Mesh) Render(mat material.Material, viewMtx *float32, modelMtx *float32, projMtx *float32) {
+	gl.BindVertexArray(p.VAO.id)
+	mat.GetShader().Bind()
+
+	gl.EnableVertexAttribArray(0)
+
+	if p.TexCoordsEnabled {
+		gl.EnableVertexAttribArray(1)
+	}
+
+	if p.NormalsEnabled {
+		gl.EnableVertexAttribArray(2)
+	}
+
+	if p.TangentsEnabled {
+		gl.EnableVertexAttribArray(3)
+	}
+
+	if p.BitangentsEnabled {
+		gl.EnableVertexAttribArray(4)
+	}
+
 	gl.UniformMatrix4fv(
-		p.Material.GetShader().GetUniform("viewMtx"),
+		mat.GetShader().GetUniform("viewMtx"),
 		1, false, viewMtx,
 	)
 
 	gl.UniformMatrix4fv(
-		p.Material.GetShader().GetUniform("modelMtx"),
+		mat.GetShader().GetUniform("modelMtx"),
 		1, false, modelMtx,
 	)
 
-}
+	gl.UniformMatrix4fv(
+		mat.GetShader().GetUniform("projectionMtx"),
+		1, false, projMtx,
+	)
 
-func (p *Mesh) GetID() string {
-	return p.id
-}
+	mat.Render(0, 1, 0)
 
-func (p *Mesh) GetVAO() *VertexArray {
-	return p.vao
-}
-
-func (p *Mesh) GetNumVertices() int32 {
-	return p.numVertices
-}
-
-func (p *Mesh) GetTexCoords() []float32 {
-	return p.texCoords
-}
-
-func (p *Mesh) GetNormals() []float32 {
-	return p.normals
+	gl.DrawElements(gl.TRIANGLES, p.NumVertices, gl.UNSIGNED_INT, gl.PtrOffset(0))
 }
 
 // NormalizeSizes takes in a size in pixels and normalizes to [0, 1]
@@ -94,43 +108,43 @@ func GetMeshCoords(id string) []float32 {
 	return RectTextures
 }
 
-// ComputeTangents calculates the tangents and bitangents
+// ComputeTangents calculates the Tangents and Bitangents
 // of a mesh, based on vertices and UVs.
 func (m *Mesh) ComputeTangents() {
-	for i := 0; i < len(m.vao.vertices); i++ {
-		m.tangents = append(m.tangents, 0)
-		m.bitangents = append(m.bitangents, 0)
+	for i := 0; i < len(m.VAO.vertices); i++ {
+		m.Tangents = append(m.Tangents, 0)
+		m.Bitangents = append(m.Bitangents, 0)
 	}
 
-	for i := 0; i < int(len(m.vao.indices)); i += 3 {
+	for i := 0; i < int(len(m.VAO.indices)); i += 3 {
 		v0 := mgl32.Vec4{
-			m.vao.vertices[m.vao.indices[i]*3],
-			m.vao.vertices[m.vao.indices[i]*3+1],
-			m.vao.vertices[m.vao.indices[i]*3+2],
+			m.VAO.vertices[m.VAO.indices[i]*3],
+			m.VAO.vertices[m.VAO.indices[i]*3+1],
+			m.VAO.vertices[m.VAO.indices[i]*3+2],
 		}
 		v1 := mgl32.Vec4{
-			m.vao.vertices[m.vao.indices[i+1]*3],
-			m.vao.vertices[m.vao.indices[i+1]*3+1],
-			m.vao.vertices[m.vao.indices[i+1]*3+2],
+			m.VAO.vertices[m.VAO.indices[i+1]*3],
+			m.VAO.vertices[m.VAO.indices[i+1]*3+1],
+			m.VAO.vertices[m.VAO.indices[i+1]*3+2],
 		}
 		v2 := mgl32.Vec4{
-			m.vao.vertices[m.vao.indices[i+2]*3],
-			m.vao.vertices[m.vao.indices[i+2]*3+1],
-			m.vao.vertices[m.vao.indices[i+2]*3+2],
+			m.VAO.vertices[m.VAO.indices[i+2]*3],
+			m.VAO.vertices[m.VAO.indices[i+2]*3+1],
+			m.VAO.vertices[m.VAO.indices[i+2]*3+2],
 		}
 
-		texCoords := m.texCoords
+		texCoords := m.TexCoords
 		uv0 := mgl32.Vec2{
-			texCoords[m.vao.indices[i]*3],
-			texCoords[m.vao.indices[i]*3+1],
+			texCoords[m.VAO.indices[i]*3],
+			texCoords[m.VAO.indices[i]*3+1],
 		}
 		uv1 := mgl32.Vec2{
-			texCoords[m.vao.indices[i+1]*3],
-			texCoords[m.vao.indices[i+1]*3+1],
+			texCoords[m.VAO.indices[i+1]*3],
+			texCoords[m.VAO.indices[i+1]*3+1],
 		}
 		uv2 := mgl32.Vec2{
-			texCoords[m.vao.indices[i+2]*3],
-			texCoords[m.vao.indices[i+2]*3+1],
+			texCoords[m.VAO.indices[i+2]*3],
+			texCoords[m.VAO.indices[i+2]*3+1],
 		}
 
 		e1 := v1.Sub(v0)
@@ -144,32 +158,32 @@ func (m *Mesh) ComputeTangents() {
 		tangent := (e1.Mul(deltaUV2.Y()).Sub(e2.Mul(deltaUV1.Y()))).Mul(r)
 		bitangent := (e2.Mul(deltaUV1.X()).Sub(e1.Mul(deltaUV2.X()))).Mul(r)
 
-		m.tangents[m.vao.indices[i]*3] += tangent.X()
-		m.tangents[m.vao.indices[i]*3+1] += tangent.Y()
-		m.tangents[m.vao.indices[i]*3+2] += tangent.Z()
+		m.Tangents[m.VAO.indices[i]*3] += tangent.X()
+		m.Tangents[m.VAO.indices[i]*3+1] += tangent.Y()
+		m.Tangents[m.VAO.indices[i]*3+2] += tangent.Z()
 
-		m.tangents[m.vao.indices[i+1]*3] += tangent.X()
-		m.tangents[m.vao.indices[i+1]*3+1] += tangent.Y()
-		m.tangents[m.vao.indices[i+1]*3+2] += tangent.Z()
+		m.Tangents[m.VAO.indices[i+1]*3] += tangent.X()
+		m.Tangents[m.VAO.indices[i+1]*3+1] += tangent.Y()
+		m.Tangents[m.VAO.indices[i+1]*3+2] += tangent.Z()
 
-		m.tangents[m.vao.indices[i+2]*3] += tangent.X()
-		m.tangents[m.vao.indices[i+2]*3+1] += tangent.Y()
-		m.tangents[m.vao.indices[i+2]*3+2] += tangent.Z()
+		m.Tangents[m.VAO.indices[i+2]*3] += tangent.X()
+		m.Tangents[m.VAO.indices[i+2]*3+1] += tangent.Y()
+		m.Tangents[m.VAO.indices[i+2]*3+2] += tangent.Z()
 
-		m.bitangents[m.vao.indices[i]*3] += bitangent.X()
-		m.bitangents[m.vao.indices[i]*3+1] += bitangent.Y()
-		m.bitangents[m.vao.indices[i]*3+2] += bitangent.Z()
+		m.Bitangents[m.VAO.indices[i]*3] += bitangent.X()
+		m.Bitangents[m.VAO.indices[i]*3+1] += bitangent.Y()
+		m.Bitangents[m.VAO.indices[i]*3+2] += bitangent.Z()
 
-		m.bitangents[m.vao.indices[i+1]*3] += bitangent.X()
-		m.bitangents[m.vao.indices[i+1]*3+1] += bitangent.Y()
-		m.bitangents[m.vao.indices[i+1]*3+2] += bitangent.Z()
+		m.Bitangents[m.VAO.indices[i+1]*3] += bitangent.X()
+		m.Bitangents[m.VAO.indices[i+1]*3+1] += bitangent.Y()
+		m.Bitangents[m.VAO.indices[i+1]*3+2] += bitangent.Z()
 
-		m.bitangents[m.vao.indices[i+2]*3] += bitangent.X()
-		m.bitangents[m.vao.indices[i+2]*3+1] += bitangent.Y()
-		m.bitangents[m.vao.indices[i+2]*3+2] += bitangent.Z()
+		m.Bitangents[m.VAO.indices[i+2]*3] += bitangent.X()
+		m.Bitangents[m.VAO.indices[i+2]*3+1] += bitangent.Y()
+		m.Bitangents[m.VAO.indices[i+2]*3+2] += bitangent.Z()
 	}
 
-	m.GetVAO().AddVertexAttribute(m.tangents, 3, 3)
-	m.GetVAO().AddVertexAttribute(m.bitangents, 4, 3)
+	m.VAO.AddVertexAttribute(m.Tangents, 3, 3)
+	m.VAO.AddVertexAttribute(m.Bitangents, 4, 3)
 
 }
