@@ -4,7 +4,7 @@ import (
 	"rapidengine/geometry"
 	"rapidengine/material"
 
-	"github.com/krux02/assimp"
+	assimp "assimp-golang"
 )
 
 type GeometryControl struct {
