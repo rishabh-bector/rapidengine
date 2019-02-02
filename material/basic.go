@@ -50,7 +50,6 @@ func NewBasicMaterial(Shader *ShaderProgram) *BasicMaterial {
 
 func (bm *BasicMaterial) Render(delta float64, darkness float32, totalTime float64) {
 	bm.UpdateAnimation(delta)
-	bm.UpdateAttribArrays()
 
 	if bm.DiffuseMap != nil && state.BoundTexture0 != *bm.DiffuseMap {
 		gl.ActiveTexture(gl.TEXTURE0)
@@ -79,12 +78,6 @@ func (bm *BasicMaterial) Render(delta float64, darkness float32, totalTime float
 	gl.Uniform1f(bm.Shader.GetUniform("scatterLevel"), bm.ScatterLevel)
 
 	gl.Uniform1i(bm.Shader.GetUniform("flipped"), int32(bm.Flipped))
-}
-
-func (bm *BasicMaterial) UpdateAttribArrays() {
-	gl.EnableVertexAttribArray(0)
-	gl.EnableVertexAttribArray(1)
-	gl.EnableVertexAttribArray(2)
 }
 
 func (bm *BasicMaterial) GetShader() *ShaderProgram {

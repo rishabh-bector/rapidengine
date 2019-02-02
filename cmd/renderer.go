@@ -154,10 +154,10 @@ func (renderer *Renderer) RenderChildren() {
 
 // RenderChild renders a single child to the screen
 func (renderer *Renderer) RenderChild(c child.Child) {
-	/*if c.GetDimensions() == 3 {
+	if c.GetDimensions() == 3 {
 		renderer.render3DChild(c)
 		return
-	}*/
+	}
 
 	renderer.BindChild(c)
 
@@ -173,7 +173,8 @@ func (renderer *Renderer) RenderChild(c child.Child) {
 }
 
 func (renderer *Renderer) render3DChild(c child.Child) {
-
+	CheckError("e")
+	c.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.TotalFrameTime)
 }
 
 func (renderer *Renderer) drawChild(c child.Child) {

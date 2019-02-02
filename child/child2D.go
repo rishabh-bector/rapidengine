@@ -211,16 +211,16 @@ func (child2D *Child2D) AttachVertexArray(vao *geometry.VertexArray, numVertices
 }
 
 func (child2D *Child2D) AttachMesh(p geometry.Mesh) {
-	child2D.mesh = p.GetID()
+	child2D.mesh = p.ID
 
-	child2D.AttachVertexArray(p.GetVAO(), p.GetNumVertices())
+	child2D.AttachVertexArray(p.VAO, p.NumVertices)
 
-	if p.GetNormals() != nil {
-		child2D.vertexArray.AddVertexAttribute(p.GetNormals(), 2, 3)
+	if p.Normals != nil {
+		child2D.vertexArray.AddVertexAttribute(p.Normals, 2, 3)
 	}
 
-	if p.GetTexCoords() != nil {
-		child2D.AttachTextureCoords(p.GetTexCoords())
+	if p.TexCoords != nil {
+		child2D.AttachTextureCoords(p.TexCoords)
 	}
 }
 

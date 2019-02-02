@@ -15,29 +15,29 @@ func NewTriangle(points []float32) Mesh {
 		indices = append(indices, uint32(i))
 	}
 	t := Mesh{
-		id:          "triangle",
-		vao:         NewVertexArray(points, indices),
-		texCoords:   RectTextures,
-		normals:     RectNormals,
-		numVertices: int32(len(indices)),
+		ID:          "triangle",
+		VAO:         NewVertexArray(points, indices),
+		TexCoords:   RectTextures,
+		Normals:     RectNormals,
+		NumVertices: int32(len(indices)),
 	}
 	return t
 }
 
-// NewPolygon creates a mesh based on a radius and number of sides
-func NewPolygon(radius float32, numSides int, config *configuration.EngineConfig) Mesh {
-	vertices := make([]float32, (numSides+1)*3)
-	indices := make([]uint32, numSides*3)
+// NewPolygon creates a mesh based on a radius and number of sIDes
+func NewPolygon(radius float32, numSIDes int, config *configuration.EngineConfig) Mesh {
+	vertices := make([]float32, (numSIDes+1)*3)
+	indices := make([]uint32, numSIDes*3)
 
-	normals := make([]float32, (numSides+1)*3)
-	texCoords := make([]float32, (numSides+1)*3)
+	normals := make([]float32, (numSIDes+1)*3)
+	texCoords := make([]float32, (numSIDes+1)*3)
 
 	sw := float32(config.ScreenWidth)
 	sh := float32(config.ScreenHeight)
 
 	vertexPointer := 3
-	for i := 0; i < numSides; i++ {
-		circleVertex := float64((float32(i) / float32(numSides)) * (2 * math.Pi))
+	for i := 0; i < numSIDes; i++ {
+		circleVertex := float64((float32(i) / float32(numSIDes)) * (2 * math.Pi))
 		vertices[vertexPointer] = normalizeX(float32(math.Cos(circleVertex))*radius, sw)
 		vertices[vertexPointer+1] = normalizeY(float32(math.Sin(circleVertex))*radius, sh)
 		vertices[vertexPointer+2] = 0
@@ -54,7 +54,7 @@ func NewPolygon(radius float32, numSides int, config *configuration.EngineConfig
 	}
 
 	indexPointer := uint32(0)
-	for i := 0; i < numSides-1; i++ {
+	for i := 0; i < numSIDes-1; i++ {
 		indices[indexPointer] = 0
 		indices[indexPointer+1] = uint32(i + 1)
 		indices[indexPointer+2] = uint32(i + 2)
@@ -62,21 +62,21 @@ func NewPolygon(radius float32, numSides int, config *configuration.EngineConfig
 	}
 
 	indices[indexPointer] = 0
-	indices[indexPointer+1] = uint32(numSides)
+	indices[indexPointer+1] = uint32(numSIDes)
 	indices[indexPointer+2] = 1
 
 	return Mesh{
-		id:          "circle",
-		vao:         NewVertexArray(vertices, indices),
-		texCoords:   texCoords,
-		normals:     normals,
-		numVertices: int32(len(indices)),
+		ID:          "circle",
+		VAO:         NewVertexArray(vertices, indices),
+		TexCoords:   texCoords,
+		Normals:     normals,
+		NumVertices: int32(len(indices)),
 	}
 
 }
 
 // NewRectangle creates a rectangle Mesh centered around the origin,
-// based on a width and height value
+// based on a wIDth and height value
 func NewRectangle() Mesh {
 	points := []float32{
 		0, 0, 0,
@@ -90,11 +90,11 @@ func NewRectangle() Mesh {
 	}
 
 	r := Mesh{
-		id:          "rectangle",
-		vao:         NewVertexArray(points, indices),
-		texCoords:   RectTextures,
-		normals:     RectNormals,
-		numVertices: int32(len(indices)),
+		ID:          "rectangle",
+		VAO:         NewVertexArray(points, indices),
+		TexCoords:   RectTextures,
+		Normals:     RectNormals,
+		NumVertices: int32(len(indices)),
 	}
 	return r
 }
@@ -108,31 +108,40 @@ func NewScreenQuad() Mesh {
 	}
 
 	return Mesh{
-		id:          "screen",
-		vao:         NewVertexArray(ScreenQuadPoints, indices),
-		texCoords:   RectTextures,
-		numVertices: int32(len(indices)),
+		ID:          "screen",
+		VAO:         NewVertexArray(ScreenQuadPoints, indices),
+		TexCoords:   RectTextures,
+		NumVertices: int32(len(indices)),
 	}
 }
 
 // NewCube creates a 3D cube Mesh
 func NewCube() Mesh {
 	indices := []uint32{}
-	for i := 0; i < len(CubePoints); i++ {
+	for i := 0; i < len(CubePoints)/3; i++ {
 		indices = append(indices, uint32(i))
 	}
 	c := Mesh{
-		id:          "cube",
-		vao:         NewVertexArray(CubePoints, indices),
-		texCoords:   CubeTextures,
-		normals:     CubeNormals,
-		numVertices: int32(108),
+		ID:          "cube",
+		VAO:         NewVertexArray(CubePoints, indices),
+		TexCoords:   CubeTextures,
+		Normals:     CubeNormals,
+		NumVertices: int32(len(indices)),
+
+		TexCoordsEnabled: true,
+		NormalsEnabled:   true,
+
+		ModelMaterial: 0,
 	}
+
+	c.VAO.AddVertexAttribute(c.TexCoords, 1, 3)
+	c.VAO.AddVertexAttribute(c.Normals, 2, 3)
+
 	return c
 }
 
-func NewPlane(width, height, density int, heightData [][]float32, scale float32) Mesh {
-	//segWidth := float32(width) / float32(xCount)
+func NewPlane(wIDth, height, density int, heightData [][]float32, scale float32) Mesh {
+	//segWIDth := float32(wIDth) / float32(xCount)
 	//segHeight := float32(height) / float32(yCount)
 	xCount := density
 	yCount := density
@@ -148,7 +157,7 @@ func NewPlane(width, height, density int, heightData [][]float32, scale float32)
 	for i := 0; i < xCount; i++ {
 		for j := 0; j < yCount; j++ {
 
-			vertices[vertexPointer*3] = float32(j) / (float32(xCount) - 1) * float32(width)
+			vertices[vertexPointer*3] = float32(j) / (float32(xCount) - 1) * float32(wIDth)
 			vertices[vertexPointer*3+2] = float32(i) / (float32(yCount) - 1) * float32(height)
 
 			if heightData == nil {
@@ -198,13 +207,22 @@ func NewPlane(width, height, density int, heightData [][]float32, scale float32)
 		}
 	}
 
-	return Mesh{
-		id:          "plane",
-		vao:         NewVertexArray(vertices, indices),
-		texCoords:   textureCoords,
-		normals:     normals,
-		numVertices: int32(len(indices)),
+	m := Mesh{
+		ID:            "plane",
+		VAO:           NewVertexArray(vertices, indices),
+		TexCoords:     textureCoords,
+		Normals:       normals,
+		NumVertices:   int32(len(indices)),
+		ModelMaterial: 0,
+
+		TexCoordsEnabled: true,
+		NormalsEnabled:   true,
 	}
+
+	m.VAO.AddVertexAttribute(m.TexCoords, 1, 3)
+	m.VAO.AddVertexAttribute(m.Normals, 2, 3)
+
+	return m
 }
 
 var Offset = float32(1.0)
@@ -341,11 +359,11 @@ func NewBillBoard() Mesh {
 	}
 
 	return Mesh{
-		id:          "billboard",
-		vao:         NewVertexArray(points, indices),
-		numVertices: int32(len(indices)),
-		texCoords:   textures,
-		normals:     normals,
+		ID:          "billboard",
+		VAO:         NewVertexArray(points, indices),
+		NumVertices: int32(len(indices)),
+		TexCoords:   textures,
+		Normals:     normals,
 	}
 }
 

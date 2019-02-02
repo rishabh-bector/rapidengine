@@ -20,6 +20,7 @@ type Engine struct {
 	RenderFunc func(renderer *Renderer, inputs *input.Input)
 
 	ChildControl     ChildControl
+	GeometryControl  GeometryControl
 	SceneControl     SceneControl
 	CollisionControl CollisionControl
 	TextureControl   TextureControl
@@ -48,6 +49,7 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 
 		// Package Controls
 		ChildControl:     NewChildControl(),
+		GeometryControl:  NewGeometryControl(),
 		SceneControl:     NewSceneControl(),
 		CollisionControl: NewCollisionControl(config),
 		TextureControl:   NewTextureControl(config),
@@ -72,6 +74,7 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 	}
 
 	e.ChildControl.Initialize(&e)
+	e.GeometryControl.Initialize(&e)
 	e.SceneControl.Initialize(&e)
 	e.ShaderControl.Initialize()
 	e.MaterialControl.Initialize(&e)
@@ -102,16 +105,16 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 
 	if e.Config.Dimensions == 3 {
 		l := lighting.NewDirectionLight(
-			[]float32{0.2, 0.2, 0.2},
-			[]float32{0.9, 0.9, 0.9},
-			[]float32{0.4, 0.4, 0.4},
-			[]float32{1, 0, 0},
+			[]float32{0.02, 0.02, 0.02},
+			[]float32{0.0, 0.0, 0.0},
+			[]float32{0.0, 0.0, 0.0},
+			[]float32{1, -0.2, 1},
 		)
 
 		e.LightControl.SetDirectionalLight(&l)
 
 		e.Renderer.SkyBoxEnabled = true
-		e.Renderer.SkyBox = e.TerrainControl.NewSkyBox("TropicalSunnyDay", &e.ShaderControl, &e.TextureControl, e.Config)
+		e.Renderer.SkyBox = e.TerrainControl.NewSkyBox("FullMoon", &e.ShaderControl, &e.TextureControl, e.Config)
 	}
 
 	return &e
