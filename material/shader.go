@@ -184,8 +184,13 @@ var StandardProgram = ShaderProgram{
 		"heightMap":   0,
 		"specularMap": 0,
 
-		"hue":          0,
-		"diffuseLevel": 0,
+		"diffuseLevel":  0,
+		"normalLevel":   0,
+		"specularLevel": 0,
+		"heightLevel":   0,
+
+		"hue": 0,
+
 		"displacement": 0,
 		"scale":        0,
 		"reflectivity": 0,

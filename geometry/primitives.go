@@ -118,7 +118,7 @@ func NewScreenQuad() Mesh {
 // NewCube creates a 3D cube Mesh
 func NewCube() Mesh {
 	indices := []uint32{}
-	for i := 0; i < len(CubePoints); i++ {
+	for i := 0; i < len(CubePoints)/3; i++ {
 		indices = append(indices, uint32(i))
 	}
 	c := Mesh{
@@ -126,13 +126,17 @@ func NewCube() Mesh {
 		VAO:         NewVertexArray(CubePoints, indices),
 		TexCoords:   CubeTextures,
 		Normals:     CubeNormals,
-		NumVertices: int32(108),
+		NumVertices: int32(len(indices)),
 
 		TexCoordsEnabled: true,
 		NormalsEnabled:   true,
 
 		ModelMaterial: 0,
 	}
+
+	c.VAO.AddVertexAttribute(c.TexCoords, 1, 3)
+	c.VAO.AddVertexAttribute(c.Normals, 2, 3)
+
 	return c
 }
 

@@ -158,6 +158,9 @@ func (m *Mesh) ComputeTangents() {
 		tangent := (e1.Mul(deltaUV2.Y()).Sub(e2.Mul(deltaUV1.Y()))).Mul(r)
 		bitangent := (e2.Mul(deltaUV1.X()).Sub(e1.Mul(deltaUV2.X()))).Mul(r)
 
+		println(tangent.X(), tangent.Y(), tangent.Z())
+		println(bitangent.X(), bitangent.Y(), bitangent.Z())
+
 		m.Tangents[m.VAO.indices[i]*3] += tangent.X()
 		m.Tangents[m.VAO.indices[i]*3+1] += tangent.Y()
 		m.Tangents[m.VAO.indices[i]*3+2] += tangent.Z()
@@ -185,5 +188,6 @@ func (m *Mesh) ComputeTangents() {
 
 	m.VAO.AddVertexAttribute(m.Tangents, 3, 3)
 	m.VAO.AddVertexAttribute(m.Bitangents, 4, 3)
-
+	m.TangentsEnabled = true
+	m.BitangentsEnabled = true
 }

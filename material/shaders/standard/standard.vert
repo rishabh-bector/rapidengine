@@ -29,17 +29,17 @@ uniform float refractivity;
 float getDisplacement();
 
 void main() {
-    vec3 finalPosition = position + (normal * getDisplacement());
-
-    //	Vertex position 
-    gl_Position = projectionMtx * viewMtx * modelMtx * vec4(finalPosition, 1.0);
-
-    // Normal vector
-    Normal = mat3(transpose(inverse(modelMtx))) * normal;
+    vec3 finalPosition = position; //+ (normal * getDisplacement());
 
     // Fragment position
-    FragPos =  vec3(modelMtx * vec4(finalPosition, 1.0));
+    FragPos = vec3(modelMtx * vec4(finalPosition, 1.0));
 
+     // Normal vector
+    Normal = mat3(transpose(inverse(modelMtx))) * normal;
+
+    //	Vertex position 
+    gl_Position = projectionMtx * viewMtx * vec4(FragPos, 1.0);
+   
     // Texture coordinates
     TexCoords = tex / scale;
 

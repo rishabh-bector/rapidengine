@@ -173,6 +173,7 @@ func (renderer *Renderer) RenderChild(c child.Child) {
 }
 
 func (renderer *Renderer) render3DChild(c child.Child) {
+	CheckError("e")
 	c.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.TotalFrameTime)
 }
 
