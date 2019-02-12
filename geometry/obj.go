@@ -163,11 +163,18 @@ func LoadObj(path string, scale float32) Mesh {
 		verticesArray[i*3+2] = v.Z()
 	}
 
-	return Mesh{
+	m := Mesh{
 		ID:          path,
 		VAO:         NewVertexArray(verticesArray, indicesArray),
 		Normals:     normalsArray,
 		TexCoords:   texturesArray,
 		NumVertices: int32(len(indicesArray)),
 	}
+
+	m.VAO.AddVertexAttribute(m.TexCoords, 1, 3)
+	m.VAO.AddVertexAttribute(m.Normals, 2, 3)
+	m.TexCoordsEnabled = true
+	m.NormalsEnabled = true
+
+	return m
 }

@@ -219,6 +219,57 @@ var StandardProgram = ShaderProgram{
 	},
 }
 
+var PBRProgram = ShaderProgram{
+	vertexShader:   "../rapidengine/material/shaders/pbr/pbr.vert",
+	fragmentShader: "../rapidengine/material/shaders/pbr/pbr.frag",
+	uniformLocations: map[string]int32{
+		// Vertices
+		"modelMtx":      0,
+		"viewMtx":       0,
+		"projectionMtx": 0,
+
+		"albedoMap":    0,
+		"normalMap":    0,
+		"heightMap":    0,
+		"metallicMap":  0,
+		"roughnessMap": 0,
+		"aoMap":        0,
+
+		"normalScalar":    0,
+		"metallicScalar":  0,
+		"roughnessScalar": 0,
+		"aoScalar":        0,
+
+		"vertexDisplacement":   0,
+		"parallaxDisplacement": 0,
+		"scale":                0,
+
+		"reflectivity": 0,
+		"refractivity": 0,
+		"refractLevel": 0,
+
+		"cubeDiffuseMap": 0,
+
+		// Lighting
+		"dirLight.direction": 0,
+		"dirLight.ambient":   0,
+		"dirLight.diffuse":   0,
+		"dirLight.specular":  0,
+
+		"viewPos": 0,
+
+		"numPointLights": 0,
+		"pointLights":    0,
+	},
+	attributeLocations: map[string]uint32{
+		"position":   0,
+		"tex":        1,
+		"normal":     2,
+		"tangent":    3,
+		"bitTangent": 4,
+	},
+}
+
 var TerrainProgram = ShaderProgram{
 	vertexShader:   "../rapidengine/material/shaders/terrain/terrain.vert",
 	fragmentShader: "../rapidengine/material/shaders/terrain/terrain.frag",

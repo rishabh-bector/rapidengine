@@ -34,6 +34,10 @@ func (mc *MaterialControl) NewStandardMaterial() *material.StandardMaterial {
 	return material.NewStandardMaterial(mc.engine.ShaderControl.GetShader("standard"))
 }
 
+func (mc *MaterialControl) NewPBRMaterial() *material.PBRMaterial {
+	return material.NewPBRMaterial(mc.engine.ShaderControl.GetShader("pbr"))
+}
+
 func (mc *MaterialControl) NewCubemapMaterial() *material.CubemapMaterial {
 	return material.NewCubemapMaterial(mc.engine.ShaderControl.GetShader("skybox"))
 }

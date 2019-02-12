@@ -74,8 +74,8 @@ vec3 calculateRefraction() {
 vec2 parallaxMapping(vec3 viewDir) {
     // number of depth layers
     float minLayers = 8.0;
-    float maxLayers = 15.0;
-    float numLayers = 15.0;//mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));  
+    float maxLayers = 32.0;
+    float numLayers = 32.0;//mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));  
 
     // calculate the size of each layer
     float layerDepth = 1.0 / numLayers;

@@ -91,6 +91,7 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 		e.ShaderControl.GetShader("terrain"),
 		e.ShaderControl.GetShader("foliage"),
 		e.ShaderControl.GetShader("water"),
+		e.ShaderControl.GetShader("pbr"),
 	}
 
 	e.Renderer.Initialize(&e)
@@ -106,15 +107,16 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 	if e.Config.Dimensions == 3 {
 		l := lighting.NewDirectionLight(
 			[]float32{0.02, 0.02, 0.02},
-			[]float32{0.0, 0.0, 0.0},
-			[]float32{0.0, 0.0, 0.0},
+			[]float32{0.6, 0.6, 0.6},
+			[]float32{0.2, 0.2, 0.2},
 			[]float32{1, -0.2, 1},
 		)
 
 		e.LightControl.SetDirectionalLight(&l)
+		e.LightControl.EnableDirectionalLighting()
 
 		e.Renderer.SkyBoxEnabled = true
-		e.Renderer.SkyBox = e.TerrainControl.NewSkyBox("FullMoon", &e.ShaderControl, &e.TextureControl, e.Config)
+		e.Renderer.SkyBox = e.TerrainControl.NewSkyBox("Indoor", "jpg", &e.ShaderControl, &e.TextureControl, e.Config)
 	}
 
 	return &e

@@ -18,6 +18,7 @@ func (shaderControl *ShaderControl) Initialize() {
 	shaderControl.programs = map[string]*material.ShaderProgram{
 		"basic":    &material.BasicProgram,
 		"standard": &material.StandardProgram,
+		"pbr":      &material.PBRProgram,
 		"skybox":   &material.SkyBoxProgram,
 		"terrain":  &material.TerrainProgram,
 		"foliage":  &material.FoliageProgram,
