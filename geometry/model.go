@@ -18,3 +18,9 @@ func (m *Model) Render(viewMtx *float32, modelMtx *float32, projMtx *float32) {
 		ms.Render(m.Materials[ms.ModelMaterial], viewMtx, modelMtx, projMtx)
 	}
 }
+
+func (m *Model) ComputeTangents() {
+	for _, ms := range m.Meshes {
+		ms.ComputeTangents()
+	}
+}
