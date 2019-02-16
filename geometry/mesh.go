@@ -43,7 +43,7 @@ type Mesh struct {
 	ModelMaterial int
 }
 
-func (p *Mesh) Render(mat material.Material, viewMtx *float32, modelMtx *float32, projMtx *float32) {
+func (p *Mesh) Render(mat material.Material, viewMtx, modelMtx, projMtx *float32, delta, totalTime float64, darkness float32) {
 	gl.BindVertexArray(p.VAO.id)
 	mat.GetShader().Bind()
 
@@ -80,7 +80,7 @@ func (p *Mesh) Render(mat material.Material, viewMtx *float32, modelMtx *float32
 		1, false, projMtx,
 	)
 
-	mat.Render(0, 1, 0)
+	mat.Render(delta, darkness, totalTime)
 
 	gl.DrawElements(gl.TRIANGLES, p.NumVertices, gl.UNSIGNED_INT, gl.PtrOffset(0))
 }

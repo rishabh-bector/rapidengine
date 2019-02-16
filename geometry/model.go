@@ -15,7 +15,7 @@ type Model struct {
 
 func (m *Model) Render(viewMtx *float32, modelMtx *float32, projMtx *float32) {
 	for _, ms := range m.Meshes {
-		ms.Render(m.Materials[ms.ModelMaterial], viewMtx, modelMtx, projMtx)
+		ms.Render(m.Materials[ms.ModelMaterial], viewMtx, modelMtx, projMtx, 0, 0, 1)
 	}
 }
 

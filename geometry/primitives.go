@@ -90,12 +90,22 @@ func NewRectangle() Mesh {
 	}
 
 	r := Mesh{
-		ID:          "rectangle",
-		VAO:         NewVertexArray(points, indices),
+		ID:  "rectangle",
+		VAO: NewVertexArray(points, indices),
+
 		TexCoords:   RectTextures,
 		Normals:     RectNormals,
 		NumVertices: int32(len(indices)),
+
+		TexCoordsEnabled: true,
+		NormalsEnabled:   true,
+
+		ModelMaterial: 0,
 	}
+
+	r.VAO.AddVertexAttribute(r.TexCoords, 1, 3)
+	r.VAO.AddVertexAttribute(r.Normals, 2, 3)
+
 	return r
 }
 

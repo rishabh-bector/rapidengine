@@ -156,17 +156,12 @@ func (renderer *Renderer) RenderChildren() {
 func (renderer *Renderer) RenderChild(c child.Child) {
 	if c.GetDimensions() == 3 {
 		renderer.render3DChild(c)
-		return
+	} else {
+		c.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.TotalFrameTime)
 	}
-
-	renderer.BindChild(c)
-
-	c.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.TotalFrameTime)
 
 	if c.CheckInstancingEnabled() {
 		renderer.drawChildInstanced(c, c.GetNumInstances())
-	} else {
-		renderer.drawChild(c)
 	}
 
 	gl.BindVertexArray(0)
@@ -203,16 +198,16 @@ func (renderer *Renderer) RenderChildCopies(c child.Child) {
 // RenderCopy renders a single copy of a child
 func (renderer *Renderer) RenderCopy(c child.Child, cpy child.ChildCopy) {
 	renderer.BindChild(c)
+
 	if renderer.Config.Dimensions == 2 {
 		if (c.GetSpecificRenderDistance() != 0 && InBounds2D(cpy.X, cpy.Y, float32(renderer.camX), float32(renderer.camY), c.GetSpecificRenderDistance())) ||
 			InBounds2D(cpy.X, cpy.Y, float32(renderer.camX), float32(renderer.camY), renderer.RenderDistance) {
+
 			c.RenderCopy(cpy, renderer.MainCamera)
-			renderer.drawChild(c)
 			c.AddCurrentCopy(cpy)
 		}
-		c.RenderCopy(cpy, renderer.MainCamera)
-		renderer.drawChild(c)
 	}
+
 	if renderer.Config.Dimensions == 3 {
 		if InBounds3D(cpy.X, cpy.Y, cpy.Z, float32(renderer.camX), float32(renderer.camY), float32(renderer.camZ), renderer.RenderDistance) {
 			c.RenderCopy(cpy, renderer.MainCamera)

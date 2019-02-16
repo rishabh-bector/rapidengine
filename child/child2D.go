@@ -20,10 +20,7 @@ import (
 type Child2D struct {
 	active bool
 
-	vertexArray *geometry.VertexArray
-	numVertices int32
-
-	mesh string
+	Mesh geometry.Mesh
 
 	material material.Material
 	Darkness float32
@@ -101,7 +98,6 @@ func (child2D *Child2D) PreRender(mainCamera camera.Camera) {
 }
 
 func (child2D *Child2D) BindChild() {
-	gl.BindVertexArray(child2D.vertexArray.GetID())
 	child2D.material.GetShader().Bind()
 }
 
@@ -131,29 +127,11 @@ func (child2D *Child2D) Render(mainCamera camera.Camera, delta float64, totalTim
 	child2D.modelMatrix = child2D.modelMatrix.Mul4(mgl32.Scale3D(scaleX, scaleY, 0))
 
 	if !child2D.Static {
-		gl.UniformMatrix4fv(
-			child2D.material.GetShader().GetUniform("viewMtx"),
-			1, false, mainCamera.GetFirstViewIndex(),
-		)
+		child2D.Mesh.Render(child2D.material, mainCamera.GetFirstViewIndex(), &child2D.modelMatrix[0], &child2D.projectionMatrix[0], delta, totalTime, 1)
 	} else {
 		ident := mainCamera.GetStaticView()
-		gl.UniformMatrix4fv(
-			child2D.material.GetShader().GetUniform("viewMtx"),
-			1, false, &ident[0],
-		)
+		child2D.Mesh.Render(child2D.material, &ident[0], &child2D.modelMatrix[0], &child2D.projectionMatrix[0], delta, totalTime, 1)
 	}
-
-	gl.UniformMatrix4fv(
-		child2D.material.GetShader().GetUniform("projectionMtx"),
-		1, false, &child2D.projectionMatrix[0],
-	)
-
-	gl.UniformMatrix4fv(
-		child2D.material.GetShader().GetUniform("modelMtx"),
-		1, false, &child2D.modelMatrix[0],
-	)
-
-	child2D.material.Render(delta, child2D.Darkness, totalTime)
 }
 
 func (child2D *Child2D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
@@ -163,19 +141,7 @@ func (child2D *Child2D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {
 	scaleX, scaleY := ScaleTransformation(child2D.ScaleX, child2D.ScaleY, float32(child2D.config.ScreenWidth), float32(child2D.config.ScreenHeight))
 	child2D.modelMatrix = child2D.modelMatrix.Mul4(mgl32.Scale3D(scaleX, scaleY, 0))
 
-	config.Material.GetShader().Bind()
-
-	gl.UniformMatrix4fv(
-		config.Material.GetShader().GetUniform("viewMtx"),
-		1, false, mainCamera.GetFirstViewIndex(),
-	)
-
-	gl.UniformMatrix4fv(
-		config.Material.GetShader().GetUniform("modelMtx"),
-		1, false, &child2D.modelMatrix[0],
-	)
-
-	config.Material.Render(0, config.Darkness, 0)
+	child2D.Mesh.Render(config.Material, mainCamera.GetFirstViewIndex(), &child2D.modelMatrix[0], &child2D.projectionMatrix[0], 0, 0, config.Darkness)
 }
 
 func (child2D *Child2D) CheckCollision(other Child) int {
@@ -190,38 +156,12 @@ func (child2D *Child2D) CheckCollisionRaw(otherX, otherY float32, otherCollider 
 //  Component Attachment
 //  --------------------------------------------------
 
-func (child2D *Child2D) AttachTextureCoords(coords []float32) {
-	if child2D.vertexArray == nil {
-		panic("Cannot attach texture without VertexArray")
-	}
-
-	gl.BindVertexArray(child2D.vertexArray.GetID())
-	child2D.material.GetShader().Bind()
-	child2D.vertexArray.AddVertexAttribute(coords, 1, 3)
-	gl.BindVertexArray(0)
-}
-
 func (child2D *Child2D) AttachCollider(x, y, w, h float32) {
 	child2D.collider = physics.NewCollider(x, y, w, h)
 }
 
-func (child2D *Child2D) AttachVertexArray(vao *geometry.VertexArray, numVertices int32) {
-	child2D.vertexArray = vao
-	child2D.numVertices = numVertices
-}
-
 func (child2D *Child2D) AttachMesh(p geometry.Mesh) {
-	child2D.mesh = p.ID
-
-	child2D.AttachVertexArray(p.VAO, p.NumVertices)
-
-	if p.Normals != nil {
-		child2D.vertexArray.AddVertexAttribute(p.Normals, 2, 3)
-	}
-
-	if p.TexCoords != nil {
-		child2D.AttachTextureCoords(p.TexCoords)
-	}
+	child2D.Mesh = p
 }
 
 func (child2D *Child2D) AttachMaterial(m material.Material) {
@@ -270,14 +210,6 @@ func (child2D *Child2D) GetShaderProgram() *material.ShaderProgram {
 	return child2D.material.GetShader()
 }
 
-func (child2D *Child2D) GetVertexArray() *geometry.VertexArray {
-	return child2D.vertexArray
-}
-
-func (child2D *Child2D) GetNumVertices() int32 {
-	return child2D.numVertices
-}
-
 func (child2D *Child2D) GetCollider() *physics.Collider {
 	return &child2D.collider
 }
@@ -296,6 +228,10 @@ func (child2D *Child2D) GetSpecificRenderDistance() float32 {
 
 func (child2D *Child2D) GetDimensions() int {
 	return 2
+}
+
+func (child2D *Child2D) GetNumVertices() int32 {
+	return child2D.Mesh.NumVertices
 }
 
 //  --------------------------------------------------
