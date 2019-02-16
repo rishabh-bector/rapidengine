@@ -65,8 +65,8 @@ func (uiControl *UIControl) InstanceElement(e ui.Element, scene *Scene) {
 }
 
 // InitializeTrees traverses all UI trees and prerenders all children,
-// instances each element into it's scene, and instances each textbox
-// into it's scene.
+// instances each element into its scene, and instances each textbox
+// into its scene.
 func (uiControl *UIControl) InitializeTrees() {
 	for scene, root := range uiControl.roots {
 		for _, element := range root.GetElements() {
