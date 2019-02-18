@@ -249,9 +249,11 @@ func InBounds3D(x, y, z, camX, camY, camZ, renderDistance float32) bool {
 // NewRenderer creates a new renderer, and takes in a renderFunc which
 // is called every frame, allowing the User to have frame-by-frame control
 func NewRenderer(camera camera.Camera, config *configuration.EngineConfig) Renderer {
+	win := InitGLFW(config)
+	s := uint32(0)
 	r := Renderer{
-		Window:         initGLFW(config),
-		ShaderProgram:  initOpenGL(config),
+		Window:         win,
+		ShaderProgram:  s,
 		RenderFunc:     func(r *Renderer) {},
 		RenderDistance: 1000,
 		MinFrameTime:   1 / float64(config.MaxFPS),
@@ -263,6 +265,8 @@ func NewRenderer(camera camera.Camera, config *configuration.EngineConfig) Rende
 	r.Window.SetCursorPosCallback(input.MouseCallback)
 	r.Window.SetMouseButtonCallback(input.MouseButtonCallback)
 	r.Window.SetScrollCallback(input.ScrollCallback)
+
+	gl.Init()
 
 	return r
 }
@@ -288,7 +292,7 @@ func (renderer *Renderer) AttachCallback(f func(*Renderer)) {
 	renderer.RenderFunc = f
 }
 
-func initGLFW(config *configuration.EngineConfig) *glfw.Window {
+func InitGLFW(config *configuration.EngineConfig) *glfw.Window {
 	if err := glfw.Init(); err != nil {
 		log.Fatal(err)
 	}
@@ -314,7 +318,7 @@ func initGLFW(config *configuration.EngineConfig) *glfw.Window {
 	}
 
 	if config.Dimensions == 3 {
-		window.SetInputMode(glfw.CursorMode, glfw.CursorDisabled)
+		//window.SetInputMode(glfw.CursorMode, glfw.CursorDisabled)
 	}
 
 	window.MakeContextCurrent()
@@ -330,12 +334,12 @@ func initGLFW(config *configuration.EngineConfig) *glfw.Window {
 	return window
 }
 
-func initOpenGL(config *configuration.EngineConfig) uint32 {
+func InitOpenGL(config *configuration.EngineConfig) uint32 {
 	if err := gl.Init(); err != nil {
 		log.Fatal(err)
 	}
 
-	version := gl.GoStr(gl.GetString(gl.VERSION))
+	/*version := gl.GoStr(gl.GetString(gl.VERSION))
 	log.Info("Using OpenGL Version ", version)
 
 	if config.PolygonLines {
@@ -358,7 +362,7 @@ func initOpenGL(config *configuration.EngineConfig) uint32 {
 
 	if config.AntiAliasing {
 		gl.Enable(gl.MULTISAMPLE)
-	}
+	}*/
 
 	return 0
 }
