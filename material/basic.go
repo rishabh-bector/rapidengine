@@ -23,28 +23,33 @@ type BasicMaterial struct {
 
 	ScatterLevel float32
 
-	animationPlaying  string
-	animationTextures map[string][]*uint32
-	animationCurrent  int
-	animationFrame    float64
-	animationFPS      map[string]float64
-	animationEnabled  bool
+	animationPlaying   string
+	animationTextures  map[string][]*uint32
+	animationHitframes map[string][]bool
+	animationCurrent   int
+	animationFrame     float64
+	animationFPS       map[string]float64
+	animationEnabled   bool
 
 	animationPlayingOnce  bool
 	animationOnceCallback func()
+	animationHitCallback  func()
 }
 
 func NewBasicMaterial(Shader *ShaderProgram) *BasicMaterial {
 	return &BasicMaterial{
-		Shader:            Shader,
-		DiffuseLevel:      0,
-		Hue:               [4]float32{200, 200, 200, 255},
-		DiffuseMapScale:   1,
-		AlphaMapLevel:     0,
-		animationTextures: make(map[string][]*uint32),
-		animationFPS:      make(map[string]float64),
-		animationPlaying:  "",
-		animationEnabled:  false,
+		Shader: Shader,
+
+		DiffuseLevel:    0,
+		Hue:             [4]float32{200, 200, 200, 255},
+		DiffuseMapScale: 1,
+		AlphaMapLevel:   0,
+
+		animationTextures:  make(map[string][]*uint32),
+		animationHitframes: make(map[string][]bool),
+		animationFPS:       make(map[string]float64),
+		animationPlaying:   "",
+		animationEnabled:   false,
 	}
 }
 
@@ -90,6 +95,7 @@ func (bm *BasicMaterial) UpdateAnimation(delta float64) {
 			if bm.animationCurrent < len(bm.animationTextures[bm.animationPlaying])-1 {
 				bm.animationCurrent++
 			} else {
+
 				if bm.animationPlayingOnce {
 					bm.animationPlaying = ""
 					bm.animationPlayingOnce = false
@@ -101,8 +107,14 @@ func (bm *BasicMaterial) UpdateAnimation(delta float64) {
 				}
 				bm.animationCurrent = 0
 			}
+
 			bm.animationFrame = 0
 			bm.DiffuseMap = bm.animationTextures[bm.animationPlaying][bm.animationCurrent]
+
+			if bm.animationHitframes[bm.animationPlaying][bm.animationCurrent] {
+				bm.animationHitCallback()
+			}
+
 		} else {
 			bm.animationFrame += delta
 		}
@@ -115,6 +127,12 @@ func (bm *BasicMaterial) EnableAnimation() {
 
 func (bm *BasicMaterial) AddFrame(frame *uint32, anim string) {
 	bm.animationTextures[anim] = append(bm.animationTextures[anim], frame)
+	bm.animationHitframes[anim] = append(bm.animationHitframes[anim], false)
+}
+
+func (bm *BasicMaterial) AddHitFrame(frame *uint32, anim string) {
+	bm.animationTextures[anim] = append(bm.animationTextures[anim], frame)
+	bm.animationHitframes[anim] = append(bm.animationHitframes[anim], true)
 }
 
 func (bm *BasicMaterial) SetAnimationFPS(anim string, s float64) {
@@ -134,8 +152,9 @@ func (bm *BasicMaterial) PlayAnimationOnce(anim string) {
 	bm.animationPlayingOnce = true
 }
 
-func (bm *BasicMaterial) PlayAnimationOnceCallback(anim string, callback func()) {
+func (bm *BasicMaterial) PlayAnimationOnceCallback(anim string, callback func(), hitfunc func()) {
 	bm.PlayAnimation(anim)
 	bm.animationPlayingOnce = true
 	bm.animationOnceCallback = callback
+	bm.animationHitCallback = hitfunc
 }

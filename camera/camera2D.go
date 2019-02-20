@@ -1,6 +1,8 @@
 package camera
 
 import (
+	"math/rand"
+
 	"github.com/go-gl/mathgl/mgl32"
 
 	"rapidengine/configuration"
@@ -9,6 +11,12 @@ import (
 
 type Camera2D struct {
 	Speed float32
+
+	SmoothSpeed    float32
+	TargetPosition mgl32.Vec3
+
+	ShakeDuration float64
+	ShakeStrength float32
 
 	Position  mgl32.Vec3
 	UpAxis    mgl32.Vec3
@@ -22,7 +30,8 @@ type Camera2D struct {
 
 func NewCamera2D(position mgl32.Vec3, speed float32, config *configuration.EngineConfig) *Camera2D {
 	return &Camera2D{
-		Position:  position,
+		Position: position,
+
 		UpAxis:    mgl32.Vec3{0, 1, 0},
 		FrontAxis: mgl32.Vec3{0, 0, -1},
 		StaticView: mgl32.LookAtV(
@@ -30,12 +39,27 @@ func NewCamera2D(position mgl32.Vec3, speed float32, config *configuration.Engin
 			mgl32.Vec3{0, 0, 0}.Add(mgl32.Vec3{0, 0, -1}),
 			mgl32.Vec3{0, 1, 0},
 		),
-		Speed:  speed,
+
+		Speed:       speed,
+		SmoothSpeed: 1.0,
+
 		config: config,
 	}
 }
 
-func (camera2D *Camera2D) Look() {
+func (camera2D *Camera2D) Look(delta float64) {
+	// Move toward target position
+	camera2D.Position = LerpPosition(camera2D.Position, camera2D.TargetPosition, camera2D.SmoothSpeed*float32(delta)*60)
+
+	if camera2D.ShakeDuration > 0 {
+		camera2D.Position = camera2D.Position.Add(mgl32.Vec3{
+			((rand.Float32() * 2) - 1.0) * camera2D.ShakeStrength,
+			((rand.Float32() * 2) - 1.0) * camera2D.ShakeStrength,
+			((rand.Float32() * 2) - 1.0) * camera2D.ShakeStrength,
+		})
+		camera2D.ShakeDuration -= delta
+	}
+
 	camera2D.View = mgl32.LookAtV(
 		camera2D.Position,
 		camera2D.Position.Add(camera2D.FrontAxis),
@@ -106,7 +130,7 @@ func (camera2D *Camera2D) GetPosition() (float32, float32, float32) {
 }
 
 func (camera2D *Camera2D) SetPosition(x, y, z float32) {
-	camera2D.Position = mgl32.Vec3{
+	camera2D.TargetPosition = mgl32.Vec3{
 		(x - float32(camera2D.config.ScreenWidth/2)) / float32(camera2D.config.ScreenWidth/2),
 		(y - float32(camera2D.config.ScreenHeight/2)) / float32(camera2D.config.ScreenHeight/2),
 		camera2D.Position.Z(),
@@ -117,8 +141,25 @@ func (camera2D *Camera2D) SetSpeed(s float32) {
 	camera2D.Speed = s
 }
 
+func (camera2D *Camera2D) SetSmoothSpeed(s float32) {
+	camera2D.SmoothSpeed = s
+}
+
+func (camera2D *Camera2D) Shake(duration float64, strength float32) {
+	camera2D.ShakeDuration = duration
+	camera2D.ShakeStrength = strength
+}
+
 func (camera2D *Camera2D) ProcessMouse(mx, my, lmx, lmy float64) {
 	return
 }
 
 func (camera2D *Camera2D) ChangeRoll(r float32) {}
+
+func LerpPosition(pos1, pos2 mgl32.Vec3, amount float32) mgl32.Vec3 {
+	return mgl32.Vec3{
+		pos1.X() + amount*(pos2.X()-pos1.X()),
+		pos1.Y() + amount*(pos2.Y()-pos1.Y()),
+		pos1.Z() + amount*(pos2.Z()-pos1.Z()),
+	}
+}

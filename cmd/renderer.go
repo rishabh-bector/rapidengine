@@ -107,7 +107,7 @@ func (renderer *Renderer) renderFrame() {
 	renderer.RenderFunc(renderer)
 
 	// Update camera
-	renderer.MainCamera.Look()
+	renderer.MainCamera.Look(renderer.DeltaFrameTime)
 	renderer.camX, renderer.camY, renderer.camZ = renderer.MainCamera.GetPosition()
 
 	// Post processing update

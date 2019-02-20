@@ -45,7 +45,7 @@ func NewCamera3D(position mgl32.Vec3, speed float32, config *configuration.Engin
 	}
 }
 
-func (camera3D *Camera3D) Look() {
+func (camera3D *Camera3D) Look(delta float64) {
 	camera3D.View = mgl32.LookAtV(
 		camera3D.Position,
 		camera3D.Position.Add(camera3D.FrontAxis),
@@ -152,6 +152,14 @@ func (camera3D *Camera3D) SetPosition(x, y, z float32) {
 
 func (camera3D *Camera3D) SetSpeed(s float32) {
 	camera3D.Speed = s
+}
+
+func (camera3D *Camera3D) SetSmoothSpeed(s float32) {
+	//camera3D.SmoothSpeed = s
+}
+
+func (camera3D *Camera3D) Shake(duration float64, strength float32) {
+	//camera3D.SmoothSpeed = s
 }
 
 //  --------------------------------------------------

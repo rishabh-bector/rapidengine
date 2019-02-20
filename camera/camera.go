@@ -7,7 +7,7 @@ import (
 )
 
 type Camera interface {
-	Look()
+	Look(delta float64)
 
 	DefaultControls(*input.Input)
 	MoveUp()
@@ -26,7 +26,11 @@ type Camera interface {
 
 	SetPosition(float32, float32, float32)
 	GetPosition() (float32, float32, float32)
+
 	SetSpeed(float32)
+	SetSmoothSpeed(float32)
+
+	Shake(float64, float32)
 
 	ProcessMouse(float64, float64, float64, float64)
 }
