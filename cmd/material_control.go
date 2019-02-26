@@ -6,11 +6,15 @@ import (
 )
 
 type MaterialControl struct {
+	Materials map[string]material.Material
+
 	engine *Engine
 }
 
 func NewMaterialControl() MaterialControl {
-	return MaterialControl{}
+	return MaterialControl{
+		Materials: make(map[string]material.Material),
+	}
 }
 
 func (mc *MaterialControl) Initialize(engine *Engine) {
@@ -34,8 +38,10 @@ func (mc *MaterialControl) NewStandardMaterial() *material.StandardMaterial {
 	return material.NewStandardMaterial(mc.engine.ShaderControl.GetShader("standard"))
 }
 
-func (mc *MaterialControl) NewPBRMaterial() *material.PBRMaterial {
-	return material.NewPBRMaterial(mc.engine.ShaderControl.GetShader("pbr"))
+func (mc *MaterialControl) NewPBRMaterial(name string) *material.PBRMaterial {
+	m := material.NewPBRMaterial(mc.engine.ShaderControl.GetShader("pbr"))
+	mc.Materials[name] = m
+	return m
 }
 
 func (mc *MaterialControl) NewCubemapMaterial() *material.CubemapMaterial {

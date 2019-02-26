@@ -113,8 +113,8 @@ func (child2D *Child2D) Update(mainCamera camera.Camera, delta float64, totalTim
 		child2D.VX = 0
 	}*/
 
-	child2D.X += child2D.VX * -float32(delta)
-	child2D.Y += child2D.VY * float32(delta)
+	//child2D.X += child2D.VX * -float32(delta)
+	//child2D.Y += child2D.VY * float32(delta)
 
 	child2D.Render(mainCamera, delta, totalTime)
 }
