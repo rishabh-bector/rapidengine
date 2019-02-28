@@ -116,7 +116,7 @@ vec2 parallaxMapping(vec3 viewDir) {
     // number of depth layers
     float minLayers = 8.0;
     float maxLayers = 32.0;
-    float numLayers = mix(minLayers, maxLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));  
+    float numLayers = 32;//mix(minLayers, maxLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));  
 
     // calculate the size of each layer
     float layerDepth = 1.0 / numLayers;
@@ -182,7 +182,7 @@ vec3 getNormal(vec2 uvs) {
     if(normalScalar > 0) {
         norm = normalize(texture(normalMap, uvs).rgb * normalScalar);
         norm = normalize((norm * 2.0) - 0.5);
-        //norm = normalize(TBN * norm);
+        norm = normalize(TBN * norm);
     } else {
         norm = normalize(Normal);
     }
@@ -224,6 +224,24 @@ void main() {
 
     // reflectance equation
     vec3 Lo = vec3(0.0);
+
+    // directional light case
+    vec3 radiance = dirLight.diffuse;
+    vec3 L = normalize(dirLight.direction);
+    vec3 H = normalize(V + L);
+    float NDF = DistributionGGX(N, H, roughness);   
+    float G   = GeometrySmith(N, V, L, roughness);      
+    vec3 F    = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0);
+    vec3 nominator    = NDF * G * F; 
+    float denominator = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
+    vec3 specular = nominator / max(denominator, 0.001);
+    vec3 kS = F;
+    vec3 kD = vec3(1.0) - kS;
+    kD *= 1.0 - metallic;	  
+    float NdotL = max(dot(N, L), 0.0);        
+    Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+
+
     for(int i = 0; i < numPointLights; i++) 
     {
         // calculate per-light radiance
