@@ -12,6 +12,7 @@ type PBRMaterial struct {
 	RoughnessMap        *uint32
 	AmbientOcclusionMap *uint32
 
+	DiffuseScalar          float32
 	NormalScalar           float32
 	MetallicScalar         float32
 	RoughnessScalar        float32
@@ -92,4 +93,64 @@ func (pm *PBRMaterial) Render(delta float64, darkness float32, totalTime float64
 
 func (pm *PBRMaterial) GetShader() *ShaderProgram {
 	return pm.shader
+}
+
+//   --------------------------------------------------
+//   UI Interface
+//   --------------------------------------------------
+
+func (pm *PBRMaterial) GetDiffuseScalar() *float32 {
+	return &pm.DiffuseScalar
+}
+
+func (pm *PBRMaterial) GetNormalScalar() *float32 {
+	return &pm.NormalScalar
+}
+
+func (pm *PBRMaterial) GetMetallicScalar() *float32 {
+	return &pm.MetallicScalar
+}
+
+func (pm *PBRMaterial) GetRoughnessScalar() *float32 {
+	return &pm.RoughnessScalar
+}
+
+func (pm *PBRMaterial) GetAOScalar() *float32 {
+	return &pm.AmbientOcclusionScalar
+}
+
+func (pm *PBRMaterial) GetVertexDisplacement() *float32 {
+	return &pm.VertexDisplacement
+}
+
+func (pm *PBRMaterial) GetParallaxDisplacement() *float32 {
+	return &pm.ParallaxDisplacement
+}
+
+func (pm *PBRMaterial) GetScale() *float32 {
+	return &pm.Scale
+}
+
+func (pm *PBRMaterial) AttachDiffuseMap(m *uint32) {
+	pm.AlbedoMap = m
+}
+
+func (pm *PBRMaterial) AttachNormalMap(m *uint32) {
+	pm.NormalMap = m
+}
+
+func (pm *PBRMaterial) AttachHeightMap(m *uint32) {
+	pm.HeightMap = m
+}
+
+func (pm *PBRMaterial) AttachRoughnessMap(m *uint32) {
+	pm.RoughnessMap = m
+}
+
+func (pm *PBRMaterial) AttachMetallicMap(m *uint32) {
+	pm.MetallicMap = m
+}
+
+func (pm *PBRMaterial) AttachAOMap(m *uint32) {
+	pm.AmbientOcclusionMap = m
 }

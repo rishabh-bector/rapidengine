@@ -19,8 +19,18 @@ uniform mat4 modelMtx;
 uniform mat4 viewMtx;
 uniform mat4 projectionMtx;
 
+uniform sampler2D heightMap;
+uniform float vertexDisplacement;
+
+float getDisplacement() {
+    if(vertexDisplacement == 0) {
+        return 0;
+    }
+    return texture(heightMap, tex.xy / scale).r * vertexDisplacement;
+}
+
 void main() {
-    vec3 finalPosition = position; //+ (normal * getDisplacement());
+    vec3 finalPosition = position + (normal * getDisplacement());
 
     // Fragment position
     FragPos = vec3(modelMtx * vec4(finalPosition, 1.0));

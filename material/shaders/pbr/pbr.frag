@@ -182,7 +182,7 @@ vec3 getNormal(vec2 uvs) {
     if(normalScalar > 0) {
         norm = normalize(texture(normalMap, uvs).rgb * normalScalar);
         norm = normalize((norm * 2.0) - 0.5);
-        norm = normalize(TBN * norm);
+        //norm = normalize(TBN * norm);
     } else {
         norm = normalize(Normal);
     }
@@ -199,8 +199,13 @@ void main() {
     vec3 normal = getNormal(uvs);
 
     float metallic = texture(metallicMap, uvs).r * metallicScalar;
-    float roughness = texture(roughnessMap, uvs).r * roughnessScalar;
+    float roughness = (1 - texture(roughnessMap, uvs).r) * roughnessScalar;
     float ao = texture(aoMap, uvs).r * aoScalar;
+
+    //albedo = vec3(0.2, 0.2, 0.8);
+    metallic = metallicScalar;
+    // roughness = roughnessScalar;
+    //ao = aoScalar;
 
     if(metallicScalar < 0) {
         metallic = abs(metallicScalar);
