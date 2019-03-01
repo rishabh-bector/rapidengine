@@ -8,8 +8,8 @@ import (
 )
 
 type PointLight struct {
-	ambient  []float32
-	diffuse  []float32
+	Ambient  []float32
+	Diffuse  []float32
 	specular []float32
 
 	constant  float32
@@ -21,8 +21,8 @@ type PointLight struct {
 
 func NewPointLight(a, d, s []float32, c, l, q float32) *PointLight {
 	return &PointLight{
-		ambient:  a,
-		diffuse:  d,
+		Ambient:  a,
+		Diffuse:  d,
 		specular: s,
 
 		constant:  c,
@@ -39,12 +39,12 @@ func (light *PointLight) UpdateShader(cx, cy, cz float32, ind int, shader *mater
 
 	gl.Uniform3fv(
 		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+fmt.Sprint(ind)+"].ambient"+"\x00")),
-		1, &light.ambient[0],
+		1, &light.Ambient[0],
 	)
 
 	gl.Uniform3fv(
 		gl.GetUniformLocation(shader.GetID(), gl.Str("pointLights["+fmt.Sprint(ind)+"].diffuse"+"\x00")),
-		1, &light.diffuse[0],
+		1, &light.Diffuse[0],
 	)
 
 	gl.Uniform3fv(

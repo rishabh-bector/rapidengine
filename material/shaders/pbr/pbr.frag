@@ -162,14 +162,14 @@ vec2 parallaxMapping(vec3 viewDir) {
 vec2 getUVs() {
     vec2 uvs = TexCoords.xy;
 
-    if(parallaxDisplacement > 0) {
+    /*if(parallaxDisplacement > 0) {
         vec3 tangentViewDir = normalize((viewPos - FragPos) * TBN);
         uvs = parallaxMapping(tangentViewDir);
         
         if(uvs.x > 1.0 / scale || uvs.y > 1.0 / scale || uvs.x < 0.0 || uvs.y < 0.0) {
             discard;
         }
-    }
+    }*/
     
     return uvs;
 }
