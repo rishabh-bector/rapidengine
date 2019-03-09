@@ -137,7 +137,7 @@ func (terrainControl *TerrainControl) NewSkyBox(
 	)
 
 	cmaterial := terrainControl.engine.MaterialControl.NewCubemapMaterial()
-	cmaterial.CubeDiffuseMap = textureControl.GetTexture("skybox")
+	cmaterial.CubeDiffuseMap = textureControl.GetTexture("skybox").Addr
 
 	indices := []uint32{}
 	for i := 0; i < len(terrain.SkyBoxVertices); i++ {

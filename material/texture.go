@@ -12,9 +12,10 @@ import (
 )
 
 type Texture struct {
-	Name string
-	Path string
-	Addr *uint32
+	Name   string `json:"name"`
+	Path   string `json:"path"`
+	Filter string `json:"filter"`
+	Addr   *uint32
 }
 
 func LoadImage(path string) (*image.RGBA, error) {

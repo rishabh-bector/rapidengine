@@ -17,10 +17,10 @@ type MaterialUI interface {
 
 	SetRoughOrSmooth(bool)
 
-	AttachDiffuseMap(m *uint32)
-	AttachNormalMap(m *uint32)
-	AttachHeightMap(m *uint32)
-	AttachMetallicMap(m *uint32)
-	AttachRoughnessMap(m *uint32)
-	AttachAOMap(m *uint32)
+	AttachDiffuseMap(m *Texture)
+	AttachNormalMap(m *Texture)
+	AttachHeightMap(m *Texture)
+	AttachMetallicMap(m *Texture)
+	AttachRoughnessMap(m *Texture)
+	AttachAOMap(m *Texture)
 }

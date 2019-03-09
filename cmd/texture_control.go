@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"rapidengine/configuration"
 	"rapidengine/material"
 
@@ -8,7 +10,7 @@ import (
 )
 
 type TextureControl struct {
-	TexMap map[string]*material.Texture
+	TexMap map[string]*material.Texture `json:"textures"`
 
 	config *configuration.EngineConfig
 }
@@ -87,9 +89,10 @@ func (textureControl *TextureControl) NewTexture(path string, name string, filte
 	gl.GenerateMipmap(gl.TEXTURE_2D)
 	gl.BindTexture(gl.TEXTURE_2D, 0)
 	textureControl.TexMap[name] = &material.Texture{
-		Name: name,
-		Path: path,
-		Addr: &texture,
+		Name:   name,
+		Path:   path,
+		Filter: filter,
+		Addr:   &texture,
 	}
 	return nil
 }
@@ -123,5 +126,42 @@ func (textureControl *TextureControl) NewCubeMap(right, left, top, bottom, front
 		Name: right,
 		Path: right,
 		Addr: &cubeMap,
+	}
+}
+
+//   --------------------------------------------------
+//   Disk
+//   --------------------------------------------------
+
+func (textureControl *TextureControl) Save(path string) {
+	blob, err := json.Marshal(&textureControl.TexMap)
+	if err != nil {
+		panic(err)
+	}
+
+	err = ioutil.WriteFile(path, blob, 0644)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (textureControl *TextureControl) Load(path string) {
+	blob, err := ioutil.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+
+	temp := TextureControl{
+		TexMap: make(map[string]*material.Texture),
+	}
+
+	err = json.Unmarshal(blob, &temp.TexMap)
+	if err != nil {
+		panic(err)
+	}
+
+	println("Loading textures from file...")
+	for n, t := range temp.TexMap {
+		textureControl.NewTexture(t.Path, n, t.Filter)
 	}
 }

@@ -5,12 +5,12 @@ import "github.com/go-gl/gl/v4.1-core/gl"
 type PBRMaterial struct {
 	shader *ShaderProgram
 
-	AlbedoMap           *uint32
-	NormalMap           *uint32
-	HeightMap           *uint32
-	MetallicMap         *uint32
-	RoughnessMap        *uint32
-	AmbientOcclusionMap *uint32
+	AlbedoMap           *Texture
+	NormalMap           *Texture
+	HeightMap           *Texture
+	MetallicMap         *Texture
+	RoughnessMap        *Texture
+	AmbientOcclusionMap *Texture
 
 	DiffuseScalar          float32
 	NormalScalar           float32
@@ -45,37 +45,37 @@ func (pm *PBRMaterial) Render(delta float64, darkness float32, totalTime float64
 
 	if pm.AlbedoMap != nil {
 		gl.ActiveTexture(gl.TEXTURE0)
-		gl.BindTexture(gl.TEXTURE_2D, *pm.AlbedoMap)
+		gl.BindTexture(gl.TEXTURE_2D, *pm.AlbedoMap.Addr)
 	}
 	gl.Uniform1i(pm.shader.GetUniform("albedoMap"), 0)
 
 	if pm.NormalMap != nil {
 		gl.ActiveTexture(gl.TEXTURE1)
-		gl.BindTexture(gl.TEXTURE_2D, *pm.NormalMap)
+		gl.BindTexture(gl.TEXTURE_2D, *pm.NormalMap.Addr)
 	}
 	gl.Uniform1i(pm.shader.GetUniform("normalMap"), 1)
 
 	if pm.HeightMap != nil {
 		gl.ActiveTexture(gl.TEXTURE2)
-		gl.BindTexture(gl.TEXTURE_2D, *pm.HeightMap)
+		gl.BindTexture(gl.TEXTURE_2D, *pm.HeightMap.Addr)
 	}
 	gl.Uniform1i(pm.shader.GetUniform("heightMap"), 2)
 
 	if pm.MetallicMap != nil {
 		gl.ActiveTexture(gl.TEXTURE3)
-		gl.BindTexture(gl.TEXTURE_2D, *pm.MetallicMap)
+		gl.BindTexture(gl.TEXTURE_2D, *pm.MetallicMap.Addr)
 	}
 	gl.Uniform1i(pm.shader.GetUniform("metallicMap"), 3)
 
 	if pm.RoughnessMap != nil {
 		gl.ActiveTexture(gl.TEXTURE4)
-		gl.BindTexture(gl.TEXTURE_2D, *pm.RoughnessMap)
+		gl.BindTexture(gl.TEXTURE_2D, *pm.RoughnessMap.Addr)
 	}
 	gl.Uniform1i(pm.shader.GetUniform("roughnessMap"), 4)
 
 	if pm.AmbientOcclusionMap != nil {
 		gl.ActiveTexture(gl.TEXTURE5)
-		gl.BindTexture(gl.TEXTURE_2D, *pm.AmbientOcclusionMap)
+		gl.BindTexture(gl.TEXTURE_2D, *pm.AmbientOcclusionMap.Addr)
 	}
 	gl.Uniform1i(pm.shader.GetUniform("aoMap"), 5)
 
@@ -143,26 +143,26 @@ func (pm *PBRMaterial) SetRoughOrSmooth(r bool) {
 	pm.RoughOrSmooth = r
 }
 
-func (pm *PBRMaterial) AttachDiffuseMap(m *uint32) {
+func (pm *PBRMaterial) AttachDiffuseMap(m *Texture) {
 	pm.AlbedoMap = m
 }
 
-func (pm *PBRMaterial) AttachNormalMap(m *uint32) {
+func (pm *PBRMaterial) AttachNormalMap(m *Texture) {
 	pm.NormalMap = m
 }
 
-func (pm *PBRMaterial) AttachHeightMap(m *uint32) {
+func (pm *PBRMaterial) AttachHeightMap(m *Texture) {
 	pm.HeightMap = m
 }
 
-func (pm *PBRMaterial) AttachRoughnessMap(m *uint32) {
+func (pm *PBRMaterial) AttachRoughnessMap(m *Texture) {
 	pm.RoughnessMap = m
 }
 
-func (pm *PBRMaterial) AttachMetallicMap(m *uint32) {
+func (pm *PBRMaterial) AttachMetallicMap(m *Texture) {
 	pm.MetallicMap = m
 }
 
-func (pm *PBRMaterial) AttachAOMap(m *uint32) {
+func (pm *PBRMaterial) AttachAOMap(m *Texture) {
 	pm.AmbientOcclusionMap = m
 }

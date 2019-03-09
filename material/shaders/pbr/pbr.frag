@@ -182,9 +182,9 @@ vec3 getNormal(vec2 uvs) {
     vec3 norm = vec3(0, 0, 1);
 
     if(normalScalar > 0) {
-        norm = normalize(texture(normalMap, uvs).rgb * normalScalar);
+        norm = normalize(texture(normalMap, uvs).rgb);
         norm = normalize((norm * 2.0) - 0.5);
-        norm = normalize(TBN * norm);
+        norm = normalize(TBN * norm) * normalScalar;
     } else {
         norm = normalize(Normal);
     }
