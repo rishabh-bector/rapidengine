@@ -5,10 +5,10 @@ import "github.com/go-gl/gl/v4.1-core/gl"
 type StandardMaterial struct {
 	shader *ShaderProgram
 
-	diffuseMap  *uint32
-	normalMap   *uint32
-	heightMap   *uint32
-	specularMap *uint32
+	diffuseMap  *Texture
+	normalMap   *Texture
+	heightMap   *Texture
+	specularMap *Texture
 
 	DiffuseLevel  float32
 	NormalLevel   float32
@@ -35,19 +35,19 @@ func NewStandardMaterial(shader *ShaderProgram) *StandardMaterial {
 	}
 }
 
-func (sm *StandardMaterial) AttachDiffuseMap(dm *uint32) {
+func (sm *StandardMaterial) AttachDiffuseMap(dm *Texture) {
 	sm.diffuseMap = dm
 }
 
-func (sm *StandardMaterial) AttachNormalMap(nm *uint32) {
+func (sm *StandardMaterial) AttachNormalMap(nm *Texture) {
 	sm.normalMap = nm
 }
 
-func (sm *StandardMaterial) AttachHeightMap(hm *uint32) {
+func (sm *StandardMaterial) AttachHeightMap(hm *Texture) {
 	sm.heightMap = hm
 }
 
-func (sm *StandardMaterial) AttachSpecularMap(hm *uint32) {
+func (sm *StandardMaterial) AttachSpecularMap(hm *Texture) {
 	sm.specularMap = hm
 }
 
@@ -55,25 +55,25 @@ func (sm *StandardMaterial) Render(delta float64, darkness float32, totalTime fl
 
 	if sm.diffuseMap != nil {
 		gl.ActiveTexture(gl.TEXTURE0)
-		gl.BindTexture(gl.TEXTURE_2D, *sm.diffuseMap)
+		gl.BindTexture(gl.TEXTURE_2D, *sm.diffuseMap.Addr)
 	}
 	gl.Uniform1i(sm.shader.GetUniform("diffuseMap"), 0)
 
 	if sm.normalMap != nil {
 		gl.ActiveTexture(gl.TEXTURE1)
-		gl.BindTexture(gl.TEXTURE_2D, *sm.normalMap)
+		gl.BindTexture(gl.TEXTURE_2D, *sm.normalMap.Addr)
 	}
 	gl.Uniform1i(sm.shader.GetUniform("normalMap"), 1)
 
 	if sm.heightMap != nil {
 		gl.ActiveTexture(gl.TEXTURE2)
-		gl.BindTexture(gl.TEXTURE_2D, *sm.heightMap)
+		gl.BindTexture(gl.TEXTURE_2D, *sm.heightMap.Addr)
 	}
 	gl.Uniform1i(sm.shader.GetUniform("heightMap"), 2)
 
 	if sm.specularMap != nil {
 		gl.ActiveTexture(gl.TEXTURE3)
-		gl.BindTexture(gl.TEXTURE_2D, *sm.specularMap)
+		gl.BindTexture(gl.TEXTURE_2D, *sm.specularMap.Addr)
 	}
 	gl.Uniform1i(sm.shader.GetUniform("specularMap"), 3)
 

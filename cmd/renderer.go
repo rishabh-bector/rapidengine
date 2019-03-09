@@ -339,7 +339,7 @@ func InitOpenGL(config *configuration.EngineConfig) uint32 {
 		log.Fatal(err)
 	}
 
-	/*version := gl.GoStr(gl.GetString(gl.VERSION))
+	version := gl.GoStr(gl.GetString(gl.VERSION))
 	log.Info("Using OpenGL Version ", version)
 
 	if config.PolygonLines {
@@ -362,9 +362,33 @@ func InitOpenGL(config *configuration.EngineConfig) uint32 {
 
 	if config.AntiAliasing {
 		gl.Enable(gl.MULTISAMPLE)
-	}*/
+	}
 
 	return 0
+}
+
+func (renderer *Renderer) ResetOpenGL(config *configuration.EngineConfig) {
+	if config.PolygonLines {
+		gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
+	}
+
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+	if config.Dimensions == 3 {
+		gl.Enable(gl.DEPTH_TEST)
+		gl.Disable(gl.CULL_FACE)
+	} else {
+		gl.Disable(gl.DEPTH_TEST)
+	}
+
+	if config.GammaCorrection {
+		gl.Enable(gl.FRAMEBUFFER_SRGB)
+	}
+
+	if config.AntiAliasing {
+		gl.Enable(gl.MULTISAMPLE)
+	}
 }
 
 func (renderer *Renderer) EnablePolygonLines() {

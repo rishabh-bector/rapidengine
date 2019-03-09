@@ -18,6 +18,8 @@ type PBRMaterial struct {
 	RoughnessScalar        float32
 	AmbientOcclusionScalar float32
 
+	RoughOrSmooth bool
+
 	VertexDisplacement   float32
 	ParallaxDisplacement float32
 
@@ -82,6 +84,12 @@ func (pm *PBRMaterial) Render(delta float64, darkness float32, totalTime float64
 	gl.Uniform1f(pm.shader.GetUniform("roughnessScalar"), pm.RoughnessScalar)
 	gl.Uniform1f(pm.shader.GetUniform("aoScalar"), pm.AmbientOcclusionScalar)
 
+	if pm.RoughOrSmooth {
+		gl.Uniform1f(pm.shader.GetUniform("roughORsmooth"), 1)
+	} else {
+		gl.Uniform1f(pm.shader.GetUniform("roughORsmooth"), -1)
+	}
+
 	gl.Uniform1f(pm.shader.GetUniform("scale"), pm.Scale)
 	gl.Uniform1f(pm.shader.GetUniform("vertexDisplacement"), pm.VertexDisplacement)
 	gl.Uniform1f(pm.shader.GetUniform("parallaxDisplacement"), pm.ParallaxDisplacement)
@@ -129,6 +137,10 @@ func (pm *PBRMaterial) GetParallaxDisplacement() *float32 {
 
 func (pm *PBRMaterial) GetScale() *float32 {
 	return &pm.Scale
+}
+
+func (pm *PBRMaterial) SetRoughOrSmooth(r bool) {
+	pm.RoughOrSmooth = r
 }
 
 func (pm *PBRMaterial) AttachDiffuseMap(m *uint32) {

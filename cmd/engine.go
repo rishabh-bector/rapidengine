@@ -109,14 +109,21 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 			[]float32{100, 100, 100},
 			[]float32{100, 100, 100},
 			[]float32{100, 100, 100},
-			[]float32{1, -0.2, 1},
+			[]float32{-0.43, 0.44, -1},
 		)
+
+		/*l := lighting.NewDirectionLight(
+			[]float32{0.1, 0.1, 0.1},
+			[]float32{0.9, 0.9, 0.9},
+			[]float32{0.1, 0.1, 0.1},
+			[]float32{-0.43, 0.44, -1},
+		)*/
 
 		e.LightControl.SetDirectionalLight(&l)
 		e.LightControl.EnableDirectionalLighting()
 
 		e.Renderer.SkyBoxEnabled = true
-		e.Renderer.SkyBox = e.TerrainControl.NewSkyBox("TropicalSunnyDay", "png", &e.ShaderControl, &e.TextureControl, e.Config)
+		e.Renderer.SkyBox = e.TerrainControl.NewSkyBox("HDR_Snow", "png", &e.ShaderControl, &e.TextureControl, e.Config)
 	}
 
 	return &e

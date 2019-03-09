@@ -8,19 +8,19 @@ import (
 )
 
 type TextureControl struct {
-	TexMap map[string]*uint32
+	TexMap map[string]*material.Texture
 
 	config *configuration.EngineConfig
 }
 
 func NewTextureControl(config *configuration.EngineConfig) TextureControl {
 	return TextureControl{
-		TexMap: make(map[string]*uint32),
+		TexMap: make(map[string]*material.Texture),
 		config: config,
 	}
 }
 
-func (textureControl *TextureControl) GetTexture(name string) *uint32 {
+func (textureControl *TextureControl) GetTexture(name string) *material.Texture {
 	if tx, ok := textureControl.TexMap[name]; ok {
 		return tx
 	} else {
@@ -86,7 +86,11 @@ func (textureControl *TextureControl) NewTexture(path string, name string, filte
 
 	gl.GenerateMipmap(gl.TEXTURE_2D)
 	gl.BindTexture(gl.TEXTURE_2D, 0)
-	textureControl.TexMap[name] = &texture
+	textureControl.TexMap[name] = &material.Texture{
+		Name: name,
+		Path: path,
+		Addr: &texture,
+	}
 	return nil
 }
 
@@ -115,5 +119,9 @@ func (textureControl *TextureControl) NewCubeMap(right, left, top, bottom, front
 			0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(rgba.Pix))
 	}
 
-	textureControl.TexMap[name] = &cubeMap
+	textureControl.TexMap[name] = &material.Texture{
+		Name: right,
+		Path: right,
+		Addr: &cubeMap,
+	}
 }

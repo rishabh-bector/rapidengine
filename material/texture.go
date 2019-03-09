@@ -11,6 +11,12 @@ import (
 	"os"
 )
 
+type Texture struct {
+	Name string
+	Path string
+	Addr *uint32
+}
+
 func LoadImage(path string) (*image.RGBA, error) {
 	imgFile, err := os.Open(path)
 	if err != nil {

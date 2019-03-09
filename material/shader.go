@@ -240,6 +240,8 @@ var PBRProgram = ShaderProgram{
 		"roughnessScalar": 0,
 		"aoScalar":        0,
 
+		"roughORsmooth": 0,
+
 		"vertexDisplacement":   0,
 		"parallaxDisplacement": 0,
 		"scale":                0,

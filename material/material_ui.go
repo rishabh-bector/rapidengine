@@ -15,6 +15,8 @@ type MaterialUI interface {
 
 	GetScale() *float32
 
+	SetRoughOrSmooth(bool)
+
 	AttachDiffuseMap(m *uint32)
 	AttachNormalMap(m *uint32)
 	AttachHeightMap(m *uint32)

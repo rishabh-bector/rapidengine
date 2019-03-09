@@ -42,6 +42,8 @@ uniform float metallicScalar;
 uniform float roughnessScalar;
 uniform float aoScalar;
 
+uniform float roughORsmooth;
+
 uniform float parallaxDisplacement;
 uniform float vertexDisplacement;
 uniform float scale;
@@ -199,7 +201,14 @@ void main() {
     vec3 normal = getNormal(uvs);
 
     float metallic = texture(metallicMap, uvs).r * metallicScalar;
-    float roughness = (1 - texture(roughnessMap, uvs).r) * roughnessScalar;
+
+    float roughness = 0.25;
+    if(roughORsmooth > 0) {
+        roughness = (1 - texture(roughnessMap, uvs).r) * roughnessScalar;
+    } else {
+        roughness = (texture(roughnessMap, uvs).r) * roughnessScalar;
+    }
+
     float ao = texture(aoMap, uvs).r * aoScalar;
 
     //albedo = vec3(0.2, 0.2, 0.8);
