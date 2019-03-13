@@ -111,7 +111,9 @@ func (pc *PostControl) IsPostProcessingEnabled() bool {
 // default framebuffer (0) to the initial buffer of the
 // PostControl in preparation for the post processing stage.
 func (pc *PostControl) UpdateFrameBuffers() {
-	gl.Enable(gl.DEPTH_TEST)
+	if pc.engine.Config.Dimensions == 3 {
+		gl.Enable(gl.DEPTH_TEST)
+	}
 
 	if pc.PostProcessingEnabled {
 		gl.BindFramebuffer(gl.FRAMEBUFFER, pc.PInputBuffer.FrameBuffer)

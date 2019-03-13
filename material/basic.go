@@ -13,18 +13,18 @@ type BasicMaterial struct {
 
 	Hue [4]float32
 
-	DiffuseMap      *uint32
+	DiffuseMap      *Texture
 	DiffuseMapScale float32
 
 	AlphaMapLevel float32
-	AlphaMap      *uint32
+	AlphaMap      *Texture
 
 	Flipped int
 
 	ScatterLevel float32
 
 	animationPlaying   string
-	animationTextures  map[string][]*uint32
+	animationTextures  map[string][]*Texture
 	animationHitframes map[string][]bool
 	animationCurrent   int
 	animationFrame     float64
@@ -45,7 +45,7 @@ func NewBasicMaterial(Shader *ShaderProgram) *BasicMaterial {
 		DiffuseMapScale: 1,
 		AlphaMapLevel:   0,
 
-		animationTextures:  make(map[string][]*uint32),
+		animationTextures:  make(map[string][]*Texture),
 		animationHitframes: make(map[string][]bool),
 		animationFPS:       make(map[string]float64),
 		animationPlaying:   "",
@@ -56,16 +56,16 @@ func NewBasicMaterial(Shader *ShaderProgram) *BasicMaterial {
 func (bm *BasicMaterial) Render(delta float64, darkness float32, totalTime float64) {
 	bm.UpdateAnimation(delta)
 
-	if bm.DiffuseMap != nil && state.BoundTexture0 != *bm.DiffuseMap {
+	if bm.DiffuseMap != nil && state.BoundTexture0 != *bm.DiffuseMap.Addr {
 		gl.ActiveTexture(gl.TEXTURE0)
-		gl.BindTexture(gl.TEXTURE_2D, *bm.DiffuseMap)
-		state.BoundTexture0 = *bm.DiffuseMap
+		gl.BindTexture(gl.TEXTURE_2D, *bm.DiffuseMap.Addr)
+		state.BoundTexture0 = *bm.DiffuseMap.Addr
 	}
 
-	if bm.AlphaMap != nil && state.BoundTexture1 != *bm.AlphaMap {
+	if bm.AlphaMap != nil && state.BoundTexture1 != *bm.AlphaMap.Addr {
 		gl.ActiveTexture(gl.TEXTURE1)
-		gl.BindTexture(gl.TEXTURE_2D, *bm.AlphaMap)
-		state.BoundTexture1 = *bm.AlphaMap
+		gl.BindTexture(gl.TEXTURE_2D, *bm.AlphaMap.Addr)
+		state.BoundTexture1 = *bm.AlphaMap.Addr
 	}
 
 	gl.Uniform1f(bm.Shader.GetUniform("diffuseLevel"), bm.DiffuseLevel)
@@ -125,12 +125,12 @@ func (bm *BasicMaterial) EnableAnimation() {
 	bm.animationEnabled = true
 }
 
-func (bm *BasicMaterial) AddFrame(frame *uint32, anim string) {
+func (bm *BasicMaterial) AddFrame(frame *Texture, anim string) {
 	bm.animationTextures[anim] = append(bm.animationTextures[anim], frame)
 	bm.animationHitframes[anim] = append(bm.animationHitframes[anim], false)
 }
 
-func (bm *BasicMaterial) AddHitFrame(frame *uint32, anim string) {
+func (bm *BasicMaterial) AddHitFrame(frame *Texture, anim string) {
 	bm.animationTextures[anim] = append(bm.animationTextures[anim], frame)
 	bm.animationHitframes[anim] = append(bm.animationHitframes[anim], true)
 }
