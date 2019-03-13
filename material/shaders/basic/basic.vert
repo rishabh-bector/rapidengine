@@ -15,7 +15,7 @@ out vec3 texCoord;
 
 void main() {
     if(flipped == 0) {
-        texCoord = vec3(tex.x, tex.y, tex.z) / scale;
+        texCoord = vec3(tex.x / scale, tex.y, tex.z);
     } else {
         texCoord = vec3(1 - tex.x, tex.y, tex.z) / scale;
     }
