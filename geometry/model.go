@@ -24,3 +24,10 @@ func (m *Model) ComputeTangents() {
 		ms.ComputeTangents()
 	}
 }
+
+func (m *Model) EnableInstancing(num int) {
+	for _, ms := range m.Meshes {
+		ms.InstancingEnabled = true
+		ms.NumInstances = num
+	}
+}

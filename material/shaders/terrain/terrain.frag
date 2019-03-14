@@ -71,7 +71,6 @@ void main() {
     }
     
     FragColor = mix(vec4(skyColor, 1.0), vec4(result, 1.0), Visibility_FS_in);
-    //FragColor = vec4(0.5, 1.0, 0.0, 1.0);
 }
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {

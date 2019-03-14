@@ -221,6 +221,8 @@ func (pc *PostControl) ApplyVerticalGaussian(input, output *EffectBuffers) {
 
 func (pc *PostControl) ApplyGaussianBlur(input, output *EffectBuffers) {
 	gl.Viewport(0, 0, int32(pc.engine.Config.ScreenWidth/pc.gaussianScale), int32(pc.engine.Config.ScreenHeight/pc.gaussianScale))
+	pc.ScreenMaterial.FboWidth = float32(pc.engine.Config.ScreenWidth / pc.gaussianScale)
+	pc.ScreenMaterial.FboHeight = float32(pc.engine.Config.ScreenWidth / pc.gaussianScale)
 	pc.ApplyHorizontalGaussian(input, &pc.GaussianBuffer1)
 	pc.ApplyVerticalGaussian(&pc.GaussianBuffer1, &pc.GaussianBuffer2)
 	pc.swapGaussianPingPongBuffers()
@@ -231,6 +233,8 @@ func (pc *PostControl) ApplyGaussianBlur(input, output *EffectBuffers) {
 	}
 
 	gl.Viewport(pc.BloomOffsetX, pc.BloomOffsetY, int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight))
+	pc.ScreenMaterial.FboWidth = float32(pc.engine.Config.ScreenWidth)
+	pc.ScreenMaterial.FboHeight = float32(pc.engine.Config.ScreenWidth)
 	pc.ApplyHorizontalGaussian(&pc.GaussianBuffer1, &pc.GaussianBuffer3)
 	pc.ApplyVerticalGaussian(&pc.GaussianBuffer3, output)
 	gl.Viewport(0, 0, int32(pc.engine.Config.ScreenWidth), int32(pc.engine.Config.ScreenHeight))

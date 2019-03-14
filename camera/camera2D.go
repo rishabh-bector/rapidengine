@@ -72,27 +72,27 @@ func (camera2D *Camera2D) GetStaticView() mgl32.Mat4 {
 }
 
 func (camera2D *Camera2D) MoveUp() {
-	camera2D.Position = camera2D.Position.Add(camera2D.UpAxis.Mul(camera2D.Speed))
+	camera2D.TargetPosition = camera2D.TargetPosition.Add(camera2D.UpAxis.Mul(camera2D.Speed))
 }
 
 func (camera2D *Camera2D) MoveDown() {
-	camera2D.Position = camera2D.Position.Sub(camera2D.UpAxis.Mul(camera2D.Speed))
+	camera2D.TargetPosition = camera2D.TargetPosition.Sub(camera2D.UpAxis.Mul(camera2D.Speed))
 }
 
 func (camera2D *Camera2D) MoveLeft() {
-	camera2D.Position = camera2D.Position.Sub(camera2D.FrontAxis.Cross(camera2D.UpAxis).Normalize().Mul(camera2D.Speed))
+	camera2D.TargetPosition = camera2D.TargetPosition.Sub(camera2D.FrontAxis.Cross(camera2D.UpAxis).Normalize().Mul(camera2D.Speed))
 }
 
 func (camera2D *Camera2D) MoveRight() {
-	camera2D.Position = camera2D.Position.Add(camera2D.FrontAxis.Cross(camera2D.UpAxis).Normalize().Mul(camera2D.Speed))
+	camera2D.TargetPosition = camera2D.TargetPosition.Add(camera2D.FrontAxis.Cross(camera2D.UpAxis).Normalize().Mul(camera2D.Speed))
 }
 
 func (camera2D *Camera2D) MoveForward() {
-	camera2D.Position = camera2D.Position.Add(camera2D.FrontAxis.Mul(camera2D.Speed))
+	camera2D.TargetPosition = camera2D.TargetPosition.Add(camera2D.FrontAxis.Mul(camera2D.Speed))
 }
 
 func (camera2D *Camera2D) MoveBackward() {
-	camera2D.Position = camera2D.Position.Sub(camera2D.FrontAxis.Mul(camera2D.Speed))
+	camera2D.TargetPosition = camera2D.TargetPosition.Sub(camera2D.FrontAxis.Mul(camera2D.Speed))
 }
 
 func (camera2D *Camera2D) DefaultControls(inputs *input.Input) {

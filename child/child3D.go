@@ -27,9 +27,6 @@ type Child3D struct {
 	currentCopies  []ChildCopy
 	copyingEnabled bool
 
-	instancingEnabled bool
-	numInstances      int
-
 	X float32
 	Y float32
 	Z float32
@@ -244,19 +241,6 @@ func (child3D *Child3D) MouseCollisionFunc(collision bool) {
 //  --------------------------------------------------
 //  GL Instancing
 //  --------------------------------------------------
-
-func (child3D *Child3D) CheckInstancingEnabled() bool {
-	return child3D.instancingEnabled
-}
-
-func (child3D *Child3D) GetNumInstances() int {
-	return child3D.numInstances
-}
-
-func (child3D *Child3D) EnableGLInstancing(num int) {
-	child3D.instancingEnabled = true
-	child3D.numInstances = num
-}
 
 func (child3D *Child3D) SetInstanceRenderDistance(dist float32) {
 	child3D.projectionMatrix = mgl32.Perspective(

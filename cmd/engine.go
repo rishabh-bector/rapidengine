@@ -123,7 +123,7 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 		e.LightControl.EnableDirectionalLighting()
 
 		e.Renderer.SkyBoxEnabled = true
-		e.Renderer.SkyBox = e.TerrainControl.NewSkyBox("HDR_Snow", "png", &e.ShaderControl, &e.TextureControl, e.Config)
+		e.Renderer.SkyBox = e.TerrainControl.NewSkyBox("TropicalSunnyDay", "png", &e.ShaderControl, &e.TextureControl, e.Config)
 	}
 
 	return &e

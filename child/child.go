@@ -24,10 +24,6 @@ type Child interface {
 	RenderCopy(ChildCopy, camera.Camera)
 	CheckCopyingEnabled() bool
 
-	EnableGLInstancing(num int)
-	CheckInstancingEnabled() bool
-	GetNumInstances() int
-
 	GetShaderProgram() *material.ShaderProgram
 	GetNumVertices() int32
 

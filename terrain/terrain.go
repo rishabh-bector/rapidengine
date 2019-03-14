@@ -20,5 +20,5 @@ func NewTerrain(width, height int) Terrain {
 }
 
 func (terrain *Terrain) AttachMaterial(mat *material.TerrainMaterial) {
-	terrain.TChild.AttachMaterial(mat)
+	terrain.TChild.Model.Materials[0] = mat
 }

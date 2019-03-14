@@ -6,14 +6,14 @@ type FoliageMaterial struct {
 	shader *ShaderProgram
 
 	// Foliage material
-	DiffuseMap *uint32
-	NormalMap  *uint32
-	HeightMap  *uint32
-	OpacityMap *uint32
+	DiffuseMap *Texture
+	NormalMap  *Texture
+	HeightMap  *Texture
+	OpacityMap *Texture
 
 	// Terrain Info
-	TerrainHeightMap    *uint32
-	TerrainNormalMap    *uint32
+	TerrainHeightMap    *Texture
+	TerrainNormalMap    *Texture
 	TerrainDisplacement float32
 
 	TerrainWidth  float32
@@ -34,41 +34,39 @@ func NewFoliageMaterial(shader *ShaderProgram) *FoliageMaterial {
 }
 
 func (fm *FoliageMaterial) Render(delta float64, darkness float32, totalTime float64) {
-	fm.UpdateAttribArrays()
-
 	if fm.DiffuseMap != nil {
 		gl.ActiveTexture(gl.TEXTURE0)
-		gl.BindTexture(gl.TEXTURE_2D, *fm.DiffuseMap)
+		gl.BindTexture(gl.TEXTURE_2D, *fm.DiffuseMap.Addr)
 	}
 	gl.Uniform1i(fm.shader.GetUniform("diffuseMap"), 0)
 
 	if fm.NormalMap != nil {
 		gl.ActiveTexture(gl.TEXTURE1)
-		gl.BindTexture(gl.TEXTURE_2D, *fm.NormalMap)
+		gl.BindTexture(gl.TEXTURE_2D, *fm.NormalMap.Addr)
 	}
 	gl.Uniform1i(fm.shader.GetUniform("normalMap"), 1)
 
 	if fm.HeightMap != nil {
 		gl.ActiveTexture(gl.TEXTURE2)
-		gl.BindTexture(gl.TEXTURE_2D, *fm.HeightMap)
+		gl.BindTexture(gl.TEXTURE_2D, *fm.HeightMap.Addr)
 	}
 	gl.Uniform1i(fm.shader.GetUniform("heightMap"), 2)
 
 	if fm.OpacityMap != nil {
 		gl.ActiveTexture(gl.TEXTURE5)
-		gl.BindTexture(gl.TEXTURE_2D, *fm.OpacityMap)
+		gl.BindTexture(gl.TEXTURE_2D, *fm.OpacityMap.Addr)
 	}
 	gl.Uniform1i(fm.shader.GetUniform("opacityMap"), 5)
 
 	if fm.TerrainHeightMap != nil {
 		gl.ActiveTexture(gl.TEXTURE3)
-		gl.BindTexture(gl.TEXTURE_2D, *fm.TerrainHeightMap)
+		gl.BindTexture(gl.TEXTURE_2D, *fm.TerrainHeightMap.Addr)
 	}
 	gl.Uniform1i(fm.shader.GetUniform("terrainHeightMap"), 3)
 
 	if fm.TerrainNormalMap != nil {
 		gl.ActiveTexture(gl.TEXTURE4)
-		gl.BindTexture(gl.TEXTURE_2D, *fm.TerrainNormalMap)
+		gl.BindTexture(gl.TEXTURE_2D, *fm.TerrainNormalMap.Addr)
 	}
 	gl.Uniform1i(fm.shader.GetUniform("terrainNormalMap"), 4)
 
@@ -81,14 +79,6 @@ func (fm *FoliageMaterial) Render(delta float64, darkness float32, totalTime flo
 	gl.Uniform1f(fm.shader.GetUniform("foliageVariation"), fm.FoliageVariation)
 
 	gl.Uniform1f(fm.shader.GetUniform("totalTime"), float32(totalTime))
-}
-
-func (fm *FoliageMaterial) UpdateAttribArrays() {
-	gl.EnableVertexAttribArray(0)
-	gl.EnableVertexAttribArray(1)
-	gl.EnableVertexAttribArray(2)
-	//gl.EnableVertexAttribArray(3)
-	//gl.EnableVertexAttribArray(4)
 }
 
 func (fm *FoliageMaterial) GetShader() *ShaderProgram {

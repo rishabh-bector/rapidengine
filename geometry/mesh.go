@@ -41,6 +41,13 @@ type Mesh struct {
 
 	// Material
 	ModelMaterial int
+
+	// Instancing
+	InstancingEnabled bool
+	NumInstances      int
+
+	// Tesselation
+	TesselationEnabled bool
 }
 
 func (p *Mesh) Render(mat material.Material, viewMtx, modelMtx, projMtx *float32, delta, totalTime float64, darkness float32) {
@@ -52,15 +59,12 @@ func (p *Mesh) Render(mat material.Material, viewMtx, modelMtx, projMtx *float32
 	if p.TexCoordsEnabled {
 		gl.EnableVertexAttribArray(1)
 	}
-
 	if p.NormalsEnabled {
 		gl.EnableVertexAttribArray(2)
 	}
-
 	if p.TangentsEnabled {
 		gl.EnableVertexAttribArray(3)
 	}
-
 	if p.BitangentsEnabled {
 		gl.EnableVertexAttribArray(4)
 	}
@@ -81,6 +85,20 @@ func (p *Mesh) Render(mat material.Material, viewMtx, modelMtx, projMtx *float32
 	)
 
 	mat.Render(delta, darkness, totalTime)
+
+	p.Draw()
+}
+
+func (p *Mesh) Draw() {
+	if p.InstancingEnabled {
+		gl.DrawElementsInstanced(gl.TRIANGLES, p.NumVertices, gl.UNSIGNED_INT, gl.PtrOffset(0), int32(p.NumInstances))
+		return
+	}
+
+	if p.TesselationEnabled {
+		gl.DrawElements(gl.PATCHES, p.NumVertices, gl.UNSIGNED_INT, gl.PtrOffset(0))
+		return
+	}
 
 	gl.DrawElements(gl.TRIANGLES, p.NumVertices, gl.UNSIGNED_INT, gl.PtrOffset(0))
 }

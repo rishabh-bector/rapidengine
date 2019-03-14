@@ -117,12 +117,17 @@ func NewScreenQuad() Mesh {
 		2, 0, 3,
 	}
 
-	return Mesh{
-		ID:          "screen",
-		VAO:         NewVertexArray(ScreenQuadPoints, indices),
-		TexCoords:   RectTextures,
-		NumVertices: int32(len(indices)),
+	m := Mesh{
+		ID:               "screen",
+		VAO:              NewVertexArray(ScreenQuadPoints, indices),
+		TexCoords:        RectTextures,
+		NumVertices:      int32(len(indices)),
+		TexCoordsEnabled: true,
 	}
+
+	m.VAO.AddVertexAttribute(m.TexCoords, 1, 3)
+
+	return m
 }
 
 // NewCube creates a 3D cube Mesh

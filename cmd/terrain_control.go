@@ -31,7 +31,7 @@ func (tc *TerrainControl) Initialize(engine *Engine) {
 
 func (tc *TerrainControl) Update() {
 	if tc.terrainEnabled {
-		tc.engine.Renderer.RenderTerrainChild(tc.root.TChild)
+		tc.engine.Renderer.RenderChild(tc.root.TChild)
 
 		for _, f := range tc.foliages {
 			tc.engine.Renderer.RenderChild(f.FChild)
@@ -56,8 +56,14 @@ func (tc *TerrainControl) NewTerrain(width int, height int, vertices int) *terra
 
 	t.TChild = tc.engine.ChildControl.NewChild3D()
 
-	t.TChild.AttachMaterial(tc.engine.MaterialControl.NewTerrainMaterial())
-	t.TChild.AttachMesh(geometry.NewPlane(width, height, vertices, nil, 1))
+	t.TChild.AttachModel(
+		geometry.Model{
+			Meshes:    []geometry.Mesh{geometry.NewPlane(width, height, vertices, nil, 1)},
+			Materials: map[int]material.Material{0: tc.engine.MaterialControl.NewTerrainMaterial()},
+		},
+	)
+
+	t.TChild.Model.Meshes[0].TesselationEnabled = true
 
 	t.TChild.PreRender(tc.engine.Renderer.MainCamera)
 
@@ -90,10 +96,16 @@ func (tc *TerrainControl) NewFoliage(width int, height int, instances int) *terr
 
 	f.FChild = tc.engine.ChildControl.NewChild3D()
 
-	f.FChild.AttachMaterial(tc.engine.MaterialControl.NewFoliageMaterial())
-	f.FChild.AttachMesh(geometry.LoadObj("./billboard.obj", 1))
+	f.FChild.AttachModel(
+		geometry.Model{
+			Meshes:    []geometry.Mesh{geometry.LoadObj("./billboard.obj", 1)},
+			Materials: map[int]material.Material{0: tc.engine.MaterialControl.NewFoliageMaterial()},
+		},
+	)
 
-	f.FChild.EnableGLInstancing(instances)
+	f.FChild.Model.EnableInstancing(instances)
+	f.FChild.Model.Meshes[0].InstancingEnabled = true
+	f.FChild.Model.Meshes[0].NumInstances = instances
 	f.FChild.SetInstanceRenderDistance(100000)
 
 	f.FChild.PreRender(tc.engine.Renderer.MainCamera)

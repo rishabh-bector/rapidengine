@@ -154,35 +154,8 @@ func (renderer *Renderer) RenderChildren() {
 
 // RenderChild renders a single child to the screen
 func (renderer *Renderer) RenderChild(c child.Child) {
-	if c.GetDimensions() == 3 {
-		renderer.render3DChild(c)
-	} else {
-		c.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.TotalFrameTime)
-	}
-
-	if c.CheckInstancingEnabled() {
-		renderer.drawChildInstanced(c, c.GetNumInstances())
-	}
-
+	c.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.TotalFrameTime)
 	gl.BindVertexArray(0)
-}
-
-func (renderer *Renderer) render3DChild(c child.Child) {
-	c.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.TotalFrameTime)
-}
-
-func (renderer *Renderer) drawChild(c child.Child) {
-	gl.DrawElements(gl.TRIANGLES, c.GetNumVertices(), gl.UNSIGNED_INT, gl.PtrOffset(0))
-}
-
-func (renderer *Renderer) RenderTerrainChild(c child.Child) {
-	renderer.BindChild(c)
-	c.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.TotalFrameTime)
-	gl.DrawElements(gl.PATCHES, c.GetNumVertices(), gl.UNSIGNED_INT, gl.PtrOffset(0))
-}
-
-func (renderer *Renderer) drawChildInstanced(c child.Child, num int) {
-	gl.DrawElementsInstanced(gl.TRIANGLES, c.GetNumVertices(), gl.UNSIGNED_INT, gl.PtrOffset(0), int32(num))
 }
 
 // RenderChildCopies renders all copies of a child
@@ -211,7 +184,7 @@ func (renderer *Renderer) RenderCopy(c child.Child, cpy child.ChildCopy) {
 	if renderer.Config.Dimensions == 3 {
 		if InBounds3D(cpy.X, cpy.Y, cpy.Z, float32(renderer.camX), float32(renderer.camY), float32(renderer.camZ), renderer.RenderDistance) {
 			c.RenderCopy(cpy, renderer.MainCamera)
-			renderer.drawChild(c)
+
 			c.AddCurrentCopy(cpy)
 		}
 	}
