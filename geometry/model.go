@@ -31,3 +31,10 @@ func (m *Model) EnableInstancing(num int) {
 		ms.NumInstances = num
 	}
 }
+
+func NewModel(m Mesh, mat material.Material) Model {
+	return Model{
+		Meshes:    []Mesh{m},
+		Materials: map[int]material.Material{0: mat},
+	}
+}

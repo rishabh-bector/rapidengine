@@ -5,6 +5,7 @@ import (
 	"rapidengine/configuration"
 	"rapidengine/material"
 
+	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 )
 
@@ -236,6 +237,8 @@ func NewPlane(wIDth, height, density int, heightData [][]float32, scale float32)
 
 	m.VAO.AddVertexAttribute(m.TexCoords, 1, 3)
 	m.VAO.AddVertexAttribute(m.Normals, 2, 3)
+
+	gl.BindVertexArray(0)
 
 	return m
 }

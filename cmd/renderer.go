@@ -155,7 +155,6 @@ func (renderer *Renderer) RenderChildren() {
 // RenderChild renders a single child to the screen
 func (renderer *Renderer) RenderChild(c child.Child) {
 	c.Update(renderer.MainCamera, renderer.DeltaFrameTime, renderer.TotalFrameTime)
-	gl.BindVertexArray(0)
 }
 
 // RenderChildCopies renders all copies of a child
@@ -377,6 +376,14 @@ func (renderer *Renderer) DisablePolygonLines() {
 // SetRenderDistance sets the render distance
 func (renderer *Renderer) SetRenderDistance(distance float32) {
 	renderer.RenderDistance = distance
+}
+
+func (renderer *Renderer) DisableCursor() {
+	renderer.Window.SetInputMode(glfw.CursorMode, glfw.CursorDisabled)
+}
+
+func (renderer *Renderer) EnableCursor() {
+	renderer.Window.SetInputMode(glfw.CursorMode, glfw.CursorNormal)
 }
 
 // CheckError decodes the various unhelpful error codes

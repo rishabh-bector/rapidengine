@@ -63,8 +63,9 @@ func (tc *TerrainControl) NewTerrain(width int, height int, vertices int) *terra
 		},
 	)
 
-	t.TChild.Model.Meshes[0].TesselationEnabled = true
+	//t.TChild.Model.Meshes[0].TesselationEnabled = true
 
+	t.TChild.SetPosition(0, 1, 0)
 	t.TChild.PreRender(tc.engine.Renderer.MainCamera)
 
 	tc.terrainEnabled = true
