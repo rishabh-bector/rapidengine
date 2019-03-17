@@ -93,7 +93,7 @@ func (child3D *Child3D) Render(mainCamera camera.Camera, totalTime float64) {
 	child3D.modelMatrix = child3D.modelMatrix.Mul4(mgl32.HomogRotate3DY(child3D.RY))
 	child3D.modelMatrix = child3D.modelMatrix.Mul4(mgl32.HomogRotate3DZ(child3D.RZ))
 
-	child3D.Model.Render(mainCamera.GetFirstViewIndex(), &child3D.modelMatrix[0], &child3D.projectionMatrix[0])
+	child3D.Model.Render(mainCamera.GetFirstViewIndex(), &child3D.modelMatrix[0], &child3D.projectionMatrix[0], totalTime)
 }
 
 func (child3D *Child3D) RenderCopy(config ChildCopy, mainCamera camera.Camera) {

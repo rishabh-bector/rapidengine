@@ -63,7 +63,7 @@ func (tc *TerrainControl) NewTerrain(width int, height int, vertices int) *terra
 		},
 	)
 
-	//t.TChild.Model.Meshes[0].TesselationEnabled = true
+	t.TChild.Model.Meshes[0].TesselationEnabled = true
 
 	t.TChild.SetPosition(0, 1, 0)
 	t.TChild.PreRender(tc.engine.Renderer.MainCamera)
@@ -98,16 +98,20 @@ func (tc *TerrainControl) NewFoliage(width int, height int, instances int) *terr
 	f.FChild = tc.engine.ChildControl.NewChild3D()
 
 	f.FChild.AttachModel(
-		geometry.Model{
-			Meshes:    []geometry.Mesh{geometry.LoadObj("./billboard.obj", 1)},
-			Materials: map[int]material.Material{0: tc.engine.MaterialControl.NewFoliageMaterial()},
-		},
+		tc.engine.GeometryControl.LoadModel("./billboard.obj", tc.engine.MaterialControl.NewFoliageMaterial()),
 	)
 
 	f.FChild.Model.EnableInstancing(instances)
 	f.FChild.Model.Meshes[0].InstancingEnabled = true
 	f.FChild.Model.Meshes[0].NumInstances = instances
 	f.FChild.SetInstanceRenderDistance(100000)
+
+	f.FChild.Model.Meshes[0].ComputeTangents()
+
+	f.FChild.Model.Meshes[0].TexCoordsEnabled = true
+	f.FChild.Model.Meshes[0].NormalsEnabled = true
+	f.FChild.Model.Meshes[0].TangentsEnabled = true
+	f.FChild.Model.Meshes[0].BitangentsEnabled = true
 
 	f.FChild.PreRender(tc.engine.Renderer.MainCamera)
 

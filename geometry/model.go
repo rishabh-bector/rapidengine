@@ -13,9 +13,9 @@ type Model struct {
 	Materials map[int]material.Material
 }
 
-func (m *Model) Render(viewMtx *float32, modelMtx *float32, projMtx *float32) {
+func (m *Model) Render(viewMtx *float32, modelMtx *float32, projMtx *float32, totalTime float64) {
 	for _, ms := range m.Meshes {
-		ms.Render(m.Materials[ms.ModelMaterial], viewMtx, modelMtx, projMtx, 0, 0, 1)
+		ms.Render(m.Materials[ms.ModelMaterial], viewMtx, modelMtx, projMtx, 0, totalTime, 1)
 	}
 }
 

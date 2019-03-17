@@ -29,4 +29,5 @@ func NewFoliage(width, height int) Foliage {
 
 func (f *Foliage) AttachMaterial(mat *material.FoliageMaterial) {
 	f.FChild.AttachMaterial(mat)
+	f.FChild.Model.Materials[0] = mat
 }

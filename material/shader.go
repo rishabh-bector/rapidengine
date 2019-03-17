@@ -313,9 +313,9 @@ var TerrainProgram = ShaderProgram{
 }
 
 var FoliageProgram = ShaderProgram{
-	vertexShader:   "../rapidengine/material/shaders/foliage/foliage.vert",
-	fragmentShader: "../rapidengine/material/shaders/foliage/foliage.frag",
-	geometryShader: "../rapidengine/material/shaders/foliage/foliage.geom",
+	vertexShader:   "../rapidengine/material/shaders/foliage/nfoliage.vert",
+	fragmentShader: "../rapidengine/material/shaders/foliage/nfoliage.frag",
+	//geometryShader: "../rapidengine/material/shaders/foliage/foliage.geom",
 	uniformLocations: map[string]int32{
 		// Vertices
 		"modelMtx":      0,
@@ -323,10 +323,26 @@ var FoliageProgram = ShaderProgram{
 		"projectionMtx": 0,
 
 		// Standard Material
-		"diffuseMap": 0,
-		"normalMap":  0,
-		"heightMap":  0,
-		"opacityMap": 0,
+		"diffuseMap":  0,
+		"normalMap":   0,
+		"heightMap":   0,
+		"opacityMap":  0,
+		"specularMap": 0,
+
+		"diffuseLevel":  0,
+		"normalLevel":   0,
+		"specularLevel": 0,
+		"heightLevel":   0,
+
+		"hue": 0,
+
+		"displacement": 0,
+		"scale":        0,
+		"reflectivity": 0,
+		"refractivity": 0,
+		"refractLevel": 0,
+
+		"cubeDiffuseMap": 0,
 
 		// Terrain Info
 		"terrainHeightMap":    0,
@@ -336,6 +352,7 @@ var FoliageProgram = ShaderProgram{
 		"terrainWidth":  0,
 		"terrainLength": 0,
 
+		// Foliage Config
 		"foliageDisplacement": 0,
 		"foliageNoiseSeed":    0,
 		"foliageVariation":    0,
@@ -347,8 +364,11 @@ var FoliageProgram = ShaderProgram{
 		"dirLight.ambient":   0,
 		"dirLight.diffuse":   0,
 		"dirLight.specular":  0,
-		"viewPos":            0,
-		"numPointLights":     0,
+
+		"viewPos": 0,
+
+		"numPointLights": 0,
+		"pointLights":    0,
 	},
 	attributeLocations: map[string]uint32{
 		"position":   0,
