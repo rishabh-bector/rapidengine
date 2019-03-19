@@ -32,6 +32,7 @@ func (inputControl *InputControl) Update(window *glfw.Window) *input.Input {
 
 		input.LeftMouseButton,
 		input.RightMouseButton,
+		input.MiddleMouseButton,
 
 		input.ScrollXOff,
 		input.ScrollYOff,

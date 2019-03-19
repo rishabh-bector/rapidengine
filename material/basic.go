@@ -23,6 +23,8 @@ type BasicMaterial struct {
 
 	ScatterLevel float32
 
+	Blending bool
+
 	animationPlaying   string
 	animationTextures  map[string][]*Texture
 	animationHitframes map[string][]bool
@@ -83,6 +85,13 @@ func (bm *BasicMaterial) Render(delta float64, darkness float32, totalTime float
 	gl.Uniform1f(bm.Shader.GetUniform("scatterLevel"), bm.ScatterLevel)
 
 	gl.Uniform1i(bm.Shader.GetUniform("flipped"), int32(bm.Flipped))
+
+	if bm.Blending {
+		gl.Enable(gl.BLEND)
+		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	} else {
+		gl.Disable(gl.BLEND)
+	}
 }
 
 func (bm *BasicMaterial) GetShader() *ShaderProgram {

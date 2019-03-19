@@ -29,11 +29,11 @@ void main() {
     
     float finalAlpha = calculateAlpha();
 
-    if(finalColor.a < 0.2 || finalAlpha < 0.2) {
+    if(finalColor.a < 0.01 || finalAlpha < 0.2) {
         discard;
     }
 
-    outColor = vec4(darkness * finalColor.xyz, finalColor.a * finalAlpha);
+    outColor = vec4(darkness * finalColor.xyz, finalColor.a);
     scatterColor = outColor * scatterLevel;
 }
 

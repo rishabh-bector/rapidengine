@@ -109,7 +109,7 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 			[]float32{100, 100, 100},
 			[]float32{100, 100, 100},
 			[]float32{100, 100, 100},
-			[]float32{-0.43, 0.44, -1},
+			[]float32{-0.59, 0.44, -1},
 		)
 
 		/*l := lighting.NewDirectionLight(

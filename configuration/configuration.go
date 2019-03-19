@@ -11,6 +11,8 @@ type EngineConfig struct {
 	GammaCorrection bool
 	AntiAliasing    bool
 
+	Blending bool
+
 	WindowTitle    string
 	PolygonLines   bool
 	CollisionLines bool

@@ -100,6 +100,10 @@ func (renderer *Renderer) renderFrame() {
 		renderer.SkyBox.Render(renderer.MainCamera)
 	}
 
+	if renderer.Config.Blending {
+		renderer.EnableBlending()
+	}
+
 	// Render children
 	renderer.RenderChildren()
 
@@ -371,6 +375,15 @@ func (renderer *Renderer) EnablePolygonLines() {
 func (renderer *Renderer) DisablePolygonLines() {
 	renderer.engine.Config.PolygonLines = false
 	gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
+}
+
+func (renderer *Renderer) EnableBlending() {
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+}
+
+func (renderer *Renderer) DisableBlending() {
+	gl.Disable(gl.BLEND)
 }
 
 // SetRenderDistance sets the render distance

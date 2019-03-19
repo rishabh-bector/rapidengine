@@ -10,6 +10,7 @@ var LastMouseX float64
 var LastMouseY float64
 var LeftMouseButton bool
 var RightMouseButton bool
+var MiddleMouseButton bool
 
 var ScrollXOff float64
 var ScrollYOff float64
@@ -24,8 +25,9 @@ type Input struct {
 	LastMouseX float64
 	LastMouseY float64
 
-	LeftMouseButton  bool
-	RightMouseButton bool
+	LeftMouseButton   bool
+	RightMouseButton  bool
+	MiddleMouseButton bool
 
 	ScrollX float64
 	ScrollY float64
@@ -40,6 +42,7 @@ func MouseCallback(w *glfw.Window, xpos float64, ypos float64) {
 func MouseButtonCallback(w *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
 	LeftMouseButton = (button == 0 && action == glfw.Press)
 	RightMouseButton = (button == 1 && action == glfw.Press)
+	MiddleMouseButton = (button == 2 && action == glfw.Press)
 }
 
 func ScrollCallback(w *glfw.Window, xoff float64, yoff float64) {
