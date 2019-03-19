@@ -3,7 +3,7 @@ package lighting
 import (
 	"rapidengine/material"
 
-	"github.com/go-gl/gl/v4.3-core/gl"
+	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
 type DirectionLight struct {

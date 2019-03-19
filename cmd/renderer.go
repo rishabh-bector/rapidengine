@@ -9,7 +9,7 @@ package cmd
 import (
 	"time"
 
-	"github.com/go-gl/gl/v4.3-core/gl"
+	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/pkg/profile"
 	log "github.com/sirupsen/logrus"

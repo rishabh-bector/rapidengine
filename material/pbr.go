@@ -1,6 +1,6 @@
 package material
 
-import "github.com/go-gl/gl/v4.3-core/gl"
+import "github.com/go-gl/gl/v4.1-core/gl"
 
 type PBRMaterial struct {
 	shader *ShaderProgram
