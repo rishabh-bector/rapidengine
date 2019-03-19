@@ -13,7 +13,7 @@
 [[projects]]
   branch = "master"
   name = "github.com/go-gl/gl"
-  packages = ["v4.1-core/gl"]
+  packages = ["v4.3-core/gl"]
   revision = "68e2537930806bfcee1b92a0e14b4e9b8bb3a3e3"
 
 [[projects]]
