@@ -150,10 +150,11 @@ void main() {
 
     // Point lighting
     for(int i = 0; i < numPointLights; i++) {
-        result += CalcPointLight(pointLights[i], norm, viewDir, FragPos, diffuseColor, specularColor);    
+        //result += CalcPointLight(pointLights[i], norm, viewDir, FragPos, diffuseColor, specularColor);    
     }
     
     FragColor = vec4(mix(result, mix(calculateReflection(), calculateRefraction(), refractLevel), reflectivity), 1.0);
+    FragColor = vec4(result, 1.0);
 }
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec4 diffuseColor, vec4 specularColor) {

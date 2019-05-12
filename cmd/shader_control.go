@@ -39,6 +39,11 @@ func (shaderControl *ShaderControl) Initialize() {
 	}
 }
 
+func (shaderControl *ShaderControl) AddCustomShader(name string, program *material.ShaderProgram) {
+	shaderControl.programs[name] = program
+	shaderControl.programs[name].Compile()
+}
+
 func (shaderControl *ShaderControl) GetShader(name string) *material.ShaderProgram {
 	return shaderControl.programs[name]
 }

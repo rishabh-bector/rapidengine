@@ -23,6 +23,29 @@ type ShaderProgram struct {
 	attributeLocations map[string]uint32
 }
 
+func NewShaderProgram(
+	vertexShader string,
+	fragmentShader string,
+
+	geometryShader string,
+
+	controlShader string,
+	evalShader string,
+
+	uniformLocations map[string]int32,
+	attributeLocations map[string]uint32,
+) ShaderProgram {
+	return ShaderProgram{
+		vertexShader:       vertexShader,
+		fragmentShader:     fragmentShader,
+		geometryShader:     geometryShader,
+		controlShader:      controlShader,
+		evalShader:         evalShader,
+		uniformLocations:   uniformLocations,
+		attributeLocations: attributeLocations,
+	}
+}
+
 func (shaderProgram *ShaderProgram) Bind() {
 	b := shaderProgram.id
 	gl.UseProgram(b)
