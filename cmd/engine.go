@@ -109,15 +109,15 @@ func NewEngine(config *configuration.EngineConfig, renderFunc func(*Renderer, *i
 			[]float32{100, 100, 100},
 			[]float32{100, 100, 100},
 			[]float32{100, 100, 100},
-			[]float32{-0.59, 0.44, -1},
+			[]float32{-0.59, -0.5, -1},
 		)
 
-		/*l := lighting.NewDirectionLight(
+		l = lighting.NewDirectionLight(
 			[]float32{0.1, 0.1, 0.1},
 			[]float32{0.9, 0.9, 0.9},
 			[]float32{0.1, 0.1, 0.1},
-			[]float32{-0.43, 0.44, -1},
-		)*/
+			[]float32{-0.43, -0.44, -1},
+		)
 
 		e.LightControl.SetDirectionalLight(&l)
 		e.LightControl.EnableDirectionalLighting()

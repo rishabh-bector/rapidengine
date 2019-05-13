@@ -377,6 +377,10 @@ func (renderer *Renderer) DisablePolygonLines() {
 	gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
 }
 
+func (renderer *Renderer) CheckPolygonLines() bool {
+	return renderer.engine.Config.PolygonLines
+}
+
 func (renderer *Renderer) EnableBlending() {
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
