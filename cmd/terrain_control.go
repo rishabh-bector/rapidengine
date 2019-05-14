@@ -133,6 +133,7 @@ func (tc *TerrainControl) NewWater(width int, height int, vertices int) *terrain
 
 func (terrainControl *TerrainControl) NewSkyBox(
 	path string,
+	name string,
 	ext string,
 
 	shaderControl *ShaderControl,
@@ -144,12 +145,13 @@ func (terrainControl *TerrainControl) NewSkyBox(
 	shaderControl.GetShader("skybox").Bind()
 
 	textureControl.NewCubeMap(
-		fmt.Sprintf("../rapidengine/assets/skybox/%s/%s_LF.%s", path, path, ext),
-		fmt.Sprintf("../rapidengine/assets/skybox/%s/%s_RT.%s", path, path, ext),
-		fmt.Sprintf("../rapidengine/assets/skybox/%s/%s_UP.%s", path, path, ext),
-		fmt.Sprintf("../rapidengine/assets/skybox/%s/%s_DN.%s", path, path, ext),
-		fmt.Sprintf("../rapidengine/assets/skybox/%s/%s_FR.%s", path, path, ext),
-		fmt.Sprintf("../rapidengine/assets/skybox/%s/%s_BK.%s", path, path, ext),
+		fmt.Sprintf("%s/%s/%s_LF.%s", path, name, name, ext),
+		fmt.Sprintf("%s/%s/%s_RT.%s", path, name, name, ext),
+		fmt.Sprintf("%s/%s/%s_UP.%s", path, name, name, ext),
+		fmt.Sprintf("%s/%s/%s_DN.%s", path, name, name, ext),
+		fmt.Sprintf("%s/%s/%s_FR.%s", path, name, name, ext),
+		fmt.Sprintf("%s/%s/%s_BK.%s", path, name, name, ext),
+
 		"skybox",
 	)
 

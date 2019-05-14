@@ -74,6 +74,10 @@ func (skyBox *SkyBox) Render(mainCamera camera.Camera) {
 	gl.DepthMask(true)
 }
 
+func (skyBox *SkyBox) SetCustomMaterial(m *material.CubemapMaterial) {
+	skyBox.material = m
+}
+
 var SkyBoxVertices = []float32{
 
 	-1.0, 1.0, -1.0,

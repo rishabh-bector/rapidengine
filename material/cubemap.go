@@ -32,3 +32,7 @@ func (cm *CubemapMaterial) UpdateAttribArrays() {
 func (cm *CubemapMaterial) GetShader() *ShaderProgram {
 	return cm.shader
 }
+
+func (cm *CubemapMaterial) SetCustomShader(s *ShaderProgram) {
+	cm.shader = s
+}
