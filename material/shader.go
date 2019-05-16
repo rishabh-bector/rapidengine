@@ -135,6 +135,23 @@ func (shaderProgram *ShaderProgram) Compile() {
 	}
 }
 
+func (shaderProgram *ShaderProgram) UniformTexture(index uint32, texture uint32, name string) {
+	gl.ActiveTexture(gl.TEXTURE0 + index)
+	gl.BindTexture(gl.TEXTURE_2D, texture)
+	gl.Uniform1i(shaderProgram.GetUniform(name), int32(index))
+}
+
+func (shaderProgram *ShaderProgram) UniformMatrix4(name string, value *float32) {
+	gl.UniformMatrix4fv(
+		shaderProgram.GetUniform(name),
+		1, false, value,
+	)
+}
+
+func (shaderProgram *ShaderProgram) UniformVec3(name string, value *float32) {
+	gl.Uniform3fv(shaderProgram.GetUniform(name), 1, value)
+}
+
 func CompileShader(source string, shaderType uint32) (uint32, error) {
 	shader := gl.CreateShader(shaderType)
 

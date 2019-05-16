@@ -60,6 +60,9 @@ type PostControl struct {
 	ScatteringTexture uint32
 	ScatteringBuffer  EffectBuffers
 
+	// User Processing
+	UserFunc func(*PostControl)
+
 	engine *Engine
 }
 
@@ -168,6 +171,13 @@ func (pc *PostControl) Update() {
 		pc.ApplyPreScattering(&EffectBuffers{RenderedTexture: pc.ScatteringTexture}, &pc.ScatteringBuffer)
 		pc.ApplyPostScattering(&pc.PBuffer1, &pc.ScatteringBuffer, &pc.PBuffer2)
 		pc.SwapPingPongBuffers()
+	}
+
+	// The user has the freedom to write their own post processing routines.
+	// They can expect the current rendered buffer in PBuffer1, and are
+	// expected to make sure this is still the case after their own routine.
+	if pc.UserFunc != nil {
+		pc.UserFunc(pc)
 	}
 
 	// Render final buffer to screen
@@ -305,6 +315,17 @@ func (pc *PostControl) ApplyPostBloom(mainInput, bloomInput, output *EffectBuffe
 	output.BindAndClear()
 
 	pc.engine.Renderer.RenderChild(pc.ScreenChild)
+}
+
+func (pc *PostControl) ApplyCustomProcessing(mat *material.CustomProcessMaterial, input *EffectBuffers, output *EffectBuffers) {
+	pc.ScreenChild.AttachMaterial(mat)
+
+	mat.ScreenMap = &input.RenderedTexture
+	pc.ScreenMaterial.GetShader().Bind()
+	output.BindAndClear()
+	pc.engine.Renderer.RenderChild(pc.ScreenChild)
+
+	pc.ScreenChild.AttachMaterial(pc.ScreenMaterial)
 }
 
 // SwapPingPongBuffers swaps PBuffer1 and PBuffer2 so that

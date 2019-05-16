@@ -163,3 +163,5 @@ func LerpPosition(pos1, pos2 mgl32.Vec3, amount float32) mgl32.Vec3 {
 		pos1.Z() + amount*(pos2.Z()-pos1.Z()),
 	}
 }
+
+func (camera2D *Camera2D) GetFirstModelIndex() *float32 { return nil }

@@ -22,6 +22,8 @@ type Camera interface {
 	ChangeRoll(float32)
 
 	GetFirstViewIndex() *float32
+	GetFirstModelIndex() *float32
+
 	GetStaticView() mgl32.Mat4
 
 	SetPosition(float32, float32, float32)

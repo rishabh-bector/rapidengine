@@ -28,7 +28,9 @@ type Camera3D struct {
 
 	FirstMouse bool
 
-	View   mgl32.Mat4
+	View  mgl32.Mat4
+	Model mgl32.Mat4 // For ray tracing
+
 	Config *configuration.EngineConfig
 }
 
@@ -50,6 +52,14 @@ func (camera3D *Camera3D) Look(delta float64) {
 		camera3D.Position,
 		camera3D.Position.Add(camera3D.FrontAxis),
 		mgl32.HomogRotate3D(camera3D.Roll, camera3D.FrontAxis).Mul4x1(mgl32.Vec4{0, 1, 0, 1.0}).Vec3(),
+	)
+
+	xaxis := camera3D.UpAxis.Cross(camera3D.FrontAxis).Normalize()
+
+	camera3D.Model = mgl32.HomogRotate3D(-camera3D.Pitch*0.01, xaxis).Mul4(
+		mgl32.HomogRotate3D(camera3D.Yaw*0.01, camera3D.UpAxis).Mul4(
+			mgl32.HomogRotate3D(camera3D.Roll*0.01, camera3D.FrontAxis),
+		),
 	)
 }
 
@@ -170,6 +180,10 @@ func (camera3D *Camera3D) GetFirstViewIndex() *float32 {
 	return &camera3D.View[0]
 }
 
+func (camera3D *Camera3D) GetFirstModelIndex() *float32 {
+	return &camera3D.FrontAxis[0]
+}
+
 func (camera3D *Camera3D) GetStaticView() mgl32.Mat4 {
 	return mgl32.LookAtV(
 		mgl32.Vec3{0, 0, 0},
@@ -180,4 +194,42 @@ func (camera3D *Camera3D) GetStaticView() mgl32.Mat4 {
 
 func (camera3D *Camera3D) GetPosition() (float32, float32, float32) {
 	return camera3D.Position.X(), camera3D.Position.Y(), camera3D.Position.Z()
+}
+
+// Ray tracing transformation
+func (camera3D *Camera3D) CalculateRotationMatrix() mgl32.Mat4 {
+	xaxis := camera3D.UpAxis.Cross(camera3D.FrontAxis).Normalize()
+	yaxis := camera3D.UpAxis.Cross(xaxis).Normalize()
+
+	/*return mgl32.Mat4{
+		xaxis.X(), xaxis.Y(), xaxis.Z(), 0.0,
+		yaxis.X(), yaxis.Y(), yaxis.Z(), 0.0,
+		camera3D.FrontAxis.X(), camera3D.FrontAxis.Y(), camera3D.FrontAxis.Z(), 0.0,
+		0.0, 0.0, 0.0, 1.0,
+	}*/
+
+	camera3D.FrontAxis = camera3D.FrontAxis.Normalize()
+
+	return mgl32.Mat4{
+		xaxis.X(), camera3D.FrontAxis.X(), yaxis.X(), 0.0,
+		xaxis.Y(), camera3D.FrontAxis.Y(), yaxis.X(), 0.0,
+		xaxis.Z(), camera3D.FrontAxis.Z(), yaxis.Z(), 0.0,
+		0.0, 0.0, 0.0, 1.0,
+	}
+}
+
+func (camera3D *Camera3D) rotation_matrix() mgl32.Mat4 {
+	/* Find cosφ and sinφ */
+	c1 := math.Sqrt(float64(camera3D.FrontAxis.X()*camera3D.FrontAxis.X() + camera3D.FrontAxis.Y()*camera3D.FrontAxis.Y()))
+	s1 := camera3D.FrontAxis.Z()
+
+	/* Find cosθ and sinθ; if gimbal lock, choose (1,0) arbitrarily */
+	c2 := camera3D.FrontAxis.X() / float32(c1)
+	s2 := camera3D.FrontAxis.Y() / float32(c1)
+
+	return mgl32.Mat4{
+		camera3D.FrontAxis.X(), -s2, -s1 * c2, 0.0,
+		camera3D.FrontAxis.Y(), c2, -s1 * s2, 0.0,
+		camera3D.FrontAxis.Z(), 0, float32(c1), 1.0,
+	}
 }

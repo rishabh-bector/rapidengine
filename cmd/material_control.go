@@ -59,3 +59,10 @@ func (mc *MaterialControl) NewFoliageMaterial() *material.FoliageMaterial {
 func (mc *MaterialControl) NewWaterMaterial() *material.WaterMaterial {
 	return material.NewWaterMaterial(mc.engine.ShaderControl.GetShader("water"))
 }
+
+func (mc *MaterialControl) NewCustomProcessMaterial(shader string) *material.CustomProcessMaterial {
+	m := material.NewCustomProcessMaterial(mc.engine.ShaderControl.GetShader(shader))
+	m.FboWidth = float32(mc.engine.Config.ScreenWidth)
+	m.FboHeight = float32(mc.engine.Config.ScreenHeight)
+	return m
+}
