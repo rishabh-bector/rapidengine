@@ -2,10 +2,9 @@ Notice: Unfortunately, due to time constraints & other projects, I'm unable to c
 
 ## RapidEngine
 
-A fast 2D and 3D game engine written in Go. Rapid Engine is still under _rapid_ development. 
-
+A fast 2D and 3D game engine written in Go.
 Demo: https://drive.google.com/open?id=144c8FuAeysPKVbRmILE3VxBS8XavHnnl
 
-The above is a demo of Rapid Engine's terrain generation and foliage system. It's just a taste of what's to come...
+The above is a demo of Rapid Engine's terrain generation and foliage system.
 
 I'm building the UI for Rapid Engine in a separate repo: https://github.com/rishabh-bector/rapidengine-ui
