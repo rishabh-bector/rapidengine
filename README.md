@@ -1,4 +1,4 @@
-Notice: Unfortunately, due to time constraints & other projects, I'm unable to continue development on Rapid Engine. If anyone is interested in taking over the project, I'm happy to give them an overview of the current project state. Please reach out to me at bector.rishabh@gmail.com if this is the case.
+Notice: Unfortunately, due to time constraints & other projects, I'm unable to continue development on Rapid Engine. If anyone is interested in taking over the project, I'm happy to give them an overview of the current project state.
 
 ## RapidEngine
 
